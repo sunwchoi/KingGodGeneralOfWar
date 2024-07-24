@@ -2,6 +2,7 @@
 
 
 #include "BDThor.h"
+#include "BDThorFSM.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -9,6 +10,10 @@ ABDThor::ABDThor()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//스켈레탈 메시 데이터 로드
+
+	//BDThorFSM 컴포넌트 추가
+	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 }
 
 // Called when the game starts or when spawned
