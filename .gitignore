@@ -72,3 +72,9 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# ThirdPerson Template
+Content\__ExternalActors__
+Content\Characters
+Content\LevelPrototyping
+Content\ThirdPerson
