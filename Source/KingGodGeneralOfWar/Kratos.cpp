@@ -32,3 +32,8 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AKratos::Damage(int DamageValue, EAttackType AttackType)
+{
+
+}
+

@@ -6,6 +6,12 @@
 #include "GameFramework/Character.h"
 #include "Kratos.generated.h"
 
+UENUM(BlueprintType)
+enum class EAttackType : uint8
+{	Attack1 UMETA(DisplayName = "Attack1"),
+	Attack2 UMETA(DisplayName = "Attack2"),
+};
+
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
 {
@@ -25,5 +31,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void Damage(int DamageValue, EAttackType AttackType);
 
 };
