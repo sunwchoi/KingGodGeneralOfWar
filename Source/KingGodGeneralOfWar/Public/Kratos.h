@@ -19,6 +19,11 @@ enum class EPlayerState : uint8
 	Hit UMETA(DisplayName = "Hit")
 };
 
+UENUM(BlueprintType)
+enum class EAttackType : uint8
+{
+	Attack1 UMETA(DisplayName = "Attack1")
+};
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
 {
@@ -87,17 +92,23 @@ public:
 	UFUNCTION()
 	void ExitRolling();
 
-	// UFUNCTION()
-	// void Damage(int DamageValue, EAttackType AttackType);
+	UFUNCTION()
+	void Damage(int DamageValue, EAttackType AttackType);
 
+	FString GetEnumValueAsString();
+	void PlayerMove();
 
 	FVector Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHP = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float curHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerState State = EPlayerState::Idle;
 
-	FString GetEnumValueAsString();
-	void PlayerMove();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MinPitch;

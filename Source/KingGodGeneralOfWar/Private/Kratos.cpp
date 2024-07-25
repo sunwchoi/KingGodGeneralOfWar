@@ -9,6 +9,7 @@
 #include <EnhancedInputComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include "TimerManager.h"
+#include <GameFramework/CharacterMovementComponent.h>
 // Sets default values
 AKratos::AKratos()
 {
@@ -23,6 +24,8 @@ AKratos::AKratos()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	curHP = MaxHP;
+	GetCharacterMovement()->MaxWalkSpeed = 1800;
 	//Mesh->SetRelativeLocation(FVector(0, 0, -80));
 	//Mesh->SetRelativeRotation(FRotator(0, 0, -90));
 }
@@ -52,11 +55,7 @@ void AKratos::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	PlayerMove();
-
-
-	GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
-
-
+	//GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
 }
 FString AKratos::GetEnumValueAsString()
 {
@@ -72,29 +71,28 @@ void AKratos::PlayerMove()
 	FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), ControlRotation, FVector(1, 1, 1));
 	FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
 	
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 	Direction = FVector(0, 0, 0);
 
-	float MoveScale = 1;
+	float MoveScale = 0;
 	switch (State)
 	{
 	case EPlayerState::Idle:
 	case EPlayerState::Move:
-		MoveScale = 1.0f;
+		MoveScale = .33f;
 		break;
 	case EPlayerState::Run:
-		MoveScale = 3.0f;
+		MoveScale = 1.0f;
 		break;
 	case EPlayerState::Attack:
 	case EPlayerState::Hit:
 	case EPlayerState::Roll:
 		break;
 	case EPlayerState::Guard:
-		MoveScale = .2f;
+		MoveScale = .06f;
 		break;
 	}
-	ForwardDirection *= MoveScale;
-	AddMovementInput(ForwardDirection);
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
+	AddMovementInput(ForwardDirection, MoveScale);
 }
 
 // Called to bind functionality to input
@@ -158,7 +156,7 @@ void AKratos::OnMyActionRoll(const FInputActionValue& value)
 
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
 {
-	if (State == EPlayerState::Idle || State == EPlayerState::Move)
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard)
 	{
 		State = EPlayerState::Run;
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Move -> Run"));
@@ -201,10 +199,10 @@ void AKratos::ExitRolling()
 	}
 }
 
-//void AKratos::Damage(int DamageValue, EAttackType AttackType)
-//{
-//	State = EPlayerState::Hit;
-//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
-//}
+void AKratos::Damage(int DamageValue, EAttackType AttackType)
+{
+	State = EPlayerState::Hit;
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
+}
 
 
