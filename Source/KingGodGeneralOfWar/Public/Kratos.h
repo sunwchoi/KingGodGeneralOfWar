@@ -44,10 +44,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -115,4 +115,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MaxPitch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
+	TSubclassOf<class ABDThor> Boss1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
+	TSubclassOf<class ABDThor> Boss2;
 };
