@@ -26,6 +26,20 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=FSMComponent)
+	class UProjectileMovementComponent* GetMjolnirMoveComp() const;
+	UStaticMeshComponent* GetMjolnir() const;
+
+	void Move(FVector NewLoc);
+private:
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UStaticMeshComponent* Mjolnir;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	class UProjectileMovementComponent* MjolnirMoveComp;
+
+	UFUNCTION()
+	void SetThorLocation(FVector NewLoc);
 };

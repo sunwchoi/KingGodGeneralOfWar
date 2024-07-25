@@ -57,9 +57,14 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	}
 }
 
+void UAwakenThorFSM::SetState(EAwakenThorState NewState)
+{
+	State = NewState;
+}
+
 void UAwakenThorFSM::IdleState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Idle"));
+	// UE_LOG(LogTemp, Warning, TEXT("Idle"));
 	
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = Me->GetActorLocation();
@@ -76,16 +81,23 @@ void UAwakenThorFSM::IdleState()
 	}
 }
 
+
 void UAwakenThorFSM::MoveState()
 {
+	if (GetWorld()->GetTimerManager().IsTimerActive(MoveTimerHandle))
+		return ;
 	UE_LOG(LogTemp, Warning, TEXT("Move"));
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = Me->GetActorLocation();
+	FVector dir = targetLoc - myLoc;
+	FVector newLoc = Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist;
 
-	FVector nextLoc = Target->GetActorLocation();
-	FVector dir = nextLoc - Me->GetActorLocation();
+	Me->Move(newLoc);
 	
-	Me->SetActorLocation(Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist);
-	
-	State = EAwakenThorState::Idle;
+	FTimerDelegate tmpDel;
+	tmpDel.BindUFunction(this, FName("SetState"), EAwakenThorState::Idle);
+
+		GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, tmpDel, 2.f, false);
 }
 
 void UAwakenThorFSM::AttackState()

@@ -35,11 +35,13 @@ public:
 
 
 
+	UFUNCTION()
+	void SetState(EAwakenThorState NewState);
+
 	void IdleState();
 	void MoveState();
 	void AttackState();
 	void DamageState();
-
 	void DieState();
 
 private:
@@ -56,5 +58,6 @@ private:
 	float CurrentTime;
 	
 	float TeleportDist = 1000;
-	
+
+	FTimerHandle MoveTimerHandle;
 };
