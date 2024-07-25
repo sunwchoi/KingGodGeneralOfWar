@@ -65,14 +65,13 @@ void UAwakenThorFSM::IdleState()
 	FVector myLoc = Me->GetActorLocation();
 	FRotator rot = (targetLoc - myLoc).Rotation();
 
-	Me->SetActorRotation(rot);
+	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
-	if (CurrentTime > IdleDelayTime)
+	if (FVector::Dist(targetLoc, myLoc) > 1050)
+		State = EAwakenThorState::Move;
+	else if (CurrentTime > IdleDelayTime)
 	{
-		if (FVector::Dist(targetLoc, myLoc) > 1200)
-			State = EAwakenThorState::Move;
-		else
-			State = EAwakenThorState::Attack;
+		State = EAwakenThorState::Attack;
 		CurrentTime = 0;
 	}
 }
@@ -81,7 +80,7 @@ void UAwakenThorFSM::MoveState()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Move"));
 
-	FVector nextLoc = Target->GetControlRotation().Vector() * 500 + Target->GetActorLocation();
+	FVector nextLoc = Target->GetActorLocation();
 	FVector dir = nextLoc - Me->GetActorLocation();
 	
 	Me->SetActorLocation(Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist);
