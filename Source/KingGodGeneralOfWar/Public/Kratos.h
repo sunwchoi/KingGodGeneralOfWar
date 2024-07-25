@@ -44,10 +44,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -67,6 +67,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Guard;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_LockOn;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -90,6 +93,12 @@ public:
 	void OnMyActionGuardOff(const FInputActionValue& value);
 
 	UFUNCTION()
+	void OnMyActionLockOn(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionLockOff(const FInputActionValue& value);
+
+	UFUNCTION()
 	void ExitRolling();
 
 	UFUNCTION()
@@ -104,7 +113,13 @@ public:
 	float MaxHP = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float curHP;
+	float CurHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bLockOnTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AActor* LockTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerState State = EPlayerState::Idle;
@@ -115,4 +130,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MaxPitch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
+	TSubclassOf<class ABDThor> Boss1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
+	TSubclassOf<class ABDThor> Boss2;
 };
