@@ -12,6 +12,7 @@ AAwakenThor::AAwakenThor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Fsm = CreateDefaultSubobject<UAwakenThorFSM>(TEXT("FSM"));
+	
 }
 
 // Called when the game starts or when spawned
