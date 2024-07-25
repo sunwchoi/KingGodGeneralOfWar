@@ -3,6 +3,8 @@
 
 #include "BDThor.h"
 #include "BDThorFSM.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -11,6 +13,11 @@ ABDThor::ABDThor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//스켈레탈 메시 데이터 로드
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin'"));
+	if (TempMesh.Succeeded()) {
+		GetMesh()->SetSkeletalMesh(TempMesh.Object);
+
+	}
 
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
@@ -20,6 +27,8 @@ ABDThor::ABDThor()
 void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 }
 
