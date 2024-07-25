@@ -67,11 +67,15 @@ FString AKratos::GetEnumValueAsString()
 }
 void AKratos::PlayerMove()
 {
-	FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
+	FRotator ControlRotation = GetControlRotation();
+	ControlRotation.Pitch = 0;
+	FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), ControlRotation, FVector(1, 1, 1));
 	FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 	Direction = FVector(0, 0, 0);
 
-	float MoveScale = 0;
+	float MoveScale = 1;
 	switch (State)
 	{
 	case EPlayerState::Idle:
@@ -89,7 +93,8 @@ void AKratos::PlayerMove()
 		MoveScale = .2f;
 		break;
 	}
-	AddMovementInput(ForwardDirection, MoveScale);
+	ForwardDirection *= MoveScale;
+	AddMovementInput(ForwardDirection);
 }
 
 // Called to bind functionality to input
@@ -116,24 +121,22 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 	Direction.X = v.X;
 	Direction.Y = v.Y;
 
+	//Direction.Normalize();
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
+
 	// 캐릭터 현재 회전 가져오기
-	FRotator Rotation = GetActorRotation();
+	FRotator Rotation = GetControlRotation();
 	FRotator YawRotation(0, Rotation.Yaw, 0);
-
 	SetActorRotation(YawRotation);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("move!"));
-
 }
 
 void AKratos::OnMyActionLook(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 
-	
-
 	AddControllerPitchInput(-v.Y);
 	AddControllerYawInput(v.X);
+
 }
 
 void AKratos::OnMyActionRoll(const FInputActionValue& value)
