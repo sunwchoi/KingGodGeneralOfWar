@@ -68,6 +68,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Guard;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_LockOn;
+
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
 
@@ -90,6 +93,12 @@ public:
 	void OnMyActionGuardOff(const FInputActionValue& value);
 
 	UFUNCTION()
+	void OnMyActionLockOn(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionLockOff(const FInputActionValue& value);
+
+	UFUNCTION()
 	void ExitRolling();
 
 	UFUNCTION()
@@ -104,7 +113,13 @@ public:
 	float MaxHP = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float curHP;
+	float CurHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bLockOnTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AActor* LockTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerState State = EPlayerState::Idle;

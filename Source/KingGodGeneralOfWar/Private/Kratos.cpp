@@ -24,7 +24,7 @@ AKratos::AKratos()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	curHP = MaxHP;
+	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = 1800;
 	//Mesh->SetRelativeLocation(FVector(0, 0, -80));
 	//Mesh->SetRelativeRotation(FRotator(0, 0, -90));
@@ -110,6 +110,7 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Run, ETriggerEvent::Completed, this, &AKratos::OnMyActionRunOff);
 		input->BindAction(IA_Guard, ETriggerEvent::Triggered, this, &AKratos::OnMyActionGuardOn);
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
+		input->BindAction(IA_LockOn, ETriggerEvent::Triggered, this, &AKratos::OnMyActionLockOn);
 	}
 }
 
@@ -187,6 +188,15 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 		State = EPlayerState::Idle;
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Run -> Move"));
 	}
+}
+
+void AKratos::OnMyActionLockOn(const FInputActionValue& value)
+{
+	if (IsValid(LockTarget))
+}
+
+void AKratos::OnMyActionLockOff(const FInputActionValue& value)
+{
 }
 
 void AKratos::ExitRolling()
