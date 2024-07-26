@@ -286,7 +286,7 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 			if (State == EPlayerState::Attack)
 				this->State = EPlayerState::Idle;
 		},
-		2.0f, false);
+		1.2f, false);
 }
 
 
