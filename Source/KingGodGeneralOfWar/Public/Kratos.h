@@ -132,4 +132,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
 	TSubclassOf<class ABDThor> Boss2;
+
+	void LockTargetFunc();
 };

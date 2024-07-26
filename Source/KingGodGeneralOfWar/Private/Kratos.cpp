@@ -55,6 +55,10 @@ void AKratos::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	PlayerMove();
+	if (bLockOn)
+	{
+		LockTargetFunc();
+	}
 	//GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
 }
 FString AKratos::GetEnumValueAsString()
@@ -93,6 +97,12 @@ void AKratos::PlayerMove()
 	}
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 	AddMovementInput(ForwardDirection, MoveScale);
+}
+
+void AKratos::LockTargetFunc()
+{
+	GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+	
 }
 
 // Called to bind functionality to input
@@ -197,15 +207,14 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 		bLockOn = false;
 		return;
 	}
+
 	float lockOnRadius = 500.0f;
-	//float 
 	FVector cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraComp->USceneComponent::K2_GetComponentRotation());
 	FVector actorLocation = GetActorLocation() + cameraForwardVector * 500;
 	FVector endLocation = GetActorLocation() + cameraForwardVector * 2000;
 	float Radius = 500;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, actorLocation.ToString());
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(EObjectTypeQuery::ObjectTypeQuery1));
+	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1)));
 	TArray<AActor*> ActorsToIgnore;
 	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
 	FHitResult OutHit;
@@ -213,6 +222,8 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	FLinearColor TraceColor = FLinearColor::White;
 	FLinearColor TraceHitColor = FLinearColor::Red;
 	float DrawTime = 10.0f;
+	FCollisionObjectQueryParams ObjectQueryParams;
+
 	bLockOn = UKismetSystemLibrary::SphereTraceSingleForObjects(
 		GetWorld(),
 		actorLocation, 
@@ -231,7 +242,7 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 
 	if (bLockOn)
 	{
-		//LockTarget = OutHit.;
+		LockTarget = OutHit.GetActor();
 	}
 
 }
