@@ -96,14 +96,14 @@ void UAwakenThorFSM::MoveState()
 	
 	FTimerDelegate tmpDel;
 	tmpDel.BindUFunction(this, FName("SetState"), EAwakenThorState::Idle);
-
-		GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, tmpDel, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, tmpDel, 2.f, false);
 }
 
 void UAwakenThorFSM::AttackState()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
+	Me->PoundThunderAttack(Target->GetTransform());
 	State = EAwakenThorState::Idle;
 }
 
