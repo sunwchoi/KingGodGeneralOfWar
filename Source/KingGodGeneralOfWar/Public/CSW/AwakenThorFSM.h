@@ -54,7 +54,7 @@ private:
 	UPROPERTY()
 	class AAwakenThor* Me;
 	
-	float IdleDelayTime = 2.f;
+	float IdleDelayTime = 5.f;
 	float CurrentTime;
 	
 	float TeleportDist = 1000;
