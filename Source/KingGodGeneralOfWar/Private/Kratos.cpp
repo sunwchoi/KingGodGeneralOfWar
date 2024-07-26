@@ -54,7 +54,7 @@ void AKratos::Tick(float DeltaTime)
 	PlayerMove();
 
 
-	GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
+	//GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
 
 
 }
@@ -72,7 +72,7 @@ void AKratos::PlayerMove()
 	FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), ControlRotation, FVector(1, 1, 1));
 	FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
 	
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 	Direction = FVector(0, 0, 0);
 
 	float MoveScale = 1;

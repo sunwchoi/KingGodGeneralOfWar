@@ -24,11 +24,11 @@ void UBDThorFSM::BeginPlay()
 	//월드에서 플레이어 찾아오기
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AKratos::StaticClass());
 	//AKratos 타입으로 캐스팅
-	//Target = Cast<AKratos>(actor);
-	ACharacter* tmp = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	if (tmp) {
+	Target = Cast<AKratos>(actor);
+	//ACharacter* tmp = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	/*if (tmp) {
 		Target = tmp;
-	}
+	}*/
 	//소유 객체 가져오기
 	me = Cast<ABDThor>(GetOwner());
 
@@ -120,7 +120,7 @@ void UBDThorFSM::BDAttackState()
 	//2. 공격 시간이 되면
 	if (BDCurrentTime > BDAttackDelayTime) {
 		//공격, 여기엔 다양한 공격 타입을 랜덤으로 설정해둔다.
-		UE_LOG(LogTemp, Warning, TEXT("player BDAttack!!"));
+ 		UE_LOG(LogTemp, Warning, TEXT("player BDAttack!!"));
 		//경과 시간 초기화 후 대기 또는 이동으로 상태 변경하기
 		BDCurrentTime = 0;
 
@@ -134,7 +134,7 @@ void UBDThorFSM::BDAttackState()
 	//타깃의 거리가 공격 범위를 벗어났으니까
 	if (distance > BDAttackRange) {
 		//상태를 잠시 대기로 전환한다.
-		mState = BDThorGeneralState::BDIdle;
+		mState = BDThorGeneralState::BDMove;
 	}
 
 }
@@ -154,6 +154,15 @@ void UBDThorFSM::BDDamageState()
 	else if (BDCurrentHP <= 0) {
 		//2 페이즈로 전환
 	}
+}
+
+void UBDThorFSM::BDEndState()
+{
+
+}
+
+void UBDThorFSM::SetState()
+{
 }
 
 //데미지를 받을 시 발생하는 함수

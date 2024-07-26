@@ -60,7 +60,7 @@ public:
 	class ABDThor* me; //나 자신
 
 	UPROPERTY(EditAnywhere, Category = FSM) 
-	float BDAttackRange = 50.0f; // 에너미 공격 범위
+	float BDAttackRange = 150.0f; // 에너미 공격 범위
 	
 
 	UPROPERTY(EditAnywhere)
@@ -78,6 +78,12 @@ public:
 	void BDAvoidanceState(); //회피 상태
 	void BDAttackState(); //공격 상태
 	void BDDamageState(); //피격 상태
+
+	//애니메이션 마지막에 노티파이를 넣어서 endState일 경우 특정 스테이트일때 여기로 넘어가라 이런식으로 작성
+	UFUNCTION(BlueprintCallable)
+	void BDEndState();
+
+	void SetState();
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
