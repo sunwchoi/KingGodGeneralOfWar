@@ -4,6 +4,7 @@
 #include "CSW/AwakenThor.h"
 
 #include "CSW/AwakenThorFSM.h"
+#include "CSW/PoundThunderAttackZone.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Math/UnitConversion.h"
 
@@ -62,6 +63,11 @@ void AAwakenThor::Move(FVector NewLoc)
 	FTimerDelegate tmpDel;
 	tmpDel.BindUFunction(this, FName("SetThorLocation"), NewLoc);
 	GetWorld()->GetTimerManager().SetTimer(tmpHandle, tmpDel, 1.f, false);
+}
+
+void AAwakenThor::PoundThunderAttack(const FTransform& Target) const
+{
+	GetWorld()->SpawnActor<APoundThunderAttackZone>(PoundThunderAttackZoneBP, Target);
 }
 
 void AAwakenThor::SetThorLocation(FVector NewLoc)
