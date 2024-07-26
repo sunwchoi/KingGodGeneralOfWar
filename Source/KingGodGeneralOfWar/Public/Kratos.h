@@ -16,7 +16,8 @@ enum class EPlayerState : uint8
 	Roll UMETA(DisplayName = "Roll"),
 	Attack UMETA(DisplayName = "Attack"),
 	Guard UMETA(DisplayName = "Guard"),
-	Hit UMETA(DisplayName = "Hit")
+	Hit UMETA(DisplayName = "Hit"),
+	Fail UMETA(DisplayName = "Fail")
 };
 
 UENUM(BlueprintType)
