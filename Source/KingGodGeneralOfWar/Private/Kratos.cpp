@@ -105,12 +105,12 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AKratos::OnMyActionMove);
 		input->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AKratos::OnMyActionLook);
-		input->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AKratos::OnMyActionRoll);
-		input->BindAction(IA_Run, ETriggerEvent::Triggered, this, &AKratos::OnMyActionRunOn);
+		input->BindAction(IA_Roll, ETriggerEvent::Started, this, &AKratos::OnMyActionRoll);
+		input->BindAction(IA_Run, ETriggerEvent::Started, this, &AKratos::OnMyActionRunOn);
 		input->BindAction(IA_Run, ETriggerEvent::Completed, this, &AKratos::OnMyActionRunOff);
-		input->BindAction(IA_Guard, ETriggerEvent::Triggered, this, &AKratos::OnMyActionGuardOn);
+		input->BindAction(IA_Guard, ETriggerEvent::Started, this, &AKratos::OnMyActionGuardOn);
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
-		input->BindAction(IA_LockOn, ETriggerEvent::Triggered, this, &AKratos::OnMyActionLockOn);
+		input->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AKratos::OnMyActionLockOn);
 	}
 }
 
@@ -192,12 +192,50 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 {
-	if (IsValid(LockTarget))
+	if (bLockOn)
+	{
+		bLockOn = false;
+		return;
+	}
+	float lockOnRadius = 500.0f;
+	//float 
+	FVector cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraComp->USceneComponent::K2_GetComponentRotation());
+	FVector actorLocation = GetActorLocation() + cameraForwardVector * 500;
+	FVector endLocation = GetActorLocation() + cameraForwardVector * 2000;
+	float Radius = 500;
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, actorLocation.ToString());
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(EObjectTypeQuery::ObjectTypeQuery1));
+	TArray<AActor*> ActorsToIgnore;
+	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
+	FHitResult OutHit;
+	bool bIgnoreSelf = false;
+	FLinearColor TraceColor = FLinearColor::White;
+	FLinearColor TraceHitColor = FLinearColor::Red;
+	float DrawTime = 10.0f;
+	bLockOn = UKismetSystemLibrary::SphereTraceSingleForObjects(
+		GetWorld(),
+		actorLocation, 
+		endLocation, 
+		Radius, 
+		ObjectTypes,
+		false, 
+		ActorsToIgnore,  
+		DrawDebugType, 
+		OutHit, 
+		bIgnoreSelf, 
+		TraceColor, 
+		TraceHitColor, 
+		DrawTime
+	);
+
+	if (bLockOn)
+	{
+		//LockTarget = OutHit.;
+	}
+
 }
 
-void AKratos::OnMyActionLockOff(const FInputActionValue& value)
-{
-}
 
 void AKratos::ExitRolling()
 {

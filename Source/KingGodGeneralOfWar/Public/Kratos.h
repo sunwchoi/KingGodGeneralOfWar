@@ -96,9 +96,6 @@ public:
 	void OnMyActionLockOn(const FInputActionValue& value);
 
 	UFUNCTION()
-	void OnMyActionLockOff(const FInputActionValue& value);
-
-	UFUNCTION()
 	void ExitRolling();
 
 	UFUNCTION()
@@ -116,14 +113,13 @@ public:
 	float CurHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bLockOnTarget;
+	bool bLockOn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AActor* LockTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerState State = EPlayerState::Idle;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MinPitch;
