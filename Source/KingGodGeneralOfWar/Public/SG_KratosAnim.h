@@ -20,10 +20,13 @@ private:
 public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	UFUNCTION()
-	EPlayerState GetPlayerState();
+	UFUNCTION(BlueprintCallable)
+	void UpdatePlayerState();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	EPlayerState PlayerState;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	float Direction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	float Speed;
 };

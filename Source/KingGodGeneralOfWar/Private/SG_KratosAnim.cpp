@@ -8,17 +8,19 @@ void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(("%d"), GetPlayerState()));
+	UpdatePlayerState();
 
 }
 
-EPlayerState USG_KratosAnim::GetPlayerState()
+void USG_KratosAnim::UpdatePlayerState()
 {
-	AKratos* Owner = Cast<AKratos>(GetOwningActor());
-	if (Owner)
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	if (Player)
 	{
-		return Owner->State;
+		PlayerState = Player->State;
+		FVector velocity = Player->GetVelocity();
+		FVector forwardVector = Player->GetActorForwardVector();
+		Speed = FVector::DotProduct(forwardVector, velocity);
+		Direction = FVector::DotProduct(Player->GetActorRightVector(), velocity);
 	}
-	return EPlayerState::Attack;
 }

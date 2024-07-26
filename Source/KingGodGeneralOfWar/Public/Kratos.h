@@ -71,6 +71,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_LockOn;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_Attack;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -97,7 +100,11 @@ public:
 	void OnMyActionLockOn(const FInputActionValue& value);
 
 	UFUNCTION()
-	void ExitRolling();
+	void OnMyActionIdle(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionAttack(const FInputActionValue& value);
+
 
 	UFUNCTION()
 	void Damage(int DamageValue, EAttackType AttackType);
@@ -105,6 +112,7 @@ public:
 	FString GetEnumValueAsString();
 	void PlayerMove();
 
+	UPROPERTY(BlueprintReadOnly)
 	FVector Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -135,4 +143,7 @@ public:
 	TSubclassOf<class ABDThor> Boss2;
 
 	void LockTargetFunc();
+
+	UPROPERTY(BlueprintReadOnly)
+	float Speed = 1500.0f; //스피드
 };
