@@ -16,7 +16,8 @@ const float ATTACK1_DELAY = .9f;
 const float ATTACK2_DELAY = 1.5f;
 const float ATTACK3_DELAY = 1.5f;
 const float ATTACK4_DELAY = 1.5f;
-const float GUARD_DELAY = .7f;
+const float GUARD_START_DELAY = .3f;
+const float GUARD_END_DELAY = .3f;
 const float DODGE_DELAY = .5f;
 AKratos::AKratos()
 {
@@ -72,7 +73,7 @@ void AKratos::BeginPlay()
 		}
 	}
 }
-// --------------------------------------TICK -------------------------------------
+// -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
 void AKratos::Tick(float DeltaTime)
 {
@@ -85,7 +86,7 @@ void AKratos::Tick(float DeltaTime)
 	}
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetEnumValueAsString());
 }
-// --------------------------------------TICK -------------------------------------
+// -------------------------------------------------- TICK -------------------------------------------------------------
 
 FString AKratos::GetEnumValueAsString()
 {
@@ -214,7 +215,7 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 			}
 			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("GuardCall Success"));
 
-		}, GUARD_DELAY, false);
+		}, GUARD_START_DELAY, false);
 	}
 }
 
@@ -229,7 +230,7 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 			[&]()
 		{
 			State = EPlayerState::Idle;
-		}, GUARD_DELAY / 2, false);
+		}, GUARD_END_DELAY / 2, false);
 	}
 }
 
@@ -291,20 +292,26 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 {
 	if (bIsAttacking) return;
 
-	State = EPlayerState::MeleeAttack1;
-	bIsAttacking = true;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack!"));
-
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
+		|| State == EPlayerState::Run)
 	{
-		if (State == EPlayerState::MeleeAttack1)
+		State = EPlayerState::MeleeAttack1;
+		bIsAttacking = true;
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack!"));
+
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 		{
-			this->State = EPlayerState::Idle;
-			bIsAttacking = false;
-		}
-	},
-		ATTACK1_DELAY, false);
+			if (State == EPlayerState::MeleeAttack1)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack End"));
+				this->State = EPlayerState::Idle;
+				bIsAttacking = false;
+			}
+		},
+			ATTACK1_DELAY, false);
+
+	}
 }
 
 
