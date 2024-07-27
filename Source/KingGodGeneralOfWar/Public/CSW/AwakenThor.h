@@ -30,6 +30,7 @@ public:
 	UStaticMeshComponent* GetMjolnir() const;
 
 	void Move(FVector NewLoc);
+	void PoundThunderAttack(const FTransform& Target) const;
 private:
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
@@ -40,6 +41,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	class UProjectileMovementComponent* MjolnirMoveComp;
 
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	TSubclassOf<class APoundThunderAttackZone> PoundThunderAttackZoneBP;
+	
 	UFUNCTION()
 	void SetThorLocation(FVector NewLoc);
 };

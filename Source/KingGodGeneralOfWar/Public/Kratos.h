@@ -16,7 +16,8 @@ enum class EPlayerState : uint8
 	Roll UMETA(DisplayName = "Roll"),
 	Attack UMETA(DisplayName = "Attack"),
 	Guard UMETA(DisplayName = "Guard"),
-	Hit UMETA(DisplayName = "Hit")
+	Hit UMETA(DisplayName = "Hit"),
+	Fail UMETA(DisplayName = "Fail")
 };
 
 UENUM(BlueprintType)
@@ -70,6 +71,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_LockOn;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_Attack;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -96,7 +100,11 @@ public:
 	void OnMyActionLockOn(const FInputActionValue& value);
 
 	UFUNCTION()
-	void ExitRolling();
+	void OnMyActionIdle(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionAttack(const FInputActionValue& value);
+
 
 	UFUNCTION()
 	void Damage(int DamageValue, EAttackType AttackType);
@@ -104,6 +112,7 @@ public:
 	FString GetEnumValueAsString();
 	void PlayerMove();
 
+	UPROPERTY(BlueprintReadOnly)
 	FVector Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -132,4 +141,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
 	TSubclassOf<class ABDThor> Boss2;
+
+	void LockTargetFunc();
+
+	UPROPERTY(BlueprintReadOnly)
+	float Speed = 1500.0f; //스피드
 };
