@@ -4,28 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "BDThorMjolnir.h"
 #include "BDThorFSM.generated.h"
 
 //전체 통괄 상태
 //피격은 얼라이언스 / Attack, Move은 열거형으로 관리
+//공격, 회피도 이곳에서 관리
 UENUM(BlueprintType)
 enum class BDThorGeneralState : uint8 {
 	BDIdle,
 	BDMove,
 	BDAvoidance,
-	BDAttack,
+	BDAttackModeChange,
 	BDDamage,
-};
-
-//공격 상태 관리 열거형
-UENUM(BlueprintType)
-enum class BDThorAttack : uint8 {
 	BDHammerThunder,
 	BDHammerWind,
 	BDHammerThreeSwing,
 	BDGiveUPFly,
-	BDHittingDown,
+	BDHitDown,
 };
+
 
 //이동 상태 관리 열거형
 UENUM(BlueprintType)
@@ -59,8 +57,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class ABDThor* me; //나 자신
 
+
 	UPROPERTY(EditAnywhere, Category = FSM) 
-	float BDAttackRange = 50.0f; // 에너미 공격 범위
+	float BDAttackRange = 150.0f; // 에너미 공격 범위
 	
 
 	UPROPERTY(EditAnywhere)
@@ -73,11 +72,42 @@ public:
 
 
 	// 총 상태 총괄 함수
+	UFUNCTION(BlueprintCallable, Category = State)
 	void BDIdleState(); //대기 상태
+	UFUNCTION(BlueprintCallable, Category = State)
 	void BDMoveState(); //움직임 상태
+	UFUNCTION(BlueprintCallable, Category = State)
 	void BDAvoidanceState(); //회피 상태
-	void BDAttackState(); //공격 상태
+	UFUNCTION(BlueprintCallable, Category = State)
+	void BDAttackModeChangeState(); //공격 모드 변경 상태
+	UFUNCTION(BlueprintCallable, Category = State)
 	void BDDamageState(); //피격 상태
+
+	//공격 함수
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDHammerThunderState(); //망치 날리면서 번개 공격
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDHammerWindState(); //망치 휘두르면서 바람날리는 공격
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDHammerThreeSwingState(); //망치 n번 휘두르기
+
+	//근접 컷씬 공격 함수
+	UFUNCTION(BlueprintCallable, Category = AttackScene)
+	void BDGiveUPFlyState();
+	UFUNCTION(BlueprintCallable, Category = AttackScene)
+	void BDHittingDownState();
+
+
+	//사용중인 애니메이션 블루프린트
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Anim)
+	class UBDThorAnim* anim;
+
+	//애니메이션 총관리 함수, 노티파이를 넣어서 이 함수를 호출한다. 이 함수들을 이용해 스테이트를 관리한다.
+	UFUNCTION(BlueprintCallable, Category = SetState)
+	void BDEndState();
+
+	UFUNCTION(BlueprintCallable, Category = SetState)
+	void BDSetState();
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
@@ -98,8 +128,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;
-
-	//공격 함수
-
 		
 };
