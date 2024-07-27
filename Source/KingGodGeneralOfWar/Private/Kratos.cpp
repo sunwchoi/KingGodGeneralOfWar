@@ -25,9 +25,7 @@ AKratos::AKratos()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	CurHP = MaxHP;
-	GetCharacterMovement()->MaxWalkSpeed = Speed;
-	//Mesh->SetRelativeLocation(FVector(0, 0, -80));
-	//Mesh->SetRelativeRotation(FRotator(0, 0, -90));
+	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
 }
 // Called to bind functionality to input
 void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -78,7 +76,7 @@ void AKratos::Tick(float DeltaTime)
 	{
 		LockTargetFunc();
 	}
-	GEngine->AddOnScreenDebugMessage(-1, .01f, FColor::Green, GetEnumValueAsString());
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetEnumValueAsString());
 }
 FString AKratos::GetEnumValueAsString()
 {
@@ -99,39 +97,27 @@ void AKratos::PlayerMove()
 	float MoveScale = 0;
 	switch (State)
 	{
-	case EPlayerState::Idle:
-	case EPlayerState::Attack:
-	case EPlayerState::Hit:
-	case EPlayerState::Roll:
-		MoveScale = 0;
-		Speed = 0;
-		break;
 	case EPlayerState::Guard:
-		MoveScale = .06f;
-		Speed = 90;
+		MoveScale = .1f;
 		break;
 	case EPlayerState::Move:
-		MoveScale = .33f;
-		Speed = 600;
+		MoveScale = .5f;
 		break;
 	case EPlayerState::Run:
 		MoveScale = 1.0f;
-		Speed = 1500;
 		break;
 	}
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 	AddMovementInput(ForwardDirection, MoveScale);
 }
 
-void AKratos::LockTargetFunc()
+FORCEINLINE void AKratos::LockTargetFunc()
 {
 	GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
 }
 
-
-
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
 {
+	// 움직임은 유휴, 이동, 달리기, 가드시에만 가능
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run ||
 		State == EPlayerState::Guard)
 	{
@@ -148,7 +134,6 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		FRotator YawRotation(0, Rotation.Yaw, 0);
 		SetActorRotation(YawRotation);
 	}
-
 }
 
 void AKratos::OnMyActionLook(const FInputActionValue& value)
@@ -209,7 +194,15 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		State = EPlayerState::Guard;
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
+		State = EPlayerState::GuardStart;
+		FTimerHandle guardHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(guardHandle,
+			[&]()
+		{
+			State = EPlayerState::Guard;
+		}, 1.0f, false);
 	}
 }
 
@@ -217,8 +210,14 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Guard)
 	{
-		State = EPlayerState::Idle;
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Run -> Move"));
+		State = EPlayerState::GuardEnd;
+		FTimerHandle guardHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(guardHandle,
+			[&]()
+		{
+			State = EPlayerState::Idle;
+		}, 1.0f, false);
 	}
 }
 
@@ -272,18 +271,19 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 
 void AKratos::OnMyActionIdle(const FInputActionValue& value)
 {
-	State = EPlayerState::Idle;
+	if (State == EPlayerState::Idle)
+		State = EPlayerState::Idle;
 }
 
 void AKratos::OnMyActionAttack(const FInputActionValue& value)
 {
-	State = EPlayerState::Attack;
+	State = EPlayerState::MeleeAttack1;
 
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack!"));
 
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-			if (State == EPlayerState::Attack)
+			if (State == EPlayerState::MeleeAttack1)
 				this->State = EPlayerState::Idle;
 		},
 		2.0f, false);
@@ -294,7 +294,7 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 void AKratos::Damage(int DamageValue, EAttackType AttackType)
 {
 	State = EPlayerState::Hit;
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
 }
 
 

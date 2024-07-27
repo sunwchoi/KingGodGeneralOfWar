@@ -7,17 +7,27 @@
 #include "InputAction.h"
 #include "Kratos.generated.h"
 
+const float PlayerMaxSpeed = 1200.0f; // 플레이어 최대 속도. (달리기)
+
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
 	Idle UMETA(DisplayName = "Idle"),
 	Move UMETA(DisplayName = "Move"),
 	Run UMETA(DisplayName = "Run"),
+	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	Attack UMETA(DisplayName = "Attack"),
+	MeleeAttack1 UMETA(DisplayName = "MeleeAttack1"),
+	MeleeAttack2 UMETA(DisplayName = "MeleeAttack2"),
+	MeleeAttack3 UMETA(DisplayName = "MeleeAttack3"),
+	MeleeAttack4 UMETA(DisplayName = "MeleeAttack4"),
+	DashAttack UMETA(DisplayName = "DashAttack"),
+	GuardStart UMETA(DisplayName = "GuardStart"),
 	Guard UMETA(DisplayName = "Guard"),
+	GuardHit UMETA(DisplayName = "GuardHit"),
+	GuardStaggerd UMETA(DisplayName = "GuardStaggerd"),
+	GuardEnd UMETA(DisplayName = "GuardEnd"),
 	Hit UMETA(DisplayName = "Hit"),
-	Fail UMETA(DisplayName = "Fail")
 };
 
 UENUM(BlueprintType)
@@ -143,7 +153,7 @@ public:
 	TSubclassOf<class ABDThor> Boss2;
 
 	void LockTargetFunc();
+private:
+	FTimerHandle SpeedDecreaseTimerHandle;
 
-	UPROPERTY(BlueprintReadOnly)
-	float Speed = 1500.0f; //스피드
 };
