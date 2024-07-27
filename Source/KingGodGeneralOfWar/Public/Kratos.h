@@ -71,7 +71,7 @@ public:
 	class UInputAction* IA_Look;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Roll;
+	class UInputAction* IA_Dodge;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Run;
@@ -92,7 +92,7 @@ public:
 	void OnMyActionLook(const FInputActionValue& value);
 
 	UFUNCTION()
-	void OnMyActionRoll(const FInputActionValue& value);
+	void OnMyActionDodge(const FInputActionValue& value);
 
 	UFUNCTION()
 	void OnMyActionRunOn(const FInputActionValue& value);
@@ -154,6 +154,6 @@ public:
 
 	void LockTargetFunc();
 private:
-	FTimerHandle SpeedDecreaseTimerHandle;
+	bool bIsAttacking;
 
 };

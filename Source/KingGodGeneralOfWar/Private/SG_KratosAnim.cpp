@@ -17,6 +17,7 @@ void USG_KratosAnim::UpdatePlayerState()
 	AKratos* Player = Cast<AKratos>(GetOwningActor());
 	if (Player)
 	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("UpdatePlayerState!"));
 		FVector velocity = Player->GetVelocity();
 		FVector forwardVector = Player->GetActorForwardVector();
 
