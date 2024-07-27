@@ -32,4 +32,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSMComponent)
 	class UBDThorFSM* fsm; //토르 FSM
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
+	class UStaticMeshComponent* BDWeapon;
+
+	//바람 공격할 때 넣을 액터 클래스
+	/*UPROPERTY(EditAnywhere)
+	TSubclassOf<class ASlashActor>SlashFat;*/
 };
