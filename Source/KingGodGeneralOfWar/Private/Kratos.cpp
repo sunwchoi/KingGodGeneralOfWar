@@ -9,16 +9,21 @@
 #include <EnhancedInputComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include "TimerManager.h"
+#include "SG_KratosAnim.h"
 #include <GameFramework/CharacterMovementComponent.h>
 // Sets default values
 
-const float ATTACK1_DELAY = .9f;
+const float ATTACK1_DELAY = .7f;
 const float ATTACK2_DELAY = 1.5f;
 const float ATTACK3_DELAY = 1.5f;
 const float ATTACK4_DELAY = 1.5f;
-const float GUARD_START_DELAY = .3f;
-const float GUARD_END_DELAY = .3f;
-const float DODGE_DELAY = .5f;
+
+const float GUARD_START_DELAY = 0.3f;
+const float GUARD_END_DELAY = 0.15f;
+const float DODGE_DELAY = 0.5f;
+
+const float WALK_FOV = 90;
+const float RUN_FOV = 100;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -55,6 +60,24 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Attack, ETriggerEvent::Started, this, &AKratos::OnMyActionAttack);
 	}
 }
+void AKratos::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	Anim = Cast<USG_KratosAnim>(GetMesh()->GetAnimInstance());
+
+	Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
+
+	Anim->OnNextAttackCheck.AddLambda([this]() -> void
+	{
+		CanNextCombo = false;
+
+		if (bIsComboInputOn)
+		{
+			AttackStartComboState();
+			Anim->JumpToAttackMontageSection(CurrentCombo);
+		}
+	});
+}
 // Called when the game starts or when spawned
 void AKratos::BeginPlay()
 {
@@ -80,15 +103,24 @@ void AKratos::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	PlayerMove();
-	if (bLockOn)
+	LockTargetFunc();
+
+	switch (State)
 	{
-		LockTargetFunc();
+	case EPlayerState::Run:
+		CameraComp->FieldOfView = RUN_FOV;
+		break;
+	default:
+		CameraComp->FieldOfView = WALK_FOV;
+
 	}
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetEnumValueAsString());
+	//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, GetPlayerStateString());
+
+
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
-FString AKratos::GetEnumValueAsString()
+FString AKratos::GetPlayerStateString()
 {
 	UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPlayerState"), true);
 	if (!EnumPtr) return TEXT("Invalid Enum");
@@ -122,16 +154,27 @@ void AKratos::PlayerMove()
 
 FORCEINLINE void AKratos::LockTargetFunc()
 {
-	GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+	if (bLockOn)
+		GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+}
+
+void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	State = EPlayerState::Idle;
+	CanNextCombo = false;
+	CurrentCombo = 0;
 }
 
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
 {
 	// 움직임은 유휴, 이동, 달리기, 가드시에만 가능
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
-		)
+		|| State == EPlayerState::Guard)
 	{
-		State = EPlayerState::Move;
+		if (State == EPlayerState::Guard)
+			State = EPlayerState::Guard;
+		else
+			State = EPlayerState::Move;
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
@@ -157,28 +200,33 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
-	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
+	if (bIsDodging)	return;
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
+		|| State == EPlayerState::Guard)
 	{
 		State = EPlayerState::Dodge;
+		bIsDodging = true;
+
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
 		FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
-
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 		ForwardDirection.Z = 0;
-		LaunchCharacter(ForwardDirection * 3000.0f, true, false);
+		LaunchCharacter(ForwardDirection * 3000.0f, true, true);
 
-		FTimerHandle DodgeHandle;
-		GetWorldTimerManager().SetTimer(DodgeHandle,
-			// Roll -> Idle 전환
-			[&]() {
-			if (State == EPlayerState::Dodge)
-			{
-				State = EPlayerState::Idle;
-				// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
+		if (!GetWorld()->GetTimerManager().IsTimerActive(DodgeHandle))
+		{
+			GetWorldTimerManager().SetTimer(DodgeHandle,
+				// Roll -> Idle 전환
+				[&]() {
+				if (State == EPlayerState::Dodge)
+				{
+					State = EPlayerState::Idle;
+					bIsDodging = false;
+					// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
+				}
+			},
+				DODGE_DELAY, false);
 
-			}
-		},
-			DODGE_DELAY, false);
+		}
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
@@ -230,7 +278,7 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 			[&]()
 		{
 			State = EPlayerState::Idle;
-		}, GUARD_END_DELAY / 2, false);
+		}, GUARD_END_DELAY, false);
 	}
 }
 
@@ -290,15 +338,25 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 
 void AKratos::OnMyActionAttack(const FInputActionValue& value)
 {
-	if (bIsAttacking) return;
+	if (bIsAttacking)
+	{
+		if (CanNextCombo)
+		{
+			bIsComboInputOn = true;
+		}
+		else
+		{
+			return;
+
+		}
+	}
 
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
 		|| State == EPlayerState::Run)
 	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, GetPlayerStateString());
 		State = EPlayerState::MeleeAttack1;
 		bIsAttacking = true;
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack!"));
-
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 		{
@@ -312,6 +370,24 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 			ATTACK1_DELAY, false);
 
 	}
+	else if (State == EPlayerState::MeleeAttack1)
+	{
+
+	}
+}
+
+void AKratos::AttackStartComboState()
+{
+	CanNextCombo = true;
+	bIsComboInputOn = false;
+	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, MaxCombo);
+}
+
+void AKratos::AttackEndComboState()
+{
+	bIsComboInputOn = false;
+	CanNextCombo = false;
+	CurrentCombo = 0;
 }
 
 

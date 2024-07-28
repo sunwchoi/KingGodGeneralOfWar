@@ -7,6 +7,8 @@
 #include "Kratos.h"
 #include "SG_KratosAnim.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
 /**
  * 
  */
@@ -18,15 +20,33 @@ class KINGGODGENERALOFWAR_API USG_KratosAnim : public UAnimInstance
 private:
 
 public:
+	USG_KratosAnim();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
+
+	void PlayAttackMontage();
+	void JumpToAttackMontageSection(int32 NewSection);
+
+	FOnNextAttackCheckDelegate OnNextAttackCheck;
+	FOnAttackHitCheckDelegate OnAttackHitCheck;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly)
 	EPlayerState PlayerState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly)
 	float Direction;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly)
 	float Speed;
+
+private:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AttackMontage ;
+	UFUNCTION()
+	void AnimNotify_AttackHitCheck();
+
+	UFUNCTION()
+	void AnimNotify_NextAttackCheck() ;
+
+	FName GetAttackMontageSection(int32 Section);
 };

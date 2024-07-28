@@ -9,6 +9,8 @@
 
 const float PlayerMaxSpeed = 1200.0f; // 플레이어 최대 속도. (달리기)
 
+const int8 MaxCombo = 4;
+
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -48,17 +50,21 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void PostInitializeComponents() override;
+	UPROPERTY()
+	class USG_KratosAnim* Anim ;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -81,7 +87,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_LockOn;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Attack;
 
@@ -115,11 +121,13 @@ public:
 	UFUNCTION()
 	void OnMyActionAttack(const FInputActionValue& value);
 
+	void AttackStartComboState();
+	void AttackEndComboState();
 
 	UFUNCTION()
 	void Damage(int DamageValue, EAttackType AttackType);
 
-	FString GetEnumValueAsString();
+	FString GetPlayerStateString();
 	void PlayerMove();
 
 	UPROPERTY(BlueprintReadOnly)
@@ -153,7 +161,24 @@ public:
 	TSubclassOf<class ABDThor> Boss2;
 
 	void LockTargetFunc();
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool CanNextCombo;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool bIsComboInputOn;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	int CurrentCombo;
+
 private:
 	bool bIsAttacking;
+	bool bIsDodging;
+	FTimerHandle DodgeHandle;
 
+	float CurrentTime;
+	float DelayTime;
 };
