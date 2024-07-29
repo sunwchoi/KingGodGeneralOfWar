@@ -3,3 +3,9 @@
 
 #include "BDThorAnim.h"
 
+void UBDThorAnim::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	
+}
