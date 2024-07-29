@@ -17,6 +17,7 @@ TODO<br>
 
 [이니셜]<br>
 김바다 : BD
+전승건 : SG
 
 커밋 컨벤션<br>
 
@@ -39,7 +40,7 @@ Remove: test.txt 임시파일 삭제 - tyi<br>
 Rename: test.txt → operator.txt - jincpark<br>
 코드 컨벤션<br>
 
-파스칼 켄벤션 (int ShootingPlayer)<br>
+파스칼 컨벤션 (int ShootingPlayer)<br>
 블루프린트 생성 접두어 BP_  <br>
 클래스 만들 시 접두어 G  <br>
 엑터 클래스 만들 시 접두어 A  <br>

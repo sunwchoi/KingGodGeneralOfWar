@@ -7,16 +7,27 @@
 #include "InputAction.h"
 #include "Kratos.generated.h"
 
+const float PlayerMaxSpeed = 1200.0f; // 플레이어 최대 속도. (달리기)
+
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
 	Idle UMETA(DisplayName = "Idle"),
 	Move UMETA(DisplayName = "Move"),
 	Run UMETA(DisplayName = "Run"),
+	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	Attack UMETA(DisplayName = "Attack"),
+	MeleeAttack1 UMETA(DisplayName = "MeleeAttack1"),
+	MeleeAttack2 UMETA(DisplayName = "MeleeAttack2"),
+	MeleeAttack3 UMETA(DisplayName = "MeleeAttack3"),
+	MeleeAttack4 UMETA(DisplayName = "MeleeAttack4"),
+	DashAttack UMETA(DisplayName = "DashAttack"),
+	GuardStart UMETA(DisplayName = "GuardStart"),
 	Guard UMETA(DisplayName = "Guard"),
-	Hit UMETA(DisplayName = "Hit")
+	GuardHit UMETA(DisplayName = "GuardHit"),
+	GuardStaggerd UMETA(DisplayName = "GuardStaggerd"),
+	GuardEnd UMETA(DisplayName = "GuardEnd"),
+	Hit UMETA(DisplayName = "Hit"),
 };
 
 UENUM(BlueprintType)
@@ -60,7 +71,7 @@ public:
 	class UInputAction* IA_Look;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Roll;
+	class UInputAction* IA_Dodge;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Run;
@@ -70,6 +81,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_LockOn;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_Attack;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -78,7 +92,7 @@ public:
 	void OnMyActionLook(const FInputActionValue& value);
 
 	UFUNCTION()
-	void OnMyActionRoll(const FInputActionValue& value);
+	void OnMyActionDodge(const FInputActionValue& value);
 
 	UFUNCTION()
 	void OnMyActionRunOn(const FInputActionValue& value);
@@ -96,7 +110,11 @@ public:
 	void OnMyActionLockOn(const FInputActionValue& value);
 
 	UFUNCTION()
-	void ExitRolling();
+	void OnMyActionIdle(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionAttack(const FInputActionValue& value);
+
 
 	UFUNCTION()
 	void Damage(int DamageValue, EAttackType AttackType);
@@ -104,6 +122,7 @@ public:
 	FString GetEnumValueAsString();
 	void PlayerMove();
 
+	UPROPERTY(BlueprintReadOnly)
 	FVector Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -132,4 +151,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
 	TSubclassOf<class ABDThor> Boss2;
+
+	void LockTargetFunc();
+private:
+	bool bIsAttacking;
+
 };
