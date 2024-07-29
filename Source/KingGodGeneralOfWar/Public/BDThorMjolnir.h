@@ -40,8 +40,17 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class ABDThor* me; //나 자신
 
+	UPROPERTY(EditDefaultsOnly)
+	int32 BDThrowDamage = 10;
+
 
 	UFUNCTION()
 	void FireInDirection(const FVector& ShootDirection);
+
+	UFUNCTION()
+	void BackMjolnir(); //묠니르 발사 후 돌아오는 함수
+
+	UFUNCTION()
+	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 };
