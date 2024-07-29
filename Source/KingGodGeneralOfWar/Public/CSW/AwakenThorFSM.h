@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "AwakenThorFSM.generated.h"
 
-UENUM()
+UENUM(BlueprintType)
 enum class EAwakenThorState : uint8
 {
 	Idle,
@@ -35,7 +35,7 @@ public:
 
 
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void SetState(EAwakenThorState NewState);
 
 	void IdleState();
@@ -45,7 +45,7 @@ public:
 	void DieState();
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=FSM, meta=(AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;
 
 	UPROPERTY(VisibleAnywhere, Category=FSM)
@@ -53,6 +53,9 @@ private:
 	
 	UPROPERTY()
 	class AAwakenThor* Me;
+
+	UPROPERTY()
+	class UAwakenThorAnim* Anim;
 	
 	float IdleDelayTime = 5.f;
 	float CurrentTime;
@@ -60,4 +63,7 @@ private:
 	float TeleportDist = 1000;
 
 	FTimerHandle MoveTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
+	bool bPlay;
 };
