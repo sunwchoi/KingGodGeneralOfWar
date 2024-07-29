@@ -17,7 +17,7 @@ AAwakenThor::AAwakenThor()
 	Fsm = CreateDefaultSubobject<UAwakenThorFSM>(TEXT("FSM"));
 
 	Mjolnir = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mjolnir"));
-	Mjolnir->SetupAttachment(RootComponent);
+	Mjolnir->SetupAttachment(GetMesh(), TEXT("LeftHandSocket"));
 
 	MjolnirMoveComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MjolnirMoveComp"));
 	MjolnirMoveComp->SetUpdatedComponent(Mjolnir);
@@ -27,7 +27,8 @@ AAwakenThor::AAwakenThor()
 void AAwakenThor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
+
 }
 
 // Called every frame
@@ -65,9 +66,9 @@ void AAwakenThor::Move(FVector NewLoc)
 	GetWorld()->GetTimerManager().SetTimer(tmpHandle, tmpDel, 1.f, false);
 }
 
-void AAwakenThor::PoundThunderAttack(const FTransform& Target) const
+class AAttackZone* AAwakenThor::PoundThunderAttack(const FTransform& Target)
 {
-	GetWorld()->SpawnActor<APoundThunderAttackZone>(PoundThunderAttackZoneBP, Target);
+	return GetWorld()->SpawnActor<APoundThunderAttackZone>(PoundThunderAttackZoneBP, Target);
 }
 
 void AAwakenThor::SetThorLocation(FVector NewLoc)

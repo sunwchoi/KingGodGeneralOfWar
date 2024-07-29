@@ -4,6 +4,7 @@
 #include "CSW/AwakenThorFSM.h"
 
 #include "CSW/AwakenThor.h"
+#include "CSW/AwakenThorAnim.h"
 #include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
@@ -26,8 +27,7 @@ void UAwakenThorFSM::BeginPlay()
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
-
-	
+	Anim = Cast<UAwakenThorAnim>(Me->GetMesh()->GetAnimInstance());
 }
 
 
@@ -36,6 +36,8 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (bPlay == true)
+		return ;
 
 	switch (State)
 	{
@@ -60,6 +62,7 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 void UAwakenThorFSM::SetState(EAwakenThorState NewState)
 {
 	State = NewState;
+	Anim->SetState(State);
 }
 
 void UAwakenThorFSM::IdleState()
@@ -73,10 +76,10 @@ void UAwakenThorFSM::IdleState()
 	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
 	if (FVector::Dist(targetLoc, myLoc) > 1050)
-		State = EAwakenThorState::Move;
+		SetState(EAwakenThorState::Move);
 	else if (CurrentTime > IdleDelayTime)
 	{
-		State = EAwakenThorState::Attack;
+		SetState(EAwakenThorState::Attack);
 		CurrentTime = 0;
 	}
 }
@@ -94,17 +97,16 @@ void UAwakenThorFSM::MoveState()
 
 	Me->Move(newLoc);
 	
-	FTimerDelegate tmpDel;
-	tmpDel.BindUFunction(this, FName("SetState"), EAwakenThorState::Idle);
-	GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, tmpDel, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, [this]() { SetState(EAwakenThorState::Idle); }, 2.f, false);
 }
 
 void UAwakenThorFSM::AttackState()
 {
+	bPlay = true;
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
 	Me->PoundThunderAttack(Target->GetTransform());
-	State = EAwakenThorState::Idle;
+	Anim->PlayPoundAttackAnim(FName("Attack0"));
 }
 
 void UAwakenThorFSM::DamageState()

@@ -30,9 +30,11 @@ public:
 	UStaticMeshComponent* GetMjolnir() const;
 
 	void Move(FVector NewLoc);
-	void PoundThunderAttack(const FTransform& Target) const;
+
+	UFUNCTION(BlueprintCallable)
+	class AAttackZone* PoundThunderAttack(const FTransform& Target);
 private:
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
