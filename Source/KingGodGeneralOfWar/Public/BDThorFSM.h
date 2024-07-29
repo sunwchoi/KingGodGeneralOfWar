@@ -17,7 +17,7 @@ enum class BDThorGeneralState : uint8 {
 	BDAvoidance,
 	BDAttackModeChange,
 	BDDamage,
-	BDHammerThunder,
+	BDHammerThrow,
 	BDHammerWind,
 	BDHammerThreeSwing,
 	BDGiveUPFly,
@@ -58,13 +58,13 @@ public:
 	class ABDThor* me; //나 자신
 
 
-	UPROPERTY(EditAnywhere, Category = FSM) 
-	float BDAttackRange = 150.0f; // 에너미 공격 범위
+	UPROPERTY(EditDefaultsOnly, Category = FSM)
+	float BDAttackRange = 300.0f; // 에너미 공격 범위
 	
 
-	UPROPERTY(EditAnywhere)
-	//class AKratos* Target; //타겟
-	class ACharacter* Target;
+	UPROPERTY(EditDefaultsOnly)
+	class AKratos* Target; //타겟
+	//class ACharacter* Target;
 
 	//상태 변수
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
@@ -80,12 +80,17 @@ public:
 	void BDAvoidanceState(); //회피 상태
 	UFUNCTION(BlueprintCallable, Category = State)
 	void BDAttackModeChangeState(); //공격 모드 변경 상태
+	UFUNCTION(BlueprintCallable, Category = AttackScene)
+	BDThorGeneralState RandomAttackState(); // 랜덤 공격 상태 선택 함수
 	UFUNCTION(BlueprintCallable, Category = State)
 	void BDDamageState(); //피격 상태
 
 	//공격 함수
 	UFUNCTION(BlueprintCallable, Category = Attack)
-	void BDHammerThunderState(); //망치 날리면서 번개 공격
+	void BDHammerThrowState(); //망치 날리면서 공격
+	//UFUNCTION(BlueprintCallable, Category = Attack)
+	//void BDHammerThrowHit(); //망치를 Fire 하는 능력
+
 	UFUNCTION(BlueprintCallable, Category = Attack)
 	void BDHammerWindState(); //망치 휘두르면서 바람날리는 공격
 	UFUNCTION(BlueprintCallable, Category = Attack)
@@ -96,6 +101,10 @@ public:
 	void BDGiveUPFlyState();
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDHittingDownState();
+
+
+	UPROPERTY(EditDefaultsOnly)
+	BDThorGeneralState LastAttackState; // 마지막 공격 상태를 저장하는 변수
 
 
 	//사용중인 애니메이션 블루프린트
@@ -111,13 +120,13 @@ public:
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float BDidleDelayTime = 2.0f;
+	float BDidleDelayTime = 0.5f;
 	//경과 시간
 	float BDCurrentTime = 0;
 
 	//공격 대기 시간, 토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float BDAttackDelayTime = 2.0f;
+	float BDAttackDelayTime = 0.5f;
 
 	//피격 시 데미지 함수, DamageNum 데미지 수치
 	UFUNCTION()

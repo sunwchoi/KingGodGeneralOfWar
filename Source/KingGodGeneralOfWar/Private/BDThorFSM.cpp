@@ -6,6 +6,7 @@
 #include "Kratos.h"
 #include "BDThorAnim.h"
 #include "Kismet/GameplayStatics.h"
+#include "BDThorMjolnir.h"
 
 
 // Sets default values for this component's properties
@@ -13,7 +14,7 @@ UBDThorFSM::UBDThorFSM()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-
+	LastAttackState = BDThorGeneralState::BDIdle; // 초기화
 }
 
 
@@ -60,8 +61,8 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	case BDThorGeneralState::BDDamage:
 		BDDamageState(); //피격
 		break;
-	case BDThorGeneralState::BDHammerThunder:
-		BDHammerThunderState(); //공격 패턴
+	case BDThorGeneralState::BDHammerThrow:
+		BDHammerThrowState(); //공격 패턴
 		break;
 	case BDThorGeneralState::BDHammerWind:
 		BDHammerWindState(); //공격 패턴
@@ -129,9 +130,6 @@ void UBDThorFSM::BDMoveState()
 
 		//애니메이션 상태 동기화
 		anim->animState = mState;
-		//공격 애니메이션 재생 활성화
-		
-		//공격 상태 전환 시 대기시간이 바로 끝나도록 처리
 	}
 }
 
@@ -146,19 +144,21 @@ void UBDThorFSM::BDAvoidanceState()
 void UBDThorFSM::BDAttackModeChangeState()
 {
 	//일정시간에 다양한 패턴으로 넘어가야한다.
-	
-	
-	//일단 간단 구현
+
 	//1. 시간이 흐르고
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
 	//2. 공격 시간이 되면
 	if (BDCurrentTime > BDAttackDelayTime) {
-		//공격, 여기엔 다양한 공격 타입을 랜덤으로 설정해둔다.
-		UE_LOG(LogTemp, Warning, TEXT("player BDAttack!!"));
-		//경과 시간 초기화 후 대기 또는 이동으로 상태 변경하기
+		// 랜덤으로 공격 패턴 선택
+		//mState = RandomAttackState();
+		mState = BDThorGeneralState::BDHammerThrow;  // 임시 상태
+		anim->animState = mState;
+		
+		UE_LOG(LogTemp, Warning, TEXT("Attack"));
+		
 		BDCurrentTime = 0;
-
-		//mState = BDThorGeneralState::BDIdle;  // 상태를 대기로 전환
+		//애니메이션 상태 동기화
+		
 	}
 
 	//타깃이 공격을 받으면 다시 이동으로 변하고 싶다.
@@ -168,9 +168,45 @@ void UBDThorFSM::BDAttackModeChangeState()
 	//타깃의 거리가 공격 범위를 벗어났으니까
 	if (distance > BDAttackRange) {
 		//상태를 잠시 대기로 전환한다.
-		mState = BDThorGeneralState::BDMove;
+		mState = BDThorGeneralState::BDIdle;
+		//애니메이션 상태 동기화
+		anim->animState = mState;
 	}
 
+}
+
+//공격 패턴을 랜덤으로 지정하는 함수
+BDThorGeneralState UBDThorFSM::RandomAttackState()
+{
+	// 가능한 상태들을 배열로 저장
+	TArray<BDThorGeneralState> AttackStates = {
+		BDThorGeneralState::BDHammerThrow,
+		BDThorGeneralState::BDHammerWind,
+		BDThorGeneralState::BDHammerThreeSwing,
+		BDThorGeneralState::BDGiveUPFly,
+		BDThorGeneralState::BDHitDown
+	};
+
+	// 마지막 상태 제거
+	AttackStates.Remove(LastAttackState);
+
+	// 랜덤으로 선택
+	int32 RandomIndex = FMath::RandRange(0, AttackStates.Num() - 1);
+	BDThorGeneralState NewState = AttackStates[RandomIndex];
+
+	//만약 망치 공격일 경우
+	if (NewState == BDThorGeneralState::BDHammerThreeSwing || NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
+		//손에 망치를 들어라
+		me->EquipWeapon();
+	}
+	else {
+		me->DrawWeapon(); //허리에 망치를 두어라
+	}
+
+	// 마지막 상태 업데이트
+	LastAttackState = NewState;
+
+	return NewState; //상태 리턴
 }
 
 void UBDThorFSM::BDDamageState()
@@ -190,14 +226,53 @@ void UBDThorFSM::BDDamageState()
 	}
 }
 
+
 //망치 날리면서 번개 공격
-void UBDThorFSM::BDHammerThunderState()
+void UBDThorFSM::BDHammerThrowState()
 {
+	//애니메이션을 실행 후
+	anim->playBDHammerThrow();
+	
+
+	mState = BDThorGeneralState::BDIdle;  // 임시 상태
+
+	//상태를 다시 AttackChangeModeState로 변경
 }
+
+//망치를 총알처럼 날림, ThrowTiming 노티파이때 실행
+//void UBDThorFSM::BDHammerThrowHit()
+//{
+//	//손에 있는 망치 날림
+//	//me->BDWeapon->SetVisibility(false);
+//
+//	//공격 시 손 소켓에서 출발해 망치가 한번 날라갔다가 돌아와야 함
+//	//FTransform t = me->GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand")); //시작점
+//	//ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t); //여기서 스폰하면서 실행
+//
+//	// me->BDWeapon->SetVisibility(false);
+//
+//	// 공격 시 손 소켓에서 출발해 망치가 한번 날라갔다가 돌아와야 함
+//
+//	FTransform t = me->GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand"));
+//
+//	ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t);
+//	if (Mjolnir)
+//	{
+//		// 초기 속도 및 방향 설정
+//		FVector LaunchDirection = (Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
+//		Mjolnir->FireInDirection(LaunchDirection);
+//		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned successfully and fired"));
+//	}
+//	else {
+//		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned failed"));
+//	}
+//
+//}
 
 //망치 휘두르면서 바람공격
 void UBDThorFSM::BDHammerWindState()
 {
+
 }
 
 //망치 n번 휘두르기
@@ -226,6 +301,7 @@ void UBDThorFSM::BDEndState()
 //애니메이션 상태 변경
 void UBDThorFSM::BDSetState()
 {
+	//mState = 
 }
 
 

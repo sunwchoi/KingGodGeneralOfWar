@@ -32,6 +32,12 @@ public:
 	void Move(FVector NewLoc);
 
 	UFUNCTION(BlueprintCallable)
+	void Throw(FVector Target);
+
+	UFUNCTION(BlueprintCallable)
+	void Teleport(FVector Target);
+
+	UFUNCTION(BlueprintCallable)
 	class AAttackZone* PoundThunderAttack(const FTransform& Target);
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
