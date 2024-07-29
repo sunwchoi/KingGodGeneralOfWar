@@ -185,4 +185,5 @@ private:
 	float DelayTime;
 
 	FRotator TargetCameraRotation;
+	FRotator TargetActorRotation;
 };

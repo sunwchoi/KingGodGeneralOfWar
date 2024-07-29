@@ -112,6 +112,9 @@ void AKratos::Tick(float DeltaTime)
 
 	PlayerMove();
 	LockTargetFunc();
+	//SetActorRotation(YawRotation);
+	FRotator playerRotation = GetActorRotation();
+	SetActorRotation( UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 3, true));
 
 	switch (State)
 	{
@@ -162,7 +165,10 @@ void AKratos::PlayerMove()
 FORCEINLINE void AKratos::LockTargetFunc()
 {
 	if (bLockOn)
-		GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+	{
+		GetController()->AController::SetControlRotation(
+			UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+	}
 }
 
 void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -196,9 +202,9 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
 
 		// 캐릭터 현재 회전 가져오기
-		FRotator Rotation = GetControlRotation();
-		FRotator YawRotation(0, Rotation.Yaw, 0);
-		SetActorRotation(YawRotation);
+		//FRotator Rotation = GetControlRotation();
+		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
+		//SetActorRotation(YawRotation);
 	}
 }
 
