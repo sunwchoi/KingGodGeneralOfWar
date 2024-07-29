@@ -67,10 +67,11 @@ void AKratos::PostInitializeComponents()
 	if (Anim)
 	{
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
-		Anim->OnDodgeEndCheck.AddLambda([this]() -> void
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
+		/*Anim->OnDodgeEndCheck.AddLambda([this]() -> void
 			{
 
-			});
+			});*/
 		Anim->OnNextAttackCheck.AddLambda([this]() -> void
 			{
 				CanNextCombo = false;
@@ -148,9 +149,6 @@ void AKratos::PlayerMove()
 	float MoveScale = 0;
 	switch (State)
 	{
-	case EPlayerState::Guard:
-		MoveScale = .1f;
-		break;
 	case EPlayerState::Move:
 		MoveScale = .5f;
 		break;
@@ -175,11 +173,16 @@ void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	bIsAttacking = false;
 }
 
+void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	State = EPlayerState::Idle;
+	bIsDodging = false;
+}
+
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
 {
-	// 움직임은 유휴, 이동, 달리기, 가드시에만 가능
-	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
-		|| State == EPlayerState::Guard)
+	// 움직임은 유휴, 이동, 달리기가능
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		if (State == EPlayerState::Guard)
 			State = EPlayerState::Guard;
@@ -210,7 +213,7 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
-	if (bIsDodging)	return;
+	if (bIsDodging || GetVelocity().Size() < 1)	return;
 	//if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
 	//	|| State == EPlayerState::Guard)
 	{
@@ -225,7 +228,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 
-		float DodgeCoef = 3000;
+		float DodgeCoef = 1500;
 		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
 		Anim->PlayDodgeMontage();
 
@@ -315,12 +318,12 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1)));
 	TArray<AActor*> ActorsToIgnore;
-	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
+	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::None;
 	FHitResult OutHit;
 	bool bIgnoreSelf = false;
 	FLinearColor TraceColor = FLinearColor::White;
 	FLinearColor TraceHitColor = FLinearColor::Red;
-	float DrawTime = 10.0f;
+	float DrawTime = 0.0f;
 	FCollisionObjectQueryParams ObjectQueryParams;
 
 	bLockOn = UKismetSystemLibrary::SphereTraceSingleForObjects(
@@ -372,10 +375,6 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 		Anim->PlayAttackMontage();
 		Anim->JumpToAttackMontageSection(CurrentCombo);
 		bIsAttacking = true;
-		
-	}
-	else if (bIsComboInputOn)
-	{
 		
 	}
 }
