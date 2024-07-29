@@ -9,6 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnDodgeEndCheckDelegate);
 /**
  * 
  */
@@ -18,16 +19,18 @@ class KINGGODGENERALOFWAR_API USG_KratosAnim : public UAnimInstance
 	GENERATED_BODY()
 	
 private:
-
+	
 public:
 	USG_KratosAnim();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	void PlayAttackMontage();
+	void PlayDodgeMontage();
 	void JumpToAttackMontageSection(int32 NewSection);
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
+	FOnDodgeEndCheckDelegate OnDodgeEndCheck;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
@@ -42,6 +45,10 @@ public:
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontage ;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* DodgeMontage ;
+
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
 

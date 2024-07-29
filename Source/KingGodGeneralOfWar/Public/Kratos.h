@@ -19,7 +19,7 @@ enum class EPlayerState : uint8
 	Run UMETA(DisplayName = "Run"),
 	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	MeleeAttack1 UMETA(DisplayName = "MeleeAttack1"),
+	MeleeAttack UMETA(DisplayName = "MeleeAttack"),
 	MeleeAttack2 UMETA(DisplayName = "MeleeAttack2"),
 	MeleeAttack3 UMETA(DisplayName = "MeleeAttack3"),
 	MeleeAttack4 UMETA(DisplayName = "MeleeAttack4"),

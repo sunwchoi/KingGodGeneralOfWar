@@ -64,25 +64,32 @@ void AKratos::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	Anim = Cast<USG_KratosAnim>(GetMesh()->GetAnimInstance());
-
-	Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
-
-	Anim->OnNextAttackCheck.AddLambda([this]() -> void
+	if (Anim)
 	{
-		CanNextCombo = false;
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
+		Anim->OnDodgeEndCheck.AddLambda([this]() -> void
+			{
 
-		if (bIsComboInputOn)
-		{
-			AttackStartComboState();
-			Anim->JumpToAttackMontageSection(CurrentCombo);
-		}
-	});
+			});
+		Anim->OnNextAttackCheck.AddLambda([this]() -> void
+			{
+				CanNextCombo = false;
+
+				if (bIsComboInputOn)
+				{
+					AttackStartComboState();
+					Anim->JumpToAttackMontageSection(CurrentCombo);
+				}
+			});
+		
+	}
 }
 // Called when the game starts or when spawned
 void AKratos::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurHP = MaxHP;
 	// 1. 컨트롤러를 가져와서 PlayerController인지 캐스팅해본다.
 	auto* pc = Cast<APlayerController>(Controller);
 
@@ -112,10 +119,12 @@ void AKratos::Tick(float DeltaTime)
 		break;
 	default:
 		CameraComp->FieldOfView = WALK_FOV;
-
 	}
-	//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, GetPlayerStateString());
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("PLAYER_STATE: %s"), *GetPlayerStateString() ));
 
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
+		TEXT("HP: %f"), CurHP));
 
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
@@ -163,6 +172,7 @@ void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	State = EPlayerState::Idle;
 	CanNextCombo = false;
 	CurrentCombo = 0;
+	bIsAttacking = false;
 }
 
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
@@ -178,7 +188,7 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
-
+		Direction.Normalize();
 		//Direction.Normalize();
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
 
@@ -201,32 +211,39 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
 	if (bIsDodging)	return;
-	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
-		|| State == EPlayerState::Guard)
+	//if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
+	//	|| State == EPlayerState::Guard)
 	{
 		State = EPlayerState::Dodge;
 		bIsDodging = true;
-
+		
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
-		FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
+		//FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
+		FVector ForwardDirection = GetVelocity();
 		ForwardDirection.Z = 0;
-		LaunchCharacter(ForwardDirection * 3000.0f, true, true);
+		ForwardDirection.Normalize();
 
-		if (!GetWorld()->GetTimerManager().IsTimerActive(DodgeHandle))
-		{
-			GetWorldTimerManager().SetTimer(DodgeHandle,
-				// Roll -> Idle 전환
-				[&]() {
-				if (State == EPlayerState::Dodge)
-				{
-					State = EPlayerState::Idle;
-					bIsDodging = false;
-					// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
-				}
-			},
-				DODGE_DELAY, false);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
 
-		}
+		float DodgeCoef = 3000;
+		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
+		Anim->PlayDodgeMontage();
+
+		//if (!GetWorld()->GetTimerManager().IsTimerActive(DodgeHandle))
+		//{
+		//	GetWorldTimerManager().SetTimer(DodgeHandle,
+		//		// Roll -> Idle 전환
+		//		[&]() {
+		//		if (State == EPlayerState::Dodge)
+		//		{
+		//			State = EPlayerState::Idle;
+		//			bIsDodging = false;
+		//			// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
+		//		}
+		//	},
+		//		DODGE_DELAY, false);
+
+		//}
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
@@ -329,7 +346,6 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 
 }
 
-
 void AKratos::OnMyActionIdle(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Move || State == EPlayerState::Run)
@@ -344,35 +360,23 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 		{
 			bIsComboInputOn = true;
 		}
-		else
-		{
-			return;
-
-		}
+		return;
 	}
 
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
 		|| State == EPlayerState::Run)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, GetPlayerStateString());
-		State = EPlayerState::MeleeAttack1;
+		State = EPlayerState::MeleeAttack;
+
+		AttackStartComboState();
+		Anim->PlayAttackMontage();
+		Anim->JumpToAttackMontageSection(CurrentCombo);
 		bIsAttacking = true;
-		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
-		{
-			if (State == EPlayerState::MeleeAttack1)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack End"));
-				this->State = EPlayerState::Idle;
-				bIsAttacking = false;
-			}
-		},
-			ATTACK1_DELAY, false);
-
+		
 	}
-	else if (State == EPlayerState::MeleeAttack1)
+	else if (bIsComboInputOn)
 	{
-
+		
 	}
 }
 
@@ -394,8 +398,9 @@ void AKratos::AttackEndComboState()
 
 void AKratos::Damage(int DamageValue, EAttackType AttackType)
 {
-	State = EPlayerState::Hit;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
+	//State = EPlayerState::Hit;
+	CurHP -= DamageValue;
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Player Hit!"));
 }
 
 
