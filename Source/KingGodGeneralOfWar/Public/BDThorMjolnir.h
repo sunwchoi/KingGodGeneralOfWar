@@ -34,4 +34,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UProjectileMovementComponent* MovementComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	class AKratos* Target; //Å¸°Ù
+
+	UPROPERTY(EditDefaultsOnly)
+	class ABDThor* me; //³ª ÀÚ½Å
+
+
+	UFUNCTION()
+	void FireInDirection(const FVector& ShootDirection);
+
 };

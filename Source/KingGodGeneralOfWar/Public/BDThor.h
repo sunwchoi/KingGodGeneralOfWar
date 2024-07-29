@@ -32,10 +32,28 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSMComponent)
 	class UBDThorFSM* fsm; //토르 FSM
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
-	class UStaticMeshComponent* BDWeapon;
+
+	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
+	class UStaticMeshComponent* BDWeapon;*/
+
+	UPROPERTY(EditAnywhere, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ABDThorMjolnir> WeaponClass;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ABDThorMjolnir> CurrentWeapon;
+
+	//공격할 때 손으로 위치 바꾸기
+	UFUNCTION()
+	void EquipWeapon();
 
 	//바람 공격할 때 넣을 액터 클래스
 	/*UPROPERTY(EditAnywhere)
 	TSubclassOf<class ASlashActor>SlashFat;*/
+
+	//망치 날릴때 쓸 공장
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ABDThorMjolnir> MjolnirFactory;
+
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDHammerThrowHit(); //망치를 Fire 하는 능력
 };
