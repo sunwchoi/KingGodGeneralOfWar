@@ -160,7 +160,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
 	TSubclassOf<class ABDThor> Boss2;
 
-	void LockTargetFunc();
+	void LockTargetFunc(float DeltaTime);
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -186,4 +186,5 @@ private:
 
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
+	float TargetFOV = 90;
 };

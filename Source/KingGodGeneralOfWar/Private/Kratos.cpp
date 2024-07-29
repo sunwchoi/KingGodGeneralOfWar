@@ -23,7 +23,8 @@ const float GUARD_END_DELAY = 0.15f;
 const float DODGE_DELAY = 0.5f;
 
 const float WALK_FOV = 90;
-const float RUN_FOV = 100;
+const float RUN_FOV = 105;
+const float GUARD_FOV = 70;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -111,19 +112,41 @@ void AKratos::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	PlayerMove();
-	LockTargetFunc();
+	LockTargetFunc(DeltaTime);
 	//SetActorRotation(YawRotation);
 	FRotator playerRotation = GetActorRotation();
-	SetActorRotation( UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 3, true));
 
+	// 플레이어 로테이션 선형 보간
+	SetActorRotation( UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 5, true));
+
+	// 카메라 시야각 선형 보간
+	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 10);
 	switch (State)
 	{
 	case EPlayerState::Run:
-		CameraComp->FieldOfView = RUN_FOV;
+		TargetFOV = RUN_FOV;
+		break;
+	case EPlayerState::GuardStart:
+	case EPlayerState::Guard:
+		TargetFOV = GUARD_FOV;
 		break;
 	default:
-		CameraComp->FieldOfView = WALK_FOV;
+		TargetFOV = WALK_FOV;
 	}
+	if (bLockOn)
+	{
+		TargetFOV -= 10;
+	}
+
+	/*GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("TargetActorRotation: %s"), *TargetActorRotation.ToString()));
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("ActorRotation: %s"), *GetActorRotation().ToString()));*/
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(
+		TEXT("CurrentFOV: %f"), CameraComp->FieldOfView));
+
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
 		TEXT("PLAYER_STATE: %s"), *GetPlayerStateString() ));
 
@@ -162,12 +185,20 @@ void AKratos::PlayerMove()
 	AddMovementInput(ForwardDirection, MoveScale);
 }
 
-FORCEINLINE void AKratos::LockTargetFunc()
+FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 {
 	if (bLockOn)
 	{
-		GetController()->AController::SetControlRotation(
-			UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, TEXT("LockSystem On"));
+
+		FRotator playerCameraRotation = GetController()->AController::GetControlRotation();
+		//FRotator playerCameraYawRotation = FRotator()
+		TargetCameraRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation());
+		FRotator ToCameraRotation = UKismetMathLibrary::RLerp(playerCameraRotation, TargetCameraRotation, DeltaTime * 15, true);
+		GetController()->AController::SetControlRotation(FRotator(playerCameraRotation.Pitch, ToCameraRotation.Yaw, playerCameraRotation.Roll));
+		/*GetController()->AController::SetControlRotation(
+			UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));*/
 	}
 }
 
@@ -231,28 +262,10 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		FVector ForwardDirection = GetVelocity();
 		ForwardDirection.Z = 0;
 		ForwardDirection.Normalize();
-
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
-
-		float DodgeCoef = 1500;
+		float DodgeCoef = 2000;
 		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
 		Anim->PlayDodgeMontage();
 
-		//if (!GetWorld()->GetTimerManager().IsTimerActive(DodgeHandle))
-		//{
-		//	GetWorldTimerManager().SetTimer(DodgeHandle,
-		//		// Roll -> Idle 전환
-		//		[&]() {
-		//		if (State == EPlayerState::Dodge)
-		//		{
-		//			State = EPlayerState::Idle;
-		//			bIsDodging = false;
-		//			// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
-		//		}
-		//	},
-		//		DODGE_DELAY, false);
-
-		//}
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
@@ -260,6 +273,7 @@ void AKratos::OnMyActionRunOn(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move)
 	{
 		State = EPlayerState::Run;
+		
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Move -> Run"));
 	}
 }
