@@ -120,7 +120,7 @@ public:
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float BDidleDelayTime = 2.0f;
+	float BDidleDelayTime = 0.5f;
 	//경과 시간
 	float BDCurrentTime = 0;
 
