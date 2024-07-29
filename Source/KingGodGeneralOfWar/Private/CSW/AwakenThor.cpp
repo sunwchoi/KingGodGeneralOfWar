@@ -6,7 +6,6 @@
 #include "CSW/AwakenThorFSM.h"
 #include "CSW/PoundThunderAttackZone.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Math/UnitConversion.h"
 
 // Sets default values
 AAwakenThor::AAwakenThor()
@@ -17,7 +16,7 @@ AAwakenThor::AAwakenThor()
 	Fsm = CreateDefaultSubobject<UAwakenThorFSM>(TEXT("FSM"));
 
 	Mjolnir = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mjolnir"));
-	Mjolnir->SetupAttachment(GetMesh(), TEXT("LeftHandSocket"));
+	Mjolnir->SetupAttachment(GetMesh());
 
 	MjolnirMoveComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MjolnirMoveComp"));
 	MjolnirMoveComp->SetUpdatedComponent(Mjolnir);
@@ -57,13 +56,26 @@ UStaticMeshComponent* AAwakenThor::GetMjolnir() const
 
 void AAwakenThor::Move(FVector NewLoc)
 {
-	FVector dir = NewLoc - GetActorLocation();
-	MjolnirMoveComp->Velocity = dir;
 
 	FTimerHandle tmpHandle;
 	FTimerDelegate tmpDel;
 	tmpDel.BindUFunction(this, FName("SetThorLocation"), NewLoc);
 	GetWorld()->GetTimerManager().SetTimer(tmpHandle, tmpDel, 1.f, false);
+}
+
+void AAwakenThor::Throw(FVector Target)
+{
+	Mjolnir->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	FVector dir = Target - GetActorLocation();
+	MjolnirMoveComp->Velocity = dir;
+	
+}
+
+void AAwakenThor::Teleport(FVector Target)
+{
+	SetActorLocation(Target);
+	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
+	MjolnirMoveComp->Velocity = FVector::ZeroVector;
 }
 
 class AAttackZone* AAwakenThor::PoundThunderAttack(const FTransform& Target)
