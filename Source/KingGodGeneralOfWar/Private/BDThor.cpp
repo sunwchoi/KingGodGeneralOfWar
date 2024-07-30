@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kratos.h"
+#include "WindSlash.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -106,7 +107,7 @@ void ABDThor::BDHammerThrowHit()
 		//FVector LaunchDirection = (fsm->Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
 		FVector LaunchDirection = GetActorForwardVector();
 		Mjolnir->FireInDirection(LaunchDirection);
-		UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
+		//UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned failed"));
@@ -116,6 +117,11 @@ void ABDThor::BDHammerThrowHit()
 //바람 슬래쉬
 void ABDThor::BDHammerWindSlash()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("exex"));
+
 	//바람 액터 스폰해서 공격
+	FActorSpawnParameters parm;
+	parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GetWorld()->SpawnActor<AWindSlash>(SlashFat, GetActorLocation(), GetActorRotation(), parm);
 }
 

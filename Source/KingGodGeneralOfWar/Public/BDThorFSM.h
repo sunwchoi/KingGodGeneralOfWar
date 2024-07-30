@@ -116,7 +116,7 @@ public:
 	void BDEndState();
 
 	UFUNCTION(BlueprintCallable, Category = SetState)
-	void BDSetState();
+	void BDSetState(BDThorGeneralState BDnewState);
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
@@ -137,5 +137,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;
+
+	UPROPERTY(EditDefaultsOnly)
+	FTimerHandle StateTimerHandle; //상태 변경 전의 딜레이 주기 위한 변수
+
+	UFUNCTION()
+	void BDTransitionToMoveState();
 		
 };

@@ -36,8 +36,19 @@ void UBDThorFSM::BeginPlay()
 	//체력 설정
 	BDCurrentHP = BDMaxHp;
 
+	/*if (anim) {
+		anim->OnMontageEnded.AddDynamic(this, &UBDThorFSM::BDEndState);
+	}*/
 
 }
+
+// Called when the montage ends
+//void UBDThorFSM::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+//{
+//	if (Montage == anim->BDHammerThrowMontage || Montage == anim->BDHammerWindMontage || Montage == anim->BDHammerThreeSwingMontage) {
+//		BDEndState();
+//	}
+//}
 
 
 // Called every frame
@@ -87,7 +98,7 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 void UBDThorFSM::Damage(float DamageNum)
 {
 	BDCurrentHP -= DamageNum;
-	UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
+	//UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
 
 }
 
@@ -150,28 +161,27 @@ void UBDThorFSM::BDAttackModeChangeState()
 	//2. 공격 시간이 되면
 	if (BDCurrentTime > BDAttackDelayTime) {
 		// 랜덤으로 공격 패턴 선택
-		//mState = RandomAttackState();
-		mState = BDThorGeneralState::BDHammerThrow;  // 임시 상태
+		mState = RandomAttackState();
+		//mState = BDThorGeneralState::BDHammerWind;  // 임시 상태
 		anim->animState = mState;
 		
-		UE_LOG(LogTemp, Warning, TEXT("Attack"));
+		UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
 		
 		BDCurrentTime = 0;
-		//애니메이션 상태 동기화
 		
 	}
 
 	//타깃이 공격을 받으면 다시 이동으로 변하고 싶다.
 
-	//임시 코드, 플레이어의 Damage가 발생했을 경우 에너미의 상태를 대기 또는 이동으로 변경
-	float distance = FVector::Distance(Target->GetActorLocation(), me->GetActorLocation());
-	//타깃의 거리가 공격 범위를 벗어났으니까
-	if (distance > BDAttackRange) {
-		//상태를 잠시 대기로 전환한다.
-		mState = BDThorGeneralState::BDIdle;
-		//애니메이션 상태 동기화
-		anim->animState = mState;
-	}
+	////임시 코드, 플레이어의 Damage가 발생했을 경우 에너미의 상태를 대기 또는 이동으로 변경
+	//float distance = FVector::Distance(Target->GetActorLocation(), me->GetActorLocation());
+	////타깃의 거리가 공격 범위를 벗어났으니까
+	//if (distance > BDAttackRange) {
+	//	//상태를 잠시 대기로 전환한다.
+	//	mState = BDThorGeneralState::BDIdle;
+	//	//애니메이션 상태 동기화
+	//	anim->animState = mState;
+	//}
 
 }
 
@@ -182,9 +192,9 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
 		BDThorGeneralState::BDHammerWind,
-		BDThorGeneralState::BDHammerThreeSwing,
-		BDThorGeneralState::BDGiveUPFly,
-		BDThorGeneralState::BDHitDown
+		//BDThorGeneralState::BDHammerThreeSwing,
+		//BDThorGeneralState::BDGiveUPFly,
+		//BDThorGeneralState::BDHitDown
 	};
 
 	// 마지막 상태 제거
@@ -205,7 +215,7 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 
 	// 마지막 상태 업데이트
 	LastAttackState = NewState;
-
+	UE_LOG(LogTemp, Warning, TEXT("Random!!"));
 	return NewState; //상태 리턴
 }
 
@@ -219,7 +229,7 @@ void UBDThorFSM::BDDamageState()
 	//체력이 남아있다면
 	if (BDCurrentHP > 0) {
 		//상태를 회피로 전환
-		mState = BDThorGeneralState::BDMove;
+		//mState = BDThorGeneralState::BDMove;
 	}
 	else if (BDCurrentHP <= 0) {
 		//2 페이즈로 전환
@@ -230,48 +240,35 @@ void UBDThorFSM::BDDamageState()
 //망치 날리면서 번개 공격
 void UBDThorFSM::BDHammerThrowState()
 {
-	//애니메이션을 실행 후
-	anim->playBDHammerThrow();
+	// 현재 상태가 이미 Hammer Wind라면 함수 호출을 건너뛴다.
+	if (mState != BDThorGeneralState::BDHammerThrow) {
+		return;
+	}
+
+	if (!anim->Montage_IsPlaying(anim->BDHammerThrowMontage)) {
+		anim->playBDHammerThrow();
+	}
+
+	//mState = BDThorGeneralState::BDDamage;
 	
-
-	mState = BDThorGeneralState::BDIdle;  // 임시 상태
-
-	//상태를 다시 AttackChangeModeState로 변경
 }
-
-//망치를 총알처럼 날림, ThrowTiming 노티파이때 실행
-//void UBDThorFSM::BDHammerThrowHit()
-//{
-//	//손에 있는 망치 날림
-//	//me->BDWeapon->SetVisibility(false);
-//
-//	//공격 시 손 소켓에서 출발해 망치가 한번 날라갔다가 돌아와야 함
-//	//FTransform t = me->GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand")); //시작점
-//	//ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t); //여기서 스폰하면서 실행
-//
-//	// me->BDWeapon->SetVisibility(false);
-//
-//	// 공격 시 손 소켓에서 출발해 망치가 한번 날라갔다가 돌아와야 함
-//
-//	FTransform t = me->GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand"));
-//
-//	ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t);
-//	if (Mjolnir)
-//	{
-//		// 초기 속도 및 방향 설정
-//		FVector LaunchDirection = (Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
-//		Mjolnir->FireInDirection(LaunchDirection);
-//		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned successfully and fired"));
-//	}
-//	else {
-//		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned failed"));
-//	}
-//
-//}
 
 //망치 휘두르면서 바람공격
 void UBDThorFSM::BDHammerWindState()
 {
+	// 현재 상태가 이미 Hammer Wind라면 함수 호출을 건너뛴다.
+	if (mState != BDThorGeneralState::BDHammerWind) {
+		return;
+	}
+
+	// 애니메이션이 재생되고 있는지 확인하고, 재생되지 않았다면 재생한다.
+	if (!anim->Montage_IsPlaying(anim->BDHammerWindMontage))
+	{
+		anim->playBDHammerWind();
+		UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Wind Animation"));
+	}
+
+	//mState = BDThorGeneralState::BDDamage;
 
 }
 
@@ -296,12 +293,28 @@ void UBDThorFSM::BDHittingDownState()
 //애니메이션 마지막 종료 후 상태 확인
 void UBDThorFSM::BDEndState()
 {
+	//만약 공격 상태라면
+	if (mState == BDThorGeneralState::BDHammerThrow || mState == BDThorGeneralState::BDHammerThreeSwing || mState == BDThorGeneralState::BDHammerWind || mState == BDThorGeneralState::BDGiveUPFly || mState == BDThorGeneralState::BDHitDown) {
+		//move로 돌아가기?
+		BDSetState(BDThorGeneralState::BDMove);
+		
+		//GetWorld()->GetTimerManager().SetTimer(StateTimerHandle, this, &UBDThorFSM::BDTransitionToMoveState, 1.0f, false);
+		UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
+	}
+	//else if(mState == BDThorGeneralState::)
+}
+
+void UBDThorFSM::BDTransitionToMoveState()
+{
+	BDSetState(BDThorGeneralState::BDMove);
 }
 
 //애니메이션 상태 변경
-void UBDThorFSM::BDSetState()
+void UBDThorFSM::BDSetState(BDThorGeneralState BDnewState)
 {
-	//mState = 
+	mState = BDnewState; //상태 지정
+	anim->animState = mState;
+	UE_LOG(LogTemp, Warning, TEXT("State changed to: %s"), *UEnum::GetValueAsString(mState));
 }
 
 
