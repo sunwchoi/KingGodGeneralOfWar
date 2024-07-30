@@ -11,13 +11,14 @@ AAxe::AAxe()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+
+	
 }
 
 // Called when the game starts or when spawned
 void AAxe::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	MeshComp->OnComponentBeginOverlap.AddDynamic(this, &AAxe::OnAxeBeginOverlap);
 }
 
@@ -30,12 +31,12 @@ void AAxe::Tick(float DeltaTime)
 
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Axe Hit"));
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
 	FTimerHandle handle;
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation(), FRotator(), FVector(.2f, .2f, .2f));
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);

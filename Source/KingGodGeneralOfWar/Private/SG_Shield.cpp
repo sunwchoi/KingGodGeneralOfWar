@@ -32,7 +32,6 @@ void ASG_Shield::Tick(float DeltaTime)
 
 void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Shield Hit!!"));
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
