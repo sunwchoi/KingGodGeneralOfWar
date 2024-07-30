@@ -321,7 +321,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		FVector ForwardDirection = GetVelocity();
 		ForwardDirection.Z = 0;
 		ForwardDirection.Normalize();
-		float DodgeCoef = 2000;
+		float DodgeCoef = 1500;
 		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
 		Anim->PlayDodgeMontage();
 
