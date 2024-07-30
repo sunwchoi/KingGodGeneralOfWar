@@ -63,10 +63,11 @@ void AAwakenThor::Move(FVector NewLoc)
 	GetWorld()->GetTimerManager().SetTimer(tmpHandle, tmpDel, 1.f, false);
 }
 
-void AAwakenThor::Throw(FVector Target)
+void AAwakenThor::ThrowForTeleport(FVector Target)
 {
 	Mjolnir->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	FVector dir = Target - GetActorLocation();
+	Mjolnir->SetRelativeRotation(dir.Rotation() - FRotator(-180, 0, 0));
 	MjolnirMoveComp->Velocity = dir;
 	
 }
@@ -76,6 +77,11 @@ void AAwakenThor::Teleport(FVector Target)
 	SetActorLocation(Target);
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 	MjolnirMoveComp->Velocity = FVector::ZeroVector;
+}
+
+UAwakenThorFSM* AAwakenThor::getFSM() const
+{
+	return Fsm;
 }
 
 class AAttackZone* AAwakenThor::PoundThunderAttack(const FTransform& Target)
