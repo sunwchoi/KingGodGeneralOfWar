@@ -3,6 +3,7 @@
 
 #include "SG_Shield.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 ASG_Shield::ASG_Shield()
 {
@@ -33,5 +34,12 @@ void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Shield Hit!!"));
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, 0.002f, false);
 }
 

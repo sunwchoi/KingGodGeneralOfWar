@@ -3,6 +3,7 @@
 
 #include "Axe.h"
 #include "components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -32,6 +33,12 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Axe Hit"));
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-
+	
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, 0.002f, false);
 }
 
