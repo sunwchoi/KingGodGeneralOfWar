@@ -10,6 +10,7 @@
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackEndCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnMovableChekcDelegate);
 /**
  * 
  */
@@ -28,11 +29,13 @@ public:
 	void PlayDodgeMontage();
 	void PlayRollMontage();
 	void JumpToAttackMontageSection(int32 NewSection);
+	void JumpToDodgeMontageSection(int32 NewSection);
+	void JumpToRollMontageSection(int32 NewSection);
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
 	FOnAttackEndCheckDelegate OnAttackEndCheck;
-
+	FOnMovableChekcDelegate OnMovableCheck;
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
 
@@ -62,5 +65,9 @@ private:
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck() ;
 
+	UFUNCTION()
+	void AnimNotify_MovableCheck();
 	FName GetAttackMontageSection(int32 Section);
+	FName GetRollMontageSection(int32 Section);
+	FName GetDodgeMontageSection(int32 Section);
 };

@@ -106,7 +106,10 @@ void AKratos::PostInitializeComponents()
 					Anim->JumpToAttackMontageSection(CurrentCombo);
 				}
 			});
-		
+		Anim->OnMovableCheck.AddLambda([this]() -> void
+			{
+				State = EPlayerState::Idle;
+			});
 	}
 }
 // Called when the game starts or when spawned
@@ -137,6 +140,7 @@ void AKratos::BeginPlay()
 	{
 		SetShield();
 	}
+
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
@@ -180,8 +184,7 @@ void AKratos::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(
 		TEXT("CurrentFOV: %f"), CameraComp->FieldOfView));
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
-		TEXT("PLAYER_STATE: %s"), *GetPlayerStateString() ));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetPlayerStateString() );
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
 		TEXT("HP: %f"), CurHP));
@@ -194,10 +197,7 @@ void AKratos::Tick(float DeltaTime)
 
 FString AKratos::GetPlayerStateString()
 {
-	UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPlayerState"), true);
-	if (!EnumPtr) return TEXT("Invalid Enum");
-
-	return EnumPtr->GetDisplayNameTextByValue(static_cast<int64>(State)).ToString();
+	return UEnum::GetValueAsString(State);
 }
 void AKratos::PlayerMove()
 {
@@ -206,7 +206,9 @@ void AKratos::PlayerMove()
 	FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), ControlRotation, FVector(1, 1, 1));
 	FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
 
+	PrevDirection = Direction;
 	Direction = FVector(0, 0, 0);
+	
 
 	float MoveScale = 0;
 	switch (State)
@@ -253,7 +255,8 @@ void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->DodgeMontage)
 	{
-		if (State == EPlayerState::Roll) return;
+		//if (State == EPlayerState::Roll) return;
+		if (bInterrupted) return;
 
 		State = EPlayerState::Idle;
 		bIsDodging = false;
@@ -315,6 +318,12 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
 		//SetActorRotation(YawRotation);
 	}
+	else if (State == EPlayerState::Dodge)
+	{
+		FVector2D v = Value.Get<FVector2D>();
+		Direction.X = v.X;
+		Direction.Y = v.Y;
+	}
 }
 
 void AKratos::OnMyActionLook(const FInputActionValue& value)
@@ -329,36 +338,52 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
 	if (GetVelocity().Size() < 1)	return;
-	//if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
-	//	|| State == EPlayerState::Guard)
-	if (!bIsDodging)
+
+	if (!bIsDodging && State != EPlayerState::Roll)
 	{
 		State = EPlayerState::Dodge;
 		bIsDodging = true;
-		
-		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
-		//FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
-		FVector ForwardDirection = GetVelocity();
-		ForwardDirection.Z = 0;
-		ForwardDirection.Normalize();
-		float DodgeCoef = 1500;
-		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
+
+		int8 sectionIdx = 3;
+		if (PrevDirection.X == 0)
+		{
+			if (PrevDirection.Y == 1)
+				sectionIdx = 1;
+			else
+				sectionIdx = 0;
+		}
+		else
+		{
+			if (PrevDirection.X == 1)
+				sectionIdx = 2;
+			else
+				sectionIdx = 3;
+		}
 		Anim->PlayDodgeMontage();
+		Anim->JumpToDodgeMontageSection(sectionIdx);
 	}
-	else if (State != EPlayerState::Roll)
+	else if (State == EPlayerState::Dodge)
 	{
 		State = EPlayerState::Roll;
 		bIsDodging = true;
-		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
-		//FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
-		FVector ForwardDirection = GetVelocity();
-		ForwardDirection.Z = 0;
-		ForwardDirection.Normalize();
-		float DodgeCoef = 5000;
-		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
 		Anim->Montage_Stop(0.1f, Anim->DodgeMontage);
-
+		int8 sectionIdx = 3;
+		if (PrevDirection.X == 0)
+		{
+			if (PrevDirection.Y == 1)
+				sectionIdx = 1;
+			else
+				sectionIdx = 0;
+		}
+		else
+		{
+			if (PrevDirection.X == 1)
+				sectionIdx = 2;
+			else
+				sectionIdx = 3;
+		}
 		Anim->PlayRollMontage();
+		Anim->JumpToRollMontageSection(sectionIdx);
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
@@ -486,6 +511,7 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 
 		AttackStartComboState();
 		Anim->PlayAttackMontage();
+		//rrentWeapon->
 		Anim->JumpToAttackMontageSection(CurrentCombo);
 		bIsAttacking = true;
 		
@@ -509,6 +535,12 @@ void AKratos::AttackEndComboState()
 
 void AKratos::Damage(int DamageValue, EAttackType AttackType)
 {
+	if (State == EPlayerState::Dodge)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
+		return;
+
+	}
 	//State = EPlayerState::Hit;
 	CurHP -= DamageValue;
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Player Hit!"));

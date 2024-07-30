@@ -68,6 +68,16 @@ void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
 	Montage_JumpToSection(GetAttackMontageSection(NewSection), AttackMontage);
 }
 
+void USG_KratosAnim::JumpToDodgeMontageSection(int32 NewSection)
+{
+	Montage_JumpToSection(GetDodgeMontageSection(NewSection), DodgeMontage);
+}
+
+void USG_KratosAnim::JumpToRollMontageSection(int32 NewSection)
+{
+	Montage_JumpToSection(GetRollMontageSection(NewSection), RollMontage);
+}
+
 
 void USG_KratosAnim::AnimNotify_AttackHitCheck()
 {
@@ -84,7 +94,26 @@ void USG_KratosAnim::AnimNotify_NextAttackCheck()
 	OnNextAttackCheck.Broadcast();
 }
 
+void USG_KratosAnim::AnimNotify_MovableCheck()
+{
+	OnMovableCheck.Broadcast();
+}
+
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
 {
 	return FName(*FString::Printf(TEXT("Attack%d"), Section));
+}
+
+FName USG_KratosAnim::GetRollMontageSection(int32 Section)
+{
+	TArray<FString> RollSectionName = { TEXT("Left") , TEXT("Right") , TEXT("Forward") ,TEXT("Back") };
+	FName SectionName(*FString::Printf(TEXT("Roll_%s"), *RollSectionName[Section]));
+	return SectionName;
+}
+
+FName USG_KratosAnim::GetDodgeMontageSection(int32 Section)
+{
+	TArray<FString> RollSectionName = { TEXT("Left") , TEXT("Right") , TEXT("Forward") ,TEXT("Back") };
+	FName SectionName(*FString::Printf(TEXT("Dodge_%s"), *RollSectionName[Section]));
+	return SectionName;
 }

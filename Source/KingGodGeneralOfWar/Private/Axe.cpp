@@ -25,6 +25,7 @@ void AAxe::BeginPlay()
 {
 	Super::BeginPlay();
 	MeshComp->OnComponentBeginOverlap.AddDynamic(this, &AAxe::OnAxeBeginOverlap);
+	MeshComp->OnComponentHit.AddDynamic(this, &AAxe::OnAxeHit);
 }
 
 // Called every frame
@@ -47,7 +48,9 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	float DrawTime = 3.0f;
 	FCollisionObjectQueryParams ObjectQueryParams;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.ImpactPoint.ToString());
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.ImpactPoint.ToString());
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.BoneName.ToString());
+	
 	//UKismetSystemLibrary::LineTraceSingle(GetWorld(), SweepResult.ImpactPoint, OtherActor->GetActorLocation(),
 	//	ETraceTypeQuery::TraceTypeQuery1, true, ActorsToIgnore, DrawDebugType, OutHit, bIgnoreSelf, TraceColor, TraceHitColor, DrawTime);
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
@@ -58,5 +61,11 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 		}, 0.002f, false);
+}
+
+void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
+
 }
 

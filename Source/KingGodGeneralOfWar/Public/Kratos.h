@@ -132,7 +132,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector Direction;
-
+	UPROPERTY(BlueprintReadOnly)
+	FVector PrevDirection;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHP = 100;
 
