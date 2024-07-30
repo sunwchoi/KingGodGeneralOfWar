@@ -6,6 +6,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UAwakenThorFSM::UAwakenThorFSM()
@@ -35,10 +36,7 @@ void UAwakenThorFSM::BeginPlay()
 void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (bPlay == true)
-		return ;
-
+	
 	switch (State)
 	{
 	case EAwakenThorState::Idle:
@@ -62,24 +60,30 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 void UAwakenThorFSM::SetState(EAwakenThorState NewState)
 {
 	State = NewState;
-	Anim->SetState(State);
 }
 
 void UAwakenThorFSM::IdleState()
 {
 	// UE_LOG(LogTemp, Warning, TEXT("Idle"));
 	
+	// FVector targetLoc = Target->GetActorLocation();
+	// FVector myLoc = Me->GetActorLocation();
+	// FRotator rot = (targetLoc - myLoc).Rotation();
+	//
+	// Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+	// if (FVector::Dist(targetLoc, myLoc) > 1050)
+	// 	SetState(EAwakenThorState::Move);
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = Me->GetActorLocation();
 	FRotator rot = (targetLoc - myLoc).Rotation();
-
+	
 	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+	
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
-	if (FVector::Dist(targetLoc, myLoc) > 1050)
-		SetState(EAwakenThorState::Move);
-	else if (CurrentTime > IdleDelayTime)
+	if (CurrentTime > IdleDelayTime)
 	{
-		SetState(EAwakenThorState::Attack);
+		State = EAwakenThorState::Move;
+		Anim->SetState(EAwakenThorState::Move);
 		CurrentTime = 0;
 	}
 }
@@ -87,18 +91,6 @@ void UAwakenThorFSM::IdleState()
 
 void UAwakenThorFSM::MoveState()
 {
-	bPlay = true;
-	// if (GetWorld()->GetTimerManager().IsTimerActive(MoveTimerHandle))
-	// 	return ;
-	// UE_LOG(LogTemp, Warning, TEXT("Move"));
-	// FVector targetLoc = Target->GetActorLocation();
-	// FVector myLoc = Me->GetActorLocation();
-	// FVector dir = targetLoc - myLoc;
-	// FVector newLoc = Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist;
-	//
-	// Me->Move(newLoc);
-	//
-	// GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, [this]() { SetState(EAwakenThorState::Idle); }, 2.f, false);
 }
 
 void UAwakenThorFSM::AttackState()
@@ -116,5 +108,21 @@ void UAwakenThorFSM::DamageState()
 
 void UAwakenThorFSM::DieState()
 {
+}
+
+void UAwakenThorFSM::ThrowForTeleport()
+{
+	auto* camera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 800;
+
+	Me->ThrowForTeleport(target);
+}
+
+void UAwakenThorFSM::Teleport()
+{
+	auto* camera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 800;
+	
+	Me->Teleport(target);
 }
 

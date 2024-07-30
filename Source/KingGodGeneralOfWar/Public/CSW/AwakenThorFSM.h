@@ -44,6 +44,9 @@ public:
 	void DamageState();
 	void DieState();
 
+	void ThrowForTeleport();
+	void Teleport();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;

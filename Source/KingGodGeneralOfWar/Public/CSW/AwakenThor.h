@@ -32,13 +32,15 @@ public:
 	void Move(FVector NewLoc);
 
 	UFUNCTION(BlueprintCallable)
-	void Throw(FVector Target);
+	void ThrowForTeleport(FVector Target);
 
 	UFUNCTION(BlueprintCallable)
 	void Teleport(FVector Target);
 
 	UFUNCTION(BlueprintCallable)
 	class AAttackZone* PoundThunderAttack(const FTransform& Target);
+
+	class UAwakenThorFSM* getFSM() const;
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
