@@ -4,6 +4,7 @@
 #include "Axe.h"
 #include "components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/ArrowComponent.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -11,8 +12,12 @@ AAxe::AAxe()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	SetRootComponent(MeshComp);
 
-	
+	EdgeComp = CreateDefaultSubobject<UArrowComponent>(TEXT("EdgeComp"));
+	EdgeComp->SetupAttachment(MeshComp);
+	EdgeComp->SetRelativeLocation(FVector(-30, 0, 40));
+	EdgeComp->SetRelativeScale3D(FVector(.4, .4, .4));
 }
 
 // Called when the game starts or when spawned
@@ -33,10 +38,22 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	
+	TArray<AActor*> ActorsToIgnore;
+	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
+	FHitResult OutHit;
+	bool bIgnoreSelf = false;
+	FLinearColor TraceColor = FLinearColor::White;
+	FLinearColor TraceHitColor = FLinearColor::Red;
+	float DrawTime = 3.0f;
+	FCollisionObjectQueryParams ObjectQueryParams;
+	
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.ImpactPoint.ToString());
+	//UKismetSystemLibrary::LineTraceSingle(GetWorld(), SweepResult.ImpactPoint, OtherActor->GetActorLocation(),
+	//	ETraceTypeQuery::TraceTypeQuery1, true, ActorsToIgnore, DrawDebugType, OutHit, bIgnoreSelf, TraceColor, TraceHitColor, DrawTime);
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
 	FTimerHandle handle;
 
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation(), FRotator(), FVector(.2f, .2f, .2f));
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);

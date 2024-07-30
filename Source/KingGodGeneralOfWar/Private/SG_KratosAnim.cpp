@@ -9,13 +9,20 @@ USG_KratosAnim::USG_KratosAnim()
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> ATTACK_MONTAGE(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_MeleeAttack.AM_Kratos_MeleeAttack'")
 	);
+
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> DODGE_MONTAGE(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Dodge.AM_Kratos_Dodge'")
+	);
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> ROLL_MONTAGE(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Roll.AM_Kratos_Roll'")
 	);
 	if (ATTACK_MONTAGE.Succeeded())
 		AttackMontage = ATTACK_MONTAGE.Object;
 	if (DODGE_MONTAGE.Succeeded())
 		DodgeMontage = DODGE_MONTAGE.Object;
+	if (ROLL_MONTAGE.Succeeded())
+		RollMontage = ROLL_MONTAGE.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -49,6 +56,11 @@ void USG_KratosAnim::PlayAttackMontage()
 void USG_KratosAnim::PlayDodgeMontage()
 {
 	Montage_Play(DodgeMontage, 1.0f);
+}
+
+void USG_KratosAnim::PlayRollMontage()
+{
+	Montage_Play(RollMontage, 1.0f);
 }
 
 void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)

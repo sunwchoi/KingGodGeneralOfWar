@@ -74,7 +74,10 @@ void AKratos::PostInitializeComponents()
 
 		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
-		
+
+		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnRollMontageEnded);
+
 		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
 		// 각각 콜리전 설정을 On -> Off로 전환
 		
@@ -237,18 +240,39 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 
 void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	State = EPlayerState::Idle;
-	CanNextCombo = false;
-	CurrentCombo = 0;
-	bIsAttacking = false;
+	if (Montage == Anim->AttackMontage)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("AttackMontageEnded"));
+
+		State = EPlayerState::Idle;
+		CanNextCombo = false;
+		CurrentCombo = 0;
+		bIsAttacking = false;
+	}
 }
 
 void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	State = EPlayerState::Idle;
-	bIsDodging = false;
+	if (Montage == Anim->DodgeMontage)
+	{
+		if (State == EPlayerState::Roll) return;
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("DodgeMontageEnded"));
+
+		State = EPlayerState::Idle;
+		bIsDodging = false;
+	}
 }
 
+void AKratos::OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == Anim->RollMontage)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("RollMontageEnded"));
+
+		State = EPlayerState::Idle;
+		bIsDodging = false;
+	}
+}
 
 void AKratos::SetWeapon()
 {
@@ -309,9 +333,10 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
-	if (bIsDodging || GetVelocity().Size() < 1)	return;
+	if (GetVelocity().Size() < 1)	return;
 	//if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
 	//	|| State == EPlayerState::Guard)
+	if (!bIsDodging)
 	{
 		State = EPlayerState::Dodge;
 		bIsDodging = true;
@@ -324,7 +349,21 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		float DodgeCoef = 1500;
 		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
 		Anim->PlayDodgeMontage();
+	}
+	else if (State != EPlayerState::Roll)
+	{
+		State = EPlayerState::Roll;
+		bIsDodging = true;
+		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
+		//FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
+		FVector ForwardDirection = GetVelocity();
+		ForwardDirection.Z = 0;
+		ForwardDirection.Normalize();
+		float DodgeCoef = 5000;
+		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
+		Anim->Montage_Stop(0.1f, Anim->DodgeMontage);
 
+		Anim->PlayRollMontage();
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)

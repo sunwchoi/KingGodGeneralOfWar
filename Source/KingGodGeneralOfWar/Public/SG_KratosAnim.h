@@ -26,6 +26,7 @@ public:
 
 	void PlayAttackMontage();
 	void PlayDodgeMontage();
+	void PlayRollMontage();
 	void JumpToAttackMontageSection(int32 NewSection);
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
@@ -42,12 +43,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float Speed;
 
-private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontage ;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DodgeMontage ;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* RollMontage;
+private:
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
