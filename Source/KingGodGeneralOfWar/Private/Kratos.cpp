@@ -242,8 +242,6 @@ void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->AttackMontage)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("AttackMontageEnded"));
-
 		State = EPlayerState::Idle;
 		CanNextCombo = false;
 		CurrentCombo = 0;
@@ -256,7 +254,6 @@ void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	if (Montage == Anim->DodgeMontage)
 	{
 		if (State == EPlayerState::Roll) return;
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("DodgeMontageEnded"));
 
 		State = EPlayerState::Idle;
 		bIsDodging = false;
@@ -267,8 +264,6 @@ void AKratos::OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->RollMontage)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("RollMontageEnded"));
-
 		State = EPlayerState::Idle;
 		bIsDodging = false;
 	}
