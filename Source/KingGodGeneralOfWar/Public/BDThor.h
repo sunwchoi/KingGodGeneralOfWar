@@ -46,6 +46,10 @@ public:
 	UFUNCTION()
 	void EquipWeapon();
 
+	//망치 공격이 아닐땐 항상 허리춤에 망치 달기
+	UFUNCTION()
+	void DrawWeapon();
+
 	//바람 공격할 때 넣을 액터 클래스
 	/*UPROPERTY(EditAnywhere)
 	TSubclassOf<class ASlashActor>SlashFat;*/
@@ -56,4 +60,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Attack)
 	void BDHammerThrowHit(); //망치를 Fire 하는 능력
+
+	//바람을 날려서 데미지 주기
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDHammerWindSlash(); //바람 날리는 능력
 };

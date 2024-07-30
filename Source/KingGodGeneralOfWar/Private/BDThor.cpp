@@ -86,6 +86,14 @@ void ABDThor::EquipWeapon()
 	}
 }
 
+//무기 위치를 허리로 변경하는 함수
+void ABDThor::DrawWeapon()
+{
+	if (this) {
+		CurrentWeapon->MjolnirMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("BDMjolnirHips"));
+	}
+}
+
 void ABDThor::BDHammerThrowHit()
 {
 	FTransform t = GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand"));
@@ -98,10 +106,16 @@ void ABDThor::BDHammerThrowHit()
 		//FVector LaunchDirection = (fsm->Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
 		FVector LaunchDirection = GetActorForwardVector();
 		Mjolnir->FireInDirection(LaunchDirection);
-		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned successfully and fired"));
+		UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned failed"));
 	}
+}
+
+//바람 슬래쉬
+void ABDThor::BDHammerWindSlash()
+{
+	//바람 액터 스폰해서 공격
 }
 

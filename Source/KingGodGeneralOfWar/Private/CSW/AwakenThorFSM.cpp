@@ -87,17 +87,18 @@ void UAwakenThorFSM::IdleState()
 
 void UAwakenThorFSM::MoveState()
 {
-	if (GetWorld()->GetTimerManager().IsTimerActive(MoveTimerHandle))
-		return ;
-	UE_LOG(LogTemp, Warning, TEXT("Move"));
-	FVector targetLoc = Target->GetActorLocation();
-	FVector myLoc = Me->GetActorLocation();
-	FVector dir = targetLoc - myLoc;
-	FVector newLoc = Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist;
-
-	Me->Move(newLoc);
-	
-	GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, [this]() { SetState(EAwakenThorState::Idle); }, 2.f, false);
+	bPlay = true;
+	// if (GetWorld()->GetTimerManager().IsTimerActive(MoveTimerHandle))
+	// 	return ;
+	// UE_LOG(LogTemp, Warning, TEXT("Move"));
+	// FVector targetLoc = Target->GetActorLocation();
+	// FVector myLoc = Me->GetActorLocation();
+	// FVector dir = targetLoc - myLoc;
+	// FVector newLoc = Me->GetActorLocation() + dir.GetSafeNormal() * TeleportDist;
+	//
+	// Me->Move(newLoc);
+	//
+	// GetWorld()->GetTimerManager().SetTimer(MoveTimerHandle, [this]() { SetState(EAwakenThorState::Idle); }, 2.f, false);
 }
 
 void UAwakenThorFSM::AttackState()

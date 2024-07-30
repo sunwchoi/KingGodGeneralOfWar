@@ -194,10 +194,19 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	int32 RandomIndex = FMath::RandRange(0, AttackStates.Num() - 1);
 	BDThorGeneralState NewState = AttackStates[RandomIndex];
 
+	//만약 망치 공격일 경우
+	if (NewState == BDThorGeneralState::BDHammerThreeSwing || NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
+		//손에 망치를 들어라
+		me->EquipWeapon();
+	}
+	else {
+		me->DrawWeapon(); //허리에 망치를 두어라
+	}
+
 	// 마지막 상태 업데이트
 	LastAttackState = NewState;
 
-	return NewState;
+	return NewState; //상태 리턴
 }
 
 void UBDThorFSM::BDDamageState()
@@ -292,6 +301,7 @@ void UBDThorFSM::BDEndState()
 //애니메이션 상태 변경
 void UBDThorFSM::BDSetState()
 {
+	//mState = 
 }
 
 

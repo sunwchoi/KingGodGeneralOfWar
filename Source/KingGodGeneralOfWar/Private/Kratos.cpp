@@ -9,15 +9,24 @@
 #include <EnhancedInputComponent.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include "TimerManager.h"
+#include "SG_KratosAnim.h"
 #include <GameFramework/CharacterMovementComponent.h>
+#include "Axe.h"
+#include "SG_Shield.h"
 // Sets default values
 
-const float ATTACK1_DELAY = .9f;
+const float ATTACK1_DELAY = .7f;
 const float ATTACK2_DELAY = 1.5f;
 const float ATTACK3_DELAY = 1.5f;
 const float ATTACK4_DELAY = 1.5f;
-const float GUARD_DELAY = .7f;
-const float DODGE_DELAY = .5f;
+
+const float GUARD_START_DELAY = 0.3f;
+const float GUARD_END_DELAY = 0.15f;
+const float DODGE_DELAY = 0.5f;
+
+const float WALK_FOV = 90;
+const float RUN_FOV = 105;
+const float GUARD_FOV = 70;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -54,11 +63,55 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Attack, ETriggerEvent::Started, this, &AKratos::OnMyActionAttack);
 	}
 }
+void AKratos::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	Anim = Cast<USG_KratosAnim>(GetMesh()->GetAnimInstance());
+	if (Anim)
+	{
+		// 공격 몽타주가 끝나면 실행할 함수: OnAttackMontageEnded
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
+
+		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
+		
+		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
+		// 각각 콜리전 설정을 On -> Off로 전환
+		
+		Anim->OnAttackHitCheck.AddLambda([this]() -> void
+			{
+				if (CurrentCombo == 3)
+					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				else
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+			});
+		Anim->OnAttackEndCheck.AddLambda([this]() -> void
+			{
+				if (CurrentCombo == 3)
+					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+				else
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+			});
+		Anim->OnNextAttackCheck.AddLambda([this]() -> void
+			{
+				CanNextCombo = false;
+
+				if (bIsComboInputOn)
+				{
+					AttackStartComboState();
+					Anim->JumpToAttackMontageSection(CurrentCombo);
+				}
+			});
+		
+	}
+}
 // Called when the game starts or when spawned
 void AKratos::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurHP = MaxHP;
 	// 1. 컨트롤러를 가져와서 PlayerController인지 캐스팅해본다.
 	auto* pc = Cast<APlayerController>(Controller);
 
@@ -71,23 +124,72 @@ void AKratos::BeginPlay()
 			subSys->AddMappingContext(IMC_Player, 0);
 		}
 	}
+
+	if (nullptr == CurrentWeapon)
+	{
+		SetWeapon();
+	}
+
+	if (nullptr == Shield)
+	{
+		SetShield();
+	}
 }
-// --------------------------------------TICK -------------------------------------
+// -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
 void AKratos::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	PlayerMove();
+	LockTargetFunc(DeltaTime);
+	//SetActorRotation(YawRotation);
+	FRotator playerRotation = GetActorRotation();
+
+	// 플레이어 로테이션 선형 보간
+	SetActorRotation( UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 5, true));
+
+	// 카메라 시야각 선형 보간
+	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 10);
+	switch (State)
+	{
+	case EPlayerState::Run:
+		TargetFOV = RUN_FOV;
+		break;
+	case EPlayerState::GuardStart:
+	case EPlayerState::Guard:
+		TargetFOV = GUARD_FOV;
+		break;
+	default:
+		TargetFOV = WALK_FOV;
+	}
 	if (bLockOn)
 	{
-		LockTargetFunc();
+		TargetFOV -= 10;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetEnumValueAsString());
-}
-// --------------------------------------TICK -------------------------------------
 
-FString AKratos::GetEnumValueAsString()
+	/*GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("TargetActorRotation: %s"), *TargetActorRotation.ToString()));
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("ActorRotation: %s"), *GetActorRotation().ToString()));*/
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(
+		TEXT("CurrentFOV: %f"), CameraComp->FieldOfView));
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
+		TEXT("PLAYER_STATE: %s"), *GetPlayerStateString() ));
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
+		TEXT("HP: %f"), CurHP));
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
+		TEXT("CurrentSpeed: %lf"), GetVelocity().Size()));
+
+}
+// -------------------------------------------------- TICK -------------------------------------------------------------
+
+FString AKratos::GetPlayerStateString()
 {
 	UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPlayerState"), true);
 	if (!EnumPtr) return TEXT("Invalid Enum");
@@ -106,11 +208,8 @@ void AKratos::PlayerMove()
 	float MoveScale = 0;
 	switch (State)
 	{
-	case EPlayerState::Guard:
-		MoveScale = .1f;
-		break;
 	case EPlayerState::Move:
-		MoveScale = .5f;
+		MoveScale = .56f;
 		break;
 	case EPlayerState::Run:
 		MoveScale = 1.0f;
@@ -119,29 +218,83 @@ void AKratos::PlayerMove()
 	AddMovementInput(ForwardDirection, MoveScale);
 }
 
-FORCEINLINE void AKratos::LockTargetFunc()
+FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 {
-	GetController()->AController::SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));
+	if (bLockOn)
+	{
+
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, TEXT("LockSystem On"));
+
+		FRotator playerCameraRotation = GetController()->AController::GetControlRotation();
+		//FRotator playerCameraYawRotation = FRotator()
+		TargetCameraRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation());
+		FRotator ToCameraRotation = UKismetMathLibrary::RLerp(playerCameraRotation, TargetCameraRotation, DeltaTime * 15, true);
+		GetController()->AController::SetControlRotation(FRotator(playerCameraRotation.Pitch, ToCameraRotation.Yaw, playerCameraRotation.Roll));
+		/*GetController()->AController::SetControlRotation(
+			UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));*/
+	}
+}
+
+void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	State = EPlayerState::Idle;
+	CanNextCombo = false;
+	CurrentCombo = 0;
+	bIsAttacking = false;
+}
+
+void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	State = EPlayerState::Idle;
+	bIsDodging = false;
+}
+
+
+void AKratos::SetWeapon()
+{
+	FActorSpawnParameters param;
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CurrentWeapon = GetWorld()->SpawnActor<AAxe>(AxeFactory, GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket")), param);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->K2_AttachToComponent(GetMesh(), TEXT("hand_rAxeSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
+		CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+	}
+}
+
+void AKratos::SetShield()
+{
+	FActorSpawnParameters param;
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Shield = GetWorld()->SpawnActor<ASG_Shield>(ShieldFactory, GetMesh()->GetSocketTransform(TEXT("hand_lShieldSocket")), param);
+	if (Shield)
+	{
+		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
+		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+	}
 }
 
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
 {
-	// 움직임은 유휴, 이동, 달리기, 가드시에만 가능
-	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
-		)
+	// 움직임은 유휴, 이동, 달리기가능
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		State = EPlayerState::Move;
+		if (State == EPlayerState::Guard)
+			State = EPlayerState::Guard;
+		else
+			State = EPlayerState::Move;
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
-
+		Direction.Normalize();
 		//Direction.Normalize();
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
 
 		// 캐릭터 현재 회전 가져오기
-		FRotator Rotation = GetControlRotation();
-		FRotator YawRotation(0, Rotation.Yaw, 0);
-		SetActorRotation(YawRotation);
+		//FRotator Rotation = GetControlRotation();
+		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
+		//SetActorRotation(YawRotation);
 	}
 }
 
@@ -156,28 +309,22 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
-	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
+	if (bIsDodging || GetVelocity().Size() < 1)	return;
+	//if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run
+	//	|| State == EPlayerState::Guard)
 	{
 		State = EPlayerState::Dodge;
+		bIsDodging = true;
+		
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
-		FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
-
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, ForwardDirection.ToString());
+		//FVector ForwardDirection = UKismetMathLibrary::TransformDirection(T, Direction);
+		FVector ForwardDirection = GetVelocity();
 		ForwardDirection.Z = 0;
-		LaunchCharacter(ForwardDirection * 3000.0f, true, false);
+		ForwardDirection.Normalize();
+		float DodgeCoef = 2000;
+		LaunchCharacter(ForwardDirection * DodgeCoef, true, true);
+		Anim->PlayDodgeMontage();
 
-		FTimerHandle DodgeHandle;
-		GetWorldTimerManager().SetTimer(DodgeHandle,
-			// Roll -> Idle 전환
-			[&]() {
-			if (State == EPlayerState::Dodge)
-			{
-				State = EPlayerState::Idle;
-				// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ExitRoll!"));
-
-			}
-		},
-			DODGE_DELAY, false);
 	}
 }
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
@@ -185,6 +332,7 @@ void AKratos::OnMyActionRunOn(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move)
 	{
 		State = EPlayerState::Run;
+		
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Move -> Run"));
 	}
 }
@@ -214,7 +362,7 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 			}
 			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("GuardCall Success"));
 
-		}, GUARD_DELAY, false);
+		}, GUARD_START_DELAY, false);
 	}
 }
 
@@ -229,7 +377,7 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 			[&]()
 		{
 			State = EPlayerState::Idle;
-		}, GUARD_DELAY / 2, false);
+		}, GUARD_END_DELAY, false);
 	}
 }
 
@@ -241,20 +389,20 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 		return;
 	}
 
-	float lockOnRadius = 500.0f;
+	float lockOnRadius = 1000000.0f;
 	FVector cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraComp->USceneComponent::K2_GetComponentRotation());
 	FVector actorLocation = GetActorLocation() + cameraForwardVector * 500;
-	FVector endLocation = GetActorLocation() + cameraForwardVector * 2000;
+	FVector endLocation = GetActorLocation() + cameraForwardVector * 5000;
 	float Radius = 500;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1)));
 	TArray<AActor*> ActorsToIgnore;
-	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
+	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::None;
 	FHitResult OutHit;
 	bool bIgnoreSelf = false;
 	FLinearColor TraceColor = FLinearColor::White;
 	FLinearColor TraceHitColor = FLinearColor::Red;
-	float DrawTime = 10.0f;
+	float DrawTime = 3.0f;
 	FCollisionObjectQueryParams ObjectQueryParams;
 
 	bLockOn = UKismetSystemLibrary::SphereTraceSingleForObjects(
@@ -280,7 +428,6 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 
 }
 
-
 void AKratos::OnMyActionIdle(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Move || State == EPlayerState::Run)
@@ -289,30 +436,48 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 
 void AKratos::OnMyActionAttack(const FInputActionValue& value)
 {
-	if (bIsAttacking) return;
-
-	State = EPlayerState::MeleeAttack1;
-	bIsAttacking = true;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Attack!"));
-
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
+	if (bIsAttacking)
 	{
-		if (State == EPlayerState::MeleeAttack1)
+		if (CanNextCombo)
 		{
-			this->State = EPlayerState::Idle;
-			bIsAttacking = false;
+			bIsComboInputOn = true;
 		}
-	},
-		ATTACK1_DELAY, false);
+		return;
+	}
+
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
+		|| State == EPlayerState::Run)
+	{
+		State = EPlayerState::MeleeAttack;
+
+		AttackStartComboState();
+		Anim->PlayAttackMontage();
+		Anim->JumpToAttackMontageSection(CurrentCombo);
+		bIsAttacking = true;
+		
+	}
 }
 
+void AKratos::AttackStartComboState()
+{
+	CanNextCombo = true;
+	bIsComboInputOn = false;
+	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, MaxCombo);
+}
+
+void AKratos::AttackEndComboState()
+{
+	bIsComboInputOn = false;
+	CanNextCombo = false;
+	CurrentCombo = 0;
+}
 
 
 void AKratos::Damage(int DamageValue, EAttackType AttackType)
 {
-	State = EPlayerState::Hit;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Hit!"));
+	//State = EPlayerState::Hit;
+	CurHP -= DamageValue;
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Player Hit!"));
 }
 
 

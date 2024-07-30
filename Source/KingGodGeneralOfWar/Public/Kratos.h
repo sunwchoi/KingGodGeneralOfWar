@@ -7,7 +7,9 @@
 #include "InputAction.h"
 #include "Kratos.generated.h"
 
-const float PlayerMaxSpeed = 1200.0f; // 플레이어 최대 속도. (달리기)
+const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
+
+const int8 MaxCombo = 4;
 
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
@@ -17,7 +19,7 @@ enum class EPlayerState : uint8
 	Run UMETA(DisplayName = "Run"),
 	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	MeleeAttack1 UMETA(DisplayName = "MeleeAttack1"),
+	MeleeAttack UMETA(DisplayName = "MeleeAttack"),
 	MeleeAttack2 UMETA(DisplayName = "MeleeAttack2"),
 	MeleeAttack3 UMETA(DisplayName = "MeleeAttack3"),
 	MeleeAttack4 UMETA(DisplayName = "MeleeAttack4"),
@@ -48,17 +50,21 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void PostInitializeComponents() override;
+	UPROPERTY()
+	class USG_KratosAnim* Anim ;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -81,7 +87,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_LockOn;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Attack;
 
@@ -115,11 +121,13 @@ public:
 	UFUNCTION()
 	void OnMyActionAttack(const FInputActionValue& value);
 
+	void AttackStartComboState();
+	void AttackEndComboState();
 
 	UFUNCTION()
 	void Damage(int DamageValue, EAttackType AttackType);
 
-	FString GetEnumValueAsString();
+	FString GetPlayerStateString();
 	void PlayerMove();
 
 	UPROPERTY(BlueprintReadOnly)
@@ -152,8 +160,45 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
 	TSubclassOf<class ABDThor> Boss2;
 
-	void LockTargetFunc();
+	void LockTargetFunc(float DeltaTime);
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool CanNextCombo;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool bIsComboInputOn;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	int CurrentCombo;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AAxe> AxeFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ASG_Shield> ShieldFactory;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class AAxe* CurrentWeapon;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class ASG_Shield* Shield;
+
+	void SetWeapon();
+	void SetShield();
 private:
 	bool bIsAttacking;
+	bool bIsDodging;
+	FTimerHandle DodgeHandle;
 
+	float CurrentTime;
+	float DelayTime;
+
+	FRotator TargetCameraRotation;
+	FRotator TargetActorRotation;
+	float TargetFOV = 90;
 };
