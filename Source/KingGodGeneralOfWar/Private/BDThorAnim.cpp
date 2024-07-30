@@ -11,20 +11,48 @@ void UBDThorAnim::NativeUpdateAnimation(float DeltaSeconds)
 
 	auto ownerPawn = TryGetPawnOwner();
 	bdThor = Cast<ABDThor>(ownerPawn);
+
+	bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
+
 }
 
 
 void UBDThorAnim::playBDHammerThrow()
 {
-	Montage_Play(BDHammerThrowMontage);
+	if (!Montage_IsPlaying(BDHammerThrowMontage)) {
+		Montage_Play(BDHammerThrowMontage);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Throw Animation"));
+}
+
+void UBDThorAnim::playBDHammerWind()
+{
+	if (!Montage_IsPlaying(BDHammerWindMontage)) {
+		Montage_Play(BDHammerWindMontage);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Wind Animation"));
 }
 
 void UBDThorAnim::AnimNotify_AnimEnd()
 {
+	UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
+	if (bdThorFSM) {
+		bdThorFSM->BDEndState(); // 애니메이션이 끝날 시 제어
+		UE_LOG(LogTemp, Warning, TEXT("Succed"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Faild"));
+	}
 }
 
 //BDHammerThrow 노티파이
 void UBDThorAnim::AnimNotify_ThrowTiming()
 {
 	bdThor->BDHammerThrowHit();
+}
+
+void UBDThorAnim::AnimNotify_SlashWind()
+{
+	//슬래쉬 날리기
+	bdThor->BDHammerWindSlash();
 }

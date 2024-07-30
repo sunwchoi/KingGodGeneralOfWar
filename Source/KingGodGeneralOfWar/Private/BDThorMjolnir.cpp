@@ -38,8 +38,8 @@ ABDThorMjolnir::ABDThorMjolnir()
 	MovementComp->SetUpdatedComponent(MjoCol);
 
 	//스피드 설정
-	MovementComp->InitialSpeed = 0.0f; //원래는 1500
-	MovementComp->MaxSpeed = 0.0f;
+	MovementComp->InitialSpeed = 1500.0f; //원래는 1500
+	MovementComp->MaxSpeed = 1500.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bShouldBounce = false;
 	MovementComp->ProjectileGravityScale = 0.0f; 
@@ -104,7 +104,7 @@ void ABDThorMjolnir::BackMjolnir()
 //묠니르가 부딪혔을 때 나오는 함수
 void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Mjolnir BeginOverlap"));
+	//UE_LOG(LogTemp, Warning, TEXT("Mjolnir BeginOverlap"));
 
 	if (OtherActor && (OtherActor != this) && OtherComp) {
 		//데미지 처리
@@ -112,7 +112,7 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		if (AttackTarget) {
 			//공격 상태 나누기
 			AttackTarget->Damage(BDThrowDamage, EAttackType::Attack1);
-			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
 		}
 	}
 }

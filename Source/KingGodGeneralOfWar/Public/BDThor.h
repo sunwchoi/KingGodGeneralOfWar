@@ -51,8 +51,8 @@ public:
 	void DrawWeapon();
 
 	//바람 공격할 때 넣을 액터 클래스
-	/*UPROPERTY(EditAnywhere)
-	TSubclassOf<class ASlashActor>SlashFat;*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWindSlash> SlashFat;
 
 	//망치 날릴때 쓸 공장
 	UPROPERTY(EditDefaultsOnly)
