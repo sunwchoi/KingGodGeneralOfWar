@@ -44,6 +44,33 @@ void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Catch()
 	Fsm->Teleport();
 }
 
+void UAwakenThorAnim::AnimNotify_ClapAttackStart()
+{
+	Fsm->StartClapAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_ClapAttackEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
+void UAwakenThorAnim::AnimNotify_PoundAttackReady()
+{
+	Fsm->ReadyPoundAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_PoundAttackStart()
+{
+	Fsm->StartPoundAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
 bool UAwakenThorAnim::GetIsPlay() const
 {
 	return IsPlay;

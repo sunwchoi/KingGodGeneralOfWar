@@ -49,6 +49,21 @@ public:
 	UFUNCTION()
 	void AnimNotify_AwakenThorTeleport_Catch();
 
+	UFUNCTION()
+	void AnimNotify_ClapAttackStart();
+	
+	UFUNCTION()
+	void AnimNotify_ClapAttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_PoundAttackReady();
+
+	UFUNCTION()
+	void AnimNotify_PoundAttackStart();
+	
+	UFUNCTION()
+	void AnimNotify_PoundAttackEnd();
+	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);
 };

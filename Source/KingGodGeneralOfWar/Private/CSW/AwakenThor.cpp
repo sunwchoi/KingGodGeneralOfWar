@@ -3,8 +3,8 @@
 
 #include "CSW/AwakenThor.h"
 
+#include "Kratos.h"
 #include "CSW/AwakenThorFSM.h"
-#include "CSW/PoundThunderAttackZone.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
@@ -82,11 +82,6 @@ void AAwakenThor::Teleport(FVector Target)
 UAwakenThorFSM* AAwakenThor::getFSM() const
 {
 	return Fsm;
-}
-
-class AAttackZone* AAwakenThor::PoundThunderAttack(const FTransform& Target)
-{
-	return GetWorld()->SpawnActor<APoundThunderAttackZone>(PoundThunderAttackZoneBP, Target);
 }
 
 void AAwakenThor::SetThorLocation(FVector NewLoc)
