@@ -45,8 +45,11 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	case EAwakenThorState::Move:
 		MoveState();
 		break;
-	case EAwakenThorState::Attack:
-		AttackState();
+	case EAwakenThorState::PoundAttack:
+		PoundAttackState();
+		break;
+	case EAwakenThorState::ClapAttack:
+		ClapAttackState();
 		break;
 	case EAwakenThorState::Damage:
 		DamageState();
@@ -82,8 +85,8 @@ void UAwakenThorFSM::IdleState()
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
 	if (CurrentTime > IdleDelayTime)
 	{
-		State = EAwakenThorState::Move;
-		Anim->SetState(EAwakenThorState::Move);
+		State = EAwakenThorState::ClapAttack;
+		Anim->SetState(EAwakenThorState::ClapAttack);
 		CurrentTime = 0;
 	}
 }
@@ -93,13 +96,17 @@ void UAwakenThorFSM::MoveState()
 {
 }
 
-void UAwakenThorFSM::AttackState()
+void UAwakenThorFSM::PoundAttackState()
 {
-	bPlay = true;
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	// bPlay = true;
+	// UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
-	Me->PoundThunderAttack(Target->GetTransform());
-	Anim->PlayPoundAttackAnim(FName("Attack0"));
+	// Me->PoundThunderAttack(Target->GetTransform());
+	// Anim->PlayPoundAttackAnim(FName("Attack0"));
+}
+
+void UAwakenThorFSM::ClapAttackState()
+{
 }
 
 void UAwakenThorFSM::DamageState()
@@ -124,5 +131,73 @@ void UAwakenThorFSM::Teleport()
 	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 800;
 	
 	Me->Teleport(target);
+}
+
+
+void UAwakenThorFSM::ReadyPoundAttack()
+{
+	FVector targetLoc = Target->GetActorLocation();
+	float minDx = 300.f;
+	float maxDx = 1000.f;
+	float minDy = -1000.f;
+	float maxDy = 1000.f;
+	
+	AttackZone.Empty();
+	AttackZone.Add(FVector(targetLoc.X, targetLoc.Y, 0));
+
+	float dx = FMath::RandRange(minDx, maxDx);
+	float dy = FMath::RandRange(minDy, maxDy);
+
+	AttackZone.Add(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0));
+
+	dx = FMath::RandRange(minDx, maxDx);
+	dy = FMath::RandRange(minDy, maxDy);
+	AttackZone.Add(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0));
+	
+	for (auto zone : AttackZone)
+	{
+		FVector size = FVector(100, 100, 5);
+	
+		UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
+		UE_LOG(LogTemp, Warning, TEXT("ThorPoundAttack"));
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone, FRotator::ZeroRotator, 5.f);
+	}
+}
+
+void UAwakenThorFSM::StartPoundAttack()
+{
+	float zoneRadius = 50.f;
+	FVector targetLoc = Target->GetActorLocation();
+	targetLoc.Z = 0;
+	for (auto zone : AttackZone)
+	{
+		if (FVector::Dist(targetLoc, zone) <= zoneRadius)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PoundAttack succeed"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PoundAttack failed"));
+		}
+	}
+}
+
+void UAwakenThorFSM::StartClapAttack()
+{
+	FVector targetLoc = Target->GetActorLocation();
+	targetLoc.Z = 0;
+	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand")) + Me->GetActorForwardVector() * 100;
+	attackLoc.Z = 0;
+	float zoneRadius = 100.f;
+
+	if (FVector::Dist(targetLoc, attackLoc) <= zoneRadius)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PoundAttack succeed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PoundAttack failed"));
+	}
+		
 }
 
