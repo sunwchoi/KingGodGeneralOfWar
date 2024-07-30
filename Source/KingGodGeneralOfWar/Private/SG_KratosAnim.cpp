@@ -62,6 +62,11 @@ void USG_KratosAnim::AnimNotify_AttackHitCheck()
 	OnAttackHitCheck.Broadcast();
 }
 
+void USG_KratosAnim::AnimNotify_AttackEndCheck()
+{
+	OnAttackEndCheck.Broadcast();
+}
+
 void USG_KratosAnim::AnimNotify_NextAttackCheck()
 {
 	OnNextAttackCheck.Broadcast();

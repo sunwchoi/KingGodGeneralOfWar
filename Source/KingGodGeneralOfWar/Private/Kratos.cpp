@@ -11,6 +11,8 @@
 #include "TimerManager.h"
 #include "SG_KratosAnim.h"
 #include <GameFramework/CharacterMovementComponent.h>
+#include "Axe.h"
+#include "SG_Shield.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -67,12 +69,30 @@ void AKratos::PostInitializeComponents()
 	Anim = Cast<USG_KratosAnim>(GetMesh()->GetAnimInstance());
 	if (Anim)
 	{
+		// 공격 몽타주가 끝나면 실행할 함수: OnAttackMontageEnded
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
-		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
-		/*Anim->OnDodgeEndCheck.AddLambda([this]() -> void
-			{
 
-			});*/
+		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
+		
+		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
+		// 각각 콜리전 설정을 On -> Off로 전환
+		
+		Anim->OnAttackHitCheck.AddLambda([this]() -> void
+			{
+				if (CurrentCombo == 3)
+					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				else
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+			});
+		Anim->OnAttackEndCheck.AddLambda([this]() -> void
+			{
+				if (CurrentCombo == 3)
+					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+				else
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+			});
 		Anim->OnNextAttackCheck.AddLambda([this]() -> void
 			{
 				CanNextCombo = false;
@@ -103,6 +123,16 @@ void AKratos::BeginPlay()
 		{
 			subSys->AddMappingContext(IMC_Player, 0);
 		}
+	}
+
+	if (nullptr == CurrentWeapon)
+	{
+		SetWeapon();
+	}
+
+	if (nullptr == Shield)
+	{
+		SetShield();
 	}
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
@@ -153,6 +183,9 @@ void AKratos::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
 		TEXT("HP: %f"), CurHP));
 
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
+		TEXT("CurrentSpeed: %lf"), GetVelocity().Size()));
+
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -176,7 +209,7 @@ void AKratos::PlayerMove()
 	switch (State)
 	{
 	case EPlayerState::Move:
-		MoveScale = .5f;
+		MoveScale = .56f;
 		break;
 	case EPlayerState::Run:
 		MoveScale = 1.0f;
@@ -214,6 +247,32 @@ void AKratos::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	State = EPlayerState::Idle;
 	bIsDodging = false;
+}
+
+
+void AKratos::SetWeapon()
+{
+	FActorSpawnParameters param;
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CurrentWeapon = GetWorld()->SpawnActor<AAxe>(AxeFactory, GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket")), param);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->K2_AttachToComponent(GetMesh(), TEXT("hand_rAxeSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
+		CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+	}
+}
+
+void AKratos::SetShield()
+{
+	FActorSpawnParameters param;
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Shield = GetWorld()->SpawnActor<ASG_Shield>(ShieldFactory, GetMesh()->GetSocketTransform(TEXT("hand_lShieldSocket")), param);
+	if (Shield)
+	{
+		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
+		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+	}
 }
 
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
@@ -330,10 +389,10 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 		return;
 	}
 
-	float lockOnRadius = 500.0f;
+	float lockOnRadius = 1000000.0f;
 	FVector cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraComp->USceneComponent::K2_GetComponentRotation());
 	FVector actorLocation = GetActorLocation() + cameraForwardVector * 500;
-	FVector endLocation = GetActorLocation() + cameraForwardVector * 2000;
+	FVector endLocation = GetActorLocation() + cameraForwardVector * 5000;
 	float Radius = 500;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1)));
@@ -343,7 +402,7 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	bool bIgnoreSelf = false;
 	FLinearColor TraceColor = FLinearColor::White;
 	FLinearColor TraceHitColor = FLinearColor::Red;
-	float DrawTime = 0.0f;
+	float DrawTime = 3.0f;
 	FCollisionObjectQueryParams ObjectQueryParams;
 
 	bLockOn = UKismetSystemLibrary::SphereTraceSingleForObjects(
@@ -412,7 +471,6 @@ void AKratos::AttackEndComboState()
 	CanNextCombo = false;
 	CurrentCombo = 0;
 }
-
 
 
 void AKratos::Damage(int DamageValue, EAttackType AttackType)

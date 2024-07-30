@@ -7,7 +7,7 @@
 #include "InputAction.h"
 #include "Kratos.generated.h"
 
-const float PlayerMaxSpeed = 1200.0f; // 플레이어 최대 속도. (달리기)
+const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
 
 const int8 MaxCombo = 4;
 
@@ -176,6 +176,20 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	int CurrentCombo;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AAxe> AxeFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ASG_Shield> ShieldFactory;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class AAxe* CurrentWeapon;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class ASG_Shield* Shield;
+
+	void SetWeapon();
+	void SetShield();
 private:
 	bool bIsAttacking;
 	bool bIsDodging;

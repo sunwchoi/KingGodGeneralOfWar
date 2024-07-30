@@ -9,7 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
-DECLARE_MULTICAST_DELEGATE(FOnDodgeEndCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnAttackEndCheckDelegate);
 /**
  * 
  */
@@ -30,7 +30,7 @@ public:
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
-	FOnDodgeEndCheckDelegate OnDodgeEndCheck;
+	FOnAttackEndCheckDelegate OnAttackEndCheck;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
@@ -51,6 +51,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
+
+	UFUNCTION()
+	void AnimNotify_AttackEndCheck();
 
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck() ;
