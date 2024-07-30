@@ -35,9 +35,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDHammerThrowMontage;
 
+	//BDHammerWind 根鸥林
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDHammerWindMontage;
+
 
 	//根鸥林 角青
+	UFUNCTION()
 	void playBDHammerThrow();
+	UFUNCTION()
+	void playBDHammerWind();
 
 
 	UFUNCTION()
@@ -48,6 +55,7 @@ public:
 	void AnimNotify_ThrowTiming();
 
 
-
+	UFUNCTION()
+	void AnimNotify_SlashWind();
 	
 };

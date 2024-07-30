@@ -11,7 +11,8 @@ enum class EAwakenThorState : uint8
 {
 	Idle,
 	Move,
-	Attack,
+	PoundAttack,
+	ClapAttack,
 	Damage,
 	Die,
 };
@@ -40,14 +41,20 @@ public:
 
 	void IdleState();
 	void MoveState();
-	void AttackState();
+	void PoundAttackState();
+	void ClapAttackState();
 	void DamageState();
 	void DieState();
 
 	void ThrowForTeleport();
 	void Teleport();
+	void ReadyPoundAttack();
+	void StartPoundAttack();
+	void StartClapAttack();
+
 
 private:
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;
 
@@ -69,4 +76,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	bool bPlay;
+
+	TArray<FVector> AttackZone;
 };

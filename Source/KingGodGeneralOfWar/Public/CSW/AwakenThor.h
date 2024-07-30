@@ -36,9 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Teleport(FVector Target);
-
-	UFUNCTION(BlueprintCallable)
-	class AAttackZone* PoundThunderAttack(const FTransform& Target);
+	
 
 	class UAwakenThorFSM* getFSM() const;
 private:
@@ -50,10 +48,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	class UProjectileMovementComponent* MjolnirMoveComp;
-
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
-	TSubclassOf<class APoundThunderAttackZone> PoundThunderAttackZoneBP;
 	
 	UFUNCTION()
 	void SetThorLocation(FVector NewLoc);
+
+	
 };
