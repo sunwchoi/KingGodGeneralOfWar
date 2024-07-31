@@ -17,6 +17,15 @@ void UAwakenThorAnim::NativeBeginPlay()
 	Fsm = Owner->getFSM();
 }
 
+void UAwakenThorAnim::NativeUpdateAnimation(float DeltaSeconds)
+{
+	if (Owner == nullptr)
+		return ;
+	FVector v = Owner->GetVelocity();
+	Vertical = FVector::DotProduct(Owner->GetActorForwardVector(), v);
+	Horizontal = FVector::DotProduct(Owner->GetActorRightVector(), v);
+}
+
 void UAwakenThorAnim::SetState(EAwakenThorState State)
 {
 	AnimState = State;
@@ -24,14 +33,13 @@ void UAwakenThorAnim::SetState(EAwakenThorState State)
 
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Play()
 {
-	IsPlay = true;
+
 }
 
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_End()
 {
-	IsPlay = false;
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
+	AnimState = EAwakenThorState::RangedAttackChange;
+	Fsm->SetState(EAwakenThorState::RangedAttackChange);
 }
 
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Throw()
@@ -66,6 +74,16 @@ void UAwakenThorAnim::AnimNotify_PoundAttackStart()
 }
 
 void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
+void UAwakenThorAnim::AnimNotify_KickStart()
+{
+}
+
+void UAwakenThorAnim::AnimNotify_KickEnd()
 {
 	AnimState = EAwakenThorState::Idle;
 	Fsm->SetState(EAwakenThorState::Idle);

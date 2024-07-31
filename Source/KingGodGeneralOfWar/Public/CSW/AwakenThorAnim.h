@@ -31,6 +31,7 @@ public:
 	UAwakenThorAnim();
 
 	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
 	UFUNCTION(BlueprintImplementableEvent, Category=FSMEvent)
 	void PlayPoundAttackAnim(FName SectionName);
@@ -63,7 +64,19 @@ public:
 	
 	UFUNCTION()
 	void AnimNotify_PoundAttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_KickStart();
+
+	UFUNCTION()
+	void AnimNotify_KickEnd();
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
+	float Vertical;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
+	float Horizontal;
 };

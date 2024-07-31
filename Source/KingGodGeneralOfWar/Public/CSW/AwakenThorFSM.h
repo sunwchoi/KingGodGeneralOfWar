@@ -11,8 +11,13 @@ enum class EAwakenThorState : uint8
 {
 	Idle,
 	Move,
+	Dash,
+	Teleport,
+	MeleeAttackChange,
+	RangedAttackChange,
 	PoundAttack,
 	ClapAttack,
+	KickAttack,
 	Damage,
 	Die,
 };
@@ -41,7 +46,12 @@ public:
 
 	void IdleState();
 	void MoveState();
+	void DashState();
+	void TeleportState();
+	void MeleeAttackChangeState();
+	void RangedAttackChangeState();
 	void PoundAttackState();
+	void KickAttackState();
 	void ClapAttackState();
 	void DamageState();
 	void DieState();
@@ -67,8 +77,8 @@ private:
 	UPROPERTY()
 	class UAwakenThorAnim* Anim;
 	
-	float IdleDelayTime = 5.f;
-	float CurrentTime;
+	float IdleDelayTime = 3.f;
+	float CurrentTime = 3.f;
 	
 	float TeleportDist = 1000;
 
@@ -78,4 +88,6 @@ private:
 	bool bPlay;
 
 	TArray<FVector> AttackZone;
+
+	EAwakenThorState AttackState;
 };
