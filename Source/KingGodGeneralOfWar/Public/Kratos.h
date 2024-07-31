@@ -192,8 +192,12 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	class ASG_Shield* Shield;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UCameraShakeBase> AttackShake;
+
 	void SetWeapon();
 	void SetShield();
+	void CameraShakeOnAttack();
 private:
 	bool bIsAttacking;
 	bool bIsDodging;

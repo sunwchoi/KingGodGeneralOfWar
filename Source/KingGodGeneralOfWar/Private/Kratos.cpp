@@ -13,6 +13,7 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "Axe.h"
 #include "SG_Shield.h"
+#include "Camera/PlayerCameraManager.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -227,16 +228,12 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 {
 	if (bLockOn)
 	{
-
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, TEXT("LockSystem On"));
 
 		FRotator playerCameraRotation = GetController()->AController::GetControlRotation();
-		//FRotator playerCameraYawRotation = FRotator()
 		TargetCameraRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation());
 		FRotator ToCameraRotation = UKismetMathLibrary::RLerp(playerCameraRotation, TargetCameraRotation, DeltaTime * 15, true);
 		GetController()->AController::SetControlRotation(FRotator(playerCameraRotation.Pitch, ToCameraRotation.Yaw, playerCameraRotation.Roll));
-		/*GetController()->AController::SetControlRotation(
-			UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation()));*/
 	}
 }
 
@@ -295,6 +292,12 @@ void AKratos::SetShield()
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 
 	}
+}
+
+void AKratos::CameraShakeOnAttack()
+{
+	//FAddCameraShakeParams params();
+	//GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShake,);
 }
 
 void AKratos::OnMyActionMove(const FInputActionValue& Value)
@@ -539,11 +542,8 @@ void AKratos::Damage(int DamageValue, EAttackType AttackType)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
 		return;
-
 	}
 	//State = EPlayerState::Hit;
 	CurHP -= DamageValue;
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Player Hit!"));
 }
-
-

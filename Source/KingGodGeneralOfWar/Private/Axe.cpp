@@ -5,6 +5,7 @@
 #include "components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/ArrowComponent.h"
+#include "Kratos.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -57,6 +58,9 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	FTimerHandle handle;
 
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
+	auto* player = Cast<AKratos>(GetOwner());
+	if (player)
+		player->CameraShakeOnAttack();
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
@@ -66,6 +70,5 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
-
 }
 
