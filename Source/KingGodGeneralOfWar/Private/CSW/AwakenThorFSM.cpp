@@ -45,6 +45,9 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	case EAwakenThorState::Move:
 		MoveState();
 		break;
+	case EAwakenThorState::AttackChange:
+		AttackChangeState();
+		break;
 	case EAwakenThorState::PoundAttack:
 		PoundAttackState();
 		break;
@@ -67,26 +70,21 @@ void UAwakenThorFSM::SetState(EAwakenThorState NewState)
 
 void UAwakenThorFSM::IdleState()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Idle"));
-	
-	// FVector targetLoc = Target->GetActorLocation();
-	// FVector myLoc = Me->GetActorLocation();
-	// FRotator rot = (targetLoc - myLoc).Rotation();
-	//
-	// Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
-	// if (FVector::Dist(targetLoc, myLoc) > 1050)
-	// 	SetState(EAwakenThorState::Move);
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = Me->GetActorLocation();
-	FRotator rot = (targetLoc - myLoc).Rotation();
+	FVector dir = targetLoc - myLoc;
+	FRotator rot = dir.Rotation();
 	
 	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
+	
+	Me->AddMovementInput(dir);
 	
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
 	if (CurrentTime > IdleDelayTime)
 	{
-		State = EAwakenThorState::ClapAttack;
-		Anim->SetState(EAwakenThorState::ClapAttack);
+		State = EAwakenThorState::AttackChange;
+		Anim->SetState(EAwakenThorState::AttackChange);
 		CurrentTime = 0;
 	}
 }
@@ -96,8 +94,24 @@ void UAwakenThorFSM::MoveState()
 {
 }
 
+void UAwakenThorFSM::AttackChangeState()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Attack Change"));
+	TArray<EAwakenThorState> AttackStates = {
+		EAwakenThorState::ClapAttack,
+		EAwakenThorState::PoundAttack,
+	};
+
+	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
+
+	State = AttackStates[idx];
+	Anim->SetState(State);
+}
+
 void UAwakenThorFSM::PoundAttackState()
 {
+	// UE_LOG(LogTemp, Warning, TEXT("Pound Attack"));
+
 	// bPlay = true;
 	// UE_LOG(LogTemp, Warning, TEXT("Attack"));
 
@@ -192,11 +206,11 @@ void UAwakenThorFSM::StartClapAttack()
 
 	if (FVector::Dist(targetLoc, attackLoc) <= zoneRadius)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PoundAttack succeed"));
+		UE_LOG(LogTemp, Warning, TEXT("ClapAttack succeed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PoundAttack failed"));
+		UE_LOG(LogTemp, Warning, TEXT("ClapAttack failed"));
 	}
 		
 }

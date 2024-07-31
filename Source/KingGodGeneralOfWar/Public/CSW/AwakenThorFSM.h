@@ -11,6 +11,7 @@ enum class EAwakenThorState : uint8
 {
 	Idle,
 	Move,
+	AttackChange,
 	PoundAttack,
 	ClapAttack,
 	Damage,
@@ -41,6 +42,7 @@ public:
 
 	void IdleState();
 	void MoveState();
+	void AttackChangeState();
 	void PoundAttackState();
 	void ClapAttackState();
 	void DamageState();
@@ -78,4 +80,6 @@ private:
 	bool bPlay;
 
 	TArray<FVector> AttackZone;
+
+
 };

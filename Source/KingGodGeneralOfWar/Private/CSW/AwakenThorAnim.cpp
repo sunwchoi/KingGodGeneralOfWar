@@ -17,6 +17,15 @@ void UAwakenThorAnim::NativeBeginPlay()
 	Fsm = Owner->getFSM();
 }
 
+void UAwakenThorAnim::NativeUpdateAnimation(float DeltaSeconds)
+{
+	if (Owner == nullptr)
+		return ;
+	FVector v = Owner->GetVelocity();
+	Vertical = FVector::DotProduct(Owner->GetActorForwardVector(), v);
+	Horizontal = FVector::DotProduct(Owner->GetActorRightVector(), v);
+}
+
 void UAwakenThorAnim::SetState(EAwakenThorState State)
 {
 	AnimState = State;
