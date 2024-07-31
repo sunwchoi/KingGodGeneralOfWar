@@ -6,6 +6,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -37,6 +38,10 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Me->GetCharacterMovement()->MaxWalkSpeed);
+
+	FString tmp = UEnum::GetValueAsString(State);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
 	switch (State)
 	{
 	case EAwakenThorState::Idle:
@@ -45,8 +50,14 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	case EAwakenThorState::Move:
 		MoveState();
 		break;
-	case EAwakenThorState::AttackChange:
-		AttackChangeState();
+	case EAwakenThorState::Dash:
+		DashState();
+		break;
+	case EAwakenThorState::MeleeAttackChange:
+		MeleeAttackChangeState();
+		break;
+	case EAwakenThorState::RangedAttackChange:
+		RangedAttackChangeState();
 		break;
 	case EAwakenThorState::PoundAttack:
 		PoundAttackState();
@@ -76,16 +87,37 @@ void UAwakenThorFSM::IdleState()
 	FRotator rot = dir.Rotation();
 	
 	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
-
 	
-	Me->AddMovementInput(dir);
-	
+	// Me->AddMovementInput(dir);
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
+		
+	// if (dist > 1000.f)
 	if (CurrentTime > IdleDelayTime)
 	{
-		State = EAwakenThorState::AttackChange;
-		Anim->SetState(EAwakenThorState::AttackChange);
-		CurrentTime = 0;
+		float dist = FVector::Dist(myLoc, targetLoc);
+		TArray<EAwakenThorState> NextStates;
+
+		if (dist <= 500.f)
+		{
+			NextStates.Add(EAwakenThorState::MeleeAttackChange);
+		}
+		else if (500.f < dist && dist <= 1000.f)
+		{
+			NextStates.Add(EAwakenThorState::RangedAttackChange);
+			NextStates.Add(EAwakenThorState::Dash);
+		}
+		else
+		{
+			NextStates.Add(EAwakenThorState::Dash);
+			NextStates.Add(EAwakenThorState::Teleport);
+		}
+
+		
+		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
+		State = NextStates[idx];
+		if (State != EAwakenThorState::Dash)
+			Anim->SetState(State);
+		CurrentTime = 0.f;
 	}
 }
 
@@ -94,29 +126,76 @@ void UAwakenThorFSM::MoveState()
 {
 }
 
-void UAwakenThorFSM::AttackChangeState()
+void UAwakenThorFSM::DashState()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack Change"));
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = Me->GetActorLocation();
+	FVector dir = targetLoc - myLoc;
+	FRotator rot = dir.Rotation();
+	
+	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+	float dist = FVector::Dist(Target->GetActorLocation(), Me->GetActorLocation());
+	
+	Me->AddMovementInput(dir);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Dash"));
+	if (dist < 300.f)
+	{
+		Me->GetCharacterMovement()->MaxWalkSpeed = 50.f;
+		State = EAwakenThorState::MeleeAttackChange;
+		Anim->SetState(EAwakenThorState::MeleeAttackChange);
+	}
+	else if (dist < 600.f)
+	{
+		Me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
+	}
+	else
+	{
+		if (Me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
+			Me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
+		else
+			Me->GetCharacterMovement()->MaxWalkSpeed = 10000.f;
+	}
+}
+
+void UAwakenThorFSM::TeleportState()
+{
+	
+}
+
+void UAwakenThorFSM::MeleeAttackChangeState()
+{
 	TArray<EAwakenThorState> AttackStates = {
 		EAwakenThorState::ClapAttack,
+		EAwakenThorState::KickAttack,
+	};
+
+	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
+	AttackState = AttackStates[idx];
+	
+	State = AttackStates[idx];
+	Anim->SetState(State);
+}
+
+void UAwakenThorFSM::RangedAttackChangeState()
+{
+	TArray<EAwakenThorState> AttackStates = {
 		EAwakenThorState::PoundAttack,
 	};
 
 	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
-
+	AttackState = AttackStates[idx];
+	
 	State = AttackStates[idx];
 	Anim->SetState(State);
 }
 
 void UAwakenThorFSM::PoundAttackState()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Pound Attack"));
+}
 
-	// bPlay = true;
-	// UE_LOG(LogTemp, Warning, TEXT("Attack"));
-
-	// Me->PoundThunderAttack(Target->GetTransform());
-	// Anim->PlayPoundAttackAnim(FName("Attack0"));
+void UAwakenThorFSM::KickAttackState()
+{
 }
 
 void UAwakenThorFSM::ClapAttackState()
@@ -142,7 +221,8 @@ void UAwakenThorFSM::ThrowForTeleport()
 void UAwakenThorFSM::Teleport()
 {
 	auto* camera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 800;
+	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 400;
+	target.Z = 0;
 	
 	Me->Teleport(target);
 }
