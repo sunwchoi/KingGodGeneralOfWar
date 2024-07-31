@@ -20,9 +20,7 @@ enum class EPlayerState : uint8
 	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
 	MeleeAttack UMETA(DisplayName = "MeleeAttack"),
-	MeleeAttack2 UMETA(DisplayName = "MeleeAttack2"),
-	MeleeAttack3 UMETA(DisplayName = "MeleeAttack3"),
-	MeleeAttack4 UMETA(DisplayName = "MeleeAttack4"),
+	Aim UMETA(DisplayName = "Aim"),
 	DashAttack UMETA(DisplayName = "DashAttack"),
 	GuardStart UMETA(DisplayName = "GuardStart"),
 	Guard UMETA(DisplayName = "Guard"),
@@ -91,6 +89,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Attack;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_Aim;
+
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
 
@@ -120,6 +121,12 @@ public:
 
 	UFUNCTION()
 	void OnMyActionAttack(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionAimOn(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionAimOff(const FInputActionValue& value);
 
 	void AttackStartComboState();
 	void AttackEndComboState();
@@ -171,6 +178,9 @@ public:
 
 	UFUNCTION()
 	void OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void OnGuardMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool CanNextCombo;
 
@@ -198,6 +208,10 @@ public:
 	void SetWeapon();
 	void SetShield();
 	void CameraShakeOnAttack();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* ParryVFX;
+
 private:
 	bool bIsAttacking;
 	bool bIsDodging;
@@ -209,4 +223,5 @@ private:
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
 	float TargetFOV = 90;
+
 };

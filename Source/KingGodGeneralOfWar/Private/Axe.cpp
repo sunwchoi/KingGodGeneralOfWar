@@ -22,6 +22,8 @@ AAxe::AAxe()
 	EdgeComp->SetRelativeScale3D(FVector(.4, .4, .4));
 
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
+	MovementComp->SetUpdatedComponent(RootComponent);
+	MovementComp->Velocity = FVector(0, 0, 0);
 }
 
 // Called when the game starts or when spawned
