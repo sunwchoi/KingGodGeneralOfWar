@@ -64,6 +64,12 @@ public:
 	
 	UFUNCTION()
 	void AnimNotify_PoundAttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_KickStart();
+
+	UFUNCTION()
+	void AnimNotify_KickEnd();
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);
