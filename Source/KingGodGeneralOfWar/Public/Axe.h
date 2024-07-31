@@ -36,4 +36,7 @@ public:
 	void OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* EdgeComp;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UProjectileMovementComponent* MovementComp;
 };

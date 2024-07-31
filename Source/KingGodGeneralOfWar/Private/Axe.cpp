@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/ArrowComponent.h"
 #include "Kratos.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -19,6 +20,10 @@ AAxe::AAxe()
 	EdgeComp->SetupAttachment(MeshComp);
 	EdgeComp->SetRelativeLocation(FVector(-30, 0, 40));
 	EdgeComp->SetRelativeScale3D(FVector(.4, .4, .4));
+
+	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
+	MovementComp->SetUpdatedComponent(RootComponent);
+	MovementComp->Velocity = FVector(0, 0, 0);
 }
 
 // Called when the game starts or when spawned
@@ -39,7 +44,6 @@ void AAxe::Tick(float DeltaTime)
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-	
 	TArray<AActor*> ActorsToIgnore;
 	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
 	FHitResult OutHit;
@@ -64,7 +68,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.002f, false);
+		}, 0.001f, false);
 }
 
 void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

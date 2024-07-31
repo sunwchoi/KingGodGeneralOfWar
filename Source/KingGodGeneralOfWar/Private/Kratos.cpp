@@ -14,6 +14,7 @@
 #include "Axe.h"
 #include "SG_Shield.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -62,6 +63,8 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
 		input->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AKratos::OnMyActionLockOn);
 		input->BindAction(IA_Attack, ETriggerEvent::Started, this, &AKratos::OnMyActionAttack);
+		input->BindAction(IA_Aim, ETriggerEvent::Triggered, this, &AKratos::OnMyActionAimOn);
+		input->BindAction(IA_Aim, ETriggerEvent::Completed, this, &AKratos::OnMyActionAimOff);
 	}
 }
 void AKratos::PostInitializeComponents()
@@ -78,6 +81,9 @@ void AKratos::PostInitializeComponents()
 
 		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnRollMontageEnded);
+
+		//
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnGuardMontageEnded);
 
 		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
 		// 각각 콜리전 설정을 On -> Off로 전환
@@ -182,6 +188,8 @@ void AKratos::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
 		TEXT("ActorRotation: %s"), *GetActorRotation().ToString()));*/
 
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
+
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(
 		TEXT("CurrentFOV: %f"), CameraComp->FieldOfView));
 
@@ -264,8 +272,19 @@ void AKratos::OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->RollMontage)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnRollMontageEnded"));
 		State = EPlayerState::Idle;
 		bIsDodging = false;
+	}
+}
+
+void AKratos::OnGuardMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (bInterrupted)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnGuardMontageEnded On Interrupted"));
+		if (Anim->Montage_IsPlaying(Anim->GuardMontage)) return;
+		State = EPlayerState::Idle;
 	}
 }
 
@@ -316,7 +335,7 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		//Direction.Normalize();
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
 
-		// 캐릭터 현재 회전 가져오기
+		// 캐릭터 현재 회전 가져오기ㅠㅑㅜAKratos::OnMyActionAttack
 		//FRotator Rotation = GetControlRotation();
 		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
 		//SetActorRotation(YawRotation);
@@ -412,19 +431,9 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
 		State = EPlayerState::GuardStart;
-		FTimerHandle guardHandle;
-
-		GetWorld()->GetTimerManager().SetTimer(guardHandle,
-			[&]()
-		{
-			if (State == EPlayerState::GuardStart)
-			{
-				State = EPlayerState::Guard;
-			}
-			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("GuardCall Success"));
-
-		}, GUARD_START_DELAY, false);
+		Anim->PlayGuardMontage();
 	}
 }
 
@@ -432,14 +441,11 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Guard || State == EPlayerState::GuardStart)
 	{
-		State = EPlayerState::GuardEnd;
-		FTimerHandle guardHandle;
-
-		GetWorld()->GetTimerManager().SetTimer(guardHandle,
-			[&]()
-		{
-			State = EPlayerState::Idle;
-		}, GUARD_END_DELAY, false);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
+		Anim->Montage_Stop(0.1f, Anim->GuardMontage);
+		Anim->JumpToGuardMontageSection(TEXT("Guard_End"));
+		//State = EPlayerState::GuardEnd;
+		State = EPlayerState::Idle;
 	}
 }
 
@@ -517,7 +523,28 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 		//rrentWeapon->
 		Anim->JumpToAttackMontageSection(CurrentCombo);
 		bIsAttacking = true;
-		
+	}
+	else if (State == EPlayerState::Aim)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("도끼 날리기"));
+	}
+}
+
+void AKratos::OnMyActionAimOn(const FInputActionValue& value)
+{
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
+	{
+		State = EPlayerState::Aim;
+		TargetFOV = 60;
+	}
+}
+
+void AKratos::OnMyActionAimOff(const FInputActionValue& value)
+{
+	if (State == EPlayerState::Aim)
+	{
+		State = EPlayerState::Idle;
+		TargetFOV = 90;
 	}
 }
 
@@ -542,6 +569,17 @@ void AKratos::Damage(int DamageValue, EAttackType AttackType)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
 		return;
+	}
+
+	if (State == EPlayerState::Guard)
+	{
+		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Guard Success"));
+	}
+	else if (State == EPlayerState::GuardStart)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(1, 1, 1));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Parrying!!!!"));
 	}
 	//State = EPlayerState::Hit;
 	CurHP -= DamageValue;
