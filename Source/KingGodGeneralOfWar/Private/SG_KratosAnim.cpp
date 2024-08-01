@@ -2,33 +2,35 @@
 
 
 #include "SG_KratosAnim.h"
-
+#include "Axe.h"
 
 USG_KratosAnim::USG_KratosAnim()
 {
-	static ConstructorHelpers::FObjectFinder <UAnimMontage> ATTACK_MONTAGE(
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_MeleeAttack.AM_Kratos_MeleeAttack'")
 	);
+	if (TempAttackMontage.Succeeded())	AttackMontage = TempAttackMontage.Object;
 
-	static ConstructorHelpers::FObjectFinder <UAnimMontage> DODGE_MONTAGE(
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempDodgeMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Dodge.AM_Kratos_Dodge'")
 	);
+	if (TempDodgeMontage.Succeeded())	DodgeMontage = TempDodgeMontage.Object;
 
-	static ConstructorHelpers::FObjectFinder <UAnimMontage> ROLL_MONTAGE(
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRollMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Roll.AM_Kratos_Roll'")
 	);
+	if (TempRollMontage.Succeeded())	RollMontage = TempRollMontage.Object;
 
-	static ConstructorHelpers::FObjectFinder <UAnimMontage> GUARD_MONTAGE(
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempGuardMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Guard.AM_Kratos_Guard'")
 	);
-	if (ATTACK_MONTAGE.Succeeded())
-		AttackMontage = ATTACK_MONTAGE.Object;
-	if (DODGE_MONTAGE.Succeeded())
-		DodgeMontage = DODGE_MONTAGE.Object;
-	if (ROLL_MONTAGE.Succeeded())
-		RollMontage = ROLL_MONTAGE.Object;
-	if (GUARD_MONTAGE.Succeeded())
-		GuardMontage = GUARD_MONTAGE.Object;
+	if (TempGuardMontage.Succeeded())	GuardMontage = TempGuardMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAxeThrowMontage(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_AxeThrow.AM_AxeThrow'")
+	);
+	if (TempAxeThrowMontage.Succeeded())	AxeThrowMontage = TempAxeThrowMontage.Object;
+
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -70,6 +72,13 @@ void USG_KratosAnim::PlayRollMontage()
 void USG_KratosAnim::PlayGuardMontage()
 {
 	Montage_Play(GuardMontage, 1.0f);
+}
+
+void USG_KratosAnim::PlayAxeThrowMontage()
+{
+	Montage_Play(AxeThrowMontage, 1.0f);
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	TargetRotation = Player->GetControlRotation();
 }
 
 void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
@@ -119,6 +128,21 @@ void USG_KratosAnim::AnimNotify_GuardLoopStartCheck()
 	{
 		if (Player->State == EPlayerState::GuardStart)
 			Player->State = EPlayerState::Guard;
+	}
+}
+
+void USG_KratosAnim::AnimNotify_HideAxe()
+{
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	if (Player)
+	{
+		auto* Axe = Player->CurrentWeapon;
+		if (Axe)
+		{
+			Axe->MeshComp->SetVisibility(false, true);
+			FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRotation);
+		}
+
 	}
 }
 

@@ -11,6 +11,7 @@
 #include "BDThor.h"
 #include "BDThorFSM.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "FlyingAxe.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -53,7 +54,8 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	if (Thor)
 	{
-		//
+		Thor->fsm->Damage(10);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
 	}
 	else
 	{
@@ -75,5 +77,12 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
+}
+
+void AAxe::AxeThrowAttack(FRotator TargetRotatation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("도끼 날리기"));
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 }
 

@@ -29,6 +29,7 @@ public:
 	void PlayDodgeMontage();
 	void PlayRollMontage();
 	void PlayGuardMontage();
+	void PlayAxeThrowMontage();
 
 	void JumpToAttackMontageSection(int32 NewSection);
 	void JumpToDodgeMontageSection(int32 NewSection);
@@ -60,6 +61,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* GuardMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AxeThrowMontage;
 private:
 
 	UFUNCTION()
@@ -76,9 +80,19 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_GuardLoopStartCheck();
+	
+	UFUNCTION()
+	void AnimNotify_HideAxe();
 
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetDodgeMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
+
+	class AFlyingAxe* FlyingAxe;
+
+	FRotator TargetRotation;
 };

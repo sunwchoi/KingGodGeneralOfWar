@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputAction.h"
+#include "Blueprint/UserWidget.h"
 #include "Kratos.generated.h"
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
@@ -208,10 +209,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UCameraShakeBase> AttackShake;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> AimWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	class UUserWidget* AimWidget;
+
 	void SetWeapon();
 	void SetShield();
 	void CameraShakeOnAttack();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ParryVFX;
 

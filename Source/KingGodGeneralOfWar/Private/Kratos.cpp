@@ -15,6 +15,8 @@
 #include "SG_Shield.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -45,6 +47,20 @@ AKratos::AKratos()
 
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
+
+	if (AimWidgetClass)
+		AimWidget = CreateWidget<UUserWidget>(GetWorld(), AimWidgetClass);
+
+	if (AimWidget)
+	{
+		AimWidget->AddToViewport();
+		AimWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	/*ConstructorHelpers::FObjectFinder<UWidgetComponent>TempAimWidgetComp(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/JSG/UI/WBP_Aim.WBP_Aim'"));
+	if (TempAimWidgetComp.Succeeded())
+	{
+		AimWidgetComp = TempAimWidgetComp.Object;
+	}*/
 }
 // Called to bind functionality to input
 void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -124,7 +140,6 @@ void AKratos::PostInitializeComponents()
 void AKratos::BeginPlay()
 {
 	Super::BeginPlay();
-
 	CurHP = MaxHP;
 	// 1. 컨트롤러를 가져와서 PlayerController인지 캐스팅해본다.
 	auto* pc = Cast<APlayerController>(Controller);
@@ -524,7 +539,8 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 	}
 	else if (State == EPlayerState::Aim)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("도끼 날리기"));
+		Anim->PlayAxeThrowMontage();
+		CurrentWeapon->AxeThrowAttack(GetControlRotation());
 	}
 }
 

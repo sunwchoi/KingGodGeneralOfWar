@@ -39,4 +39,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UProjectileMovementComponent* MovementComp;
+
+	void AxeThrowAttack(FRotator TargetRotatation);
+
+	
+
 };
