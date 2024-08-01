@@ -61,6 +61,7 @@ public:
 	void ReadyPoundAttack();
 	void StartPoundAttack();
 	void StartClapAttack();
+	void StartKickAttack();
 
 
 private:
@@ -87,7 +88,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	bool bPlay;
 
-	TArray<FVector> AttackZone;
+	TArray<std::pair<FVector, float>> AttackZone;
 
 	EAwakenThorState AttackState;
+
+	void SphereOverlap();
 };

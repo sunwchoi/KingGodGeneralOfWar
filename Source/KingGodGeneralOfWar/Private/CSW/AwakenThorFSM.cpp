@@ -3,6 +3,7 @@
 
 #include "CSW/AwakenThorFSM.h"
 
+#include "Kratos.h"
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
 #include "GameFramework/Character.h"
@@ -38,10 +39,6 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Me->GetCharacterMovement()->MaxWalkSpeed);
-
-	FString tmp = UEnum::GetValueAsString(State);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
 	switch (State)
 	{
 	case EAwakenThorState::Idle:
@@ -88,10 +85,8 @@ void UAwakenThorFSM::IdleState()
 	
 	Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 	
-	// Me->AddMovementInput(dir);
 	CurrentTime += GetWorld()->DeltaTimeSeconds;
-		
-	// if (dist > 1000.f)
+	
 	if (CurrentTime > IdleDelayTime)
 	{
 		float dist = FVector::Dist(myLoc, targetLoc);
@@ -111,7 +106,6 @@ void UAwakenThorFSM::IdleState()
 			NextStates.Add(EAwakenThorState::Dash);
 			NextStates.Add(EAwakenThorState::Teleport);
 		}
-
 		
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		// State = NextStates[idx];
@@ -232,22 +226,23 @@ void UAwakenThorFSM::Teleport()
 void UAwakenThorFSM::ReadyPoundAttack()
 {
 	FVector targetLoc = Target->GetActorLocation();
+	float zoneRad = 100.f;
 	float minDx = 300.f;
 	float maxDx = 1000.f;
 	float minDy = -1000.f;
 	float maxDy = 1000.f;
 	
 	AttackZone.Empty();
-	AttackZone.Add(FVector(targetLoc.X, targetLoc.Y, 0));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X, targetLoc.Y, 0), zoneRad));
 
 	float dx = FMath::RandRange(minDx, maxDx);
 	float dy = FMath::RandRange(minDy, maxDy);
 
-	AttackZone.Add(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0), zoneRad));
 
 	dx = FMath::RandRange(minDx, maxDx);
 	dy = FMath::RandRange(minDy, maxDy);
-	AttackZone.Add(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0), zoneRad));
 	
 	for (auto zone : AttackZone)
 	{
@@ -255,44 +250,65 @@ void UAwakenThorFSM::ReadyPoundAttack()
 	
 		UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
 		UE_LOG(LogTemp, Warning, TEXT("ThorPoundAttack"));
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone, FRotator::ZeroRotator, 5.f);
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 5.f);
 	}
 }
 
 void UAwakenThorFSM::StartPoundAttack()
 {
-	float zoneRadius = 50.f;
-	FVector targetLoc = Target->GetActorLocation();
-	targetLoc.Z = 0;
-	for (auto zone : AttackZone)
-	{
-		if (FVector::Dist(targetLoc, zone) <= zoneRadius)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PoundAttack succeed"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PoundAttack failed"));
-		}
-	}
+	SphereOverlap();
+
+	
 }
 
 void UAwakenThorFSM::StartClapAttack()
 {
-	FVector targetLoc = Target->GetActorLocation();
-	targetLoc.Z = 0;
-	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand")) + Me->GetActorForwardVector() * 100;
-	attackLoc.Z = 0;
-	float zoneRadius = 100.f;
+	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand"));
+	float zoneRadius = 50.f;
 
-	if (FVector::Dist(targetLoc, attackLoc) <= zoneRadius)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ClapAttack succeed"));
+	AttackZone.Empty();
+	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
+	SphereOverlap();
+}
+
+void UAwakenThorFSM::StartKickAttack()
+{
+	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
+	float zoneRadius = 50.f;
+
+	AttackZone.Empty();
+	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
+	SphereOverlap();
+}
+
+void UAwakenThorFSM::SphereOverlap()
+{
+
+	TArray<AActor *> OverlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
+
+	for (auto zone : AttackZone)
+	{	
+		UKismetSystemLibrary::SphereOverlapActors(
+			GetWorld(),
+			zone.first,
+			zone.second,
+			ObjectTypes,
+			AKratos::StaticClass(),
+			TArray<AActor*>(),
+			OverlappedActors
+			);
+		if (OverlappedActors.Num() > 0)
+		{
+			if(Cast<AKratos>(OverlappedActors.Top()))
+			{
+				FString tmp = UEnum::GetValueAsString(State);
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
+			} // SetDamage
+		}
+
+		DrawDebugSphere(GetWorld(), zone.first, zone.second, 32, FColor::Green, false, 1.f);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ClapAttack failed"));
-	}
-		
 }
 
