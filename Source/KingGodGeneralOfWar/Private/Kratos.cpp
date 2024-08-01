@@ -182,25 +182,12 @@ void AKratos::Tick(float DeltaTime)
 		TargetFOV -= 10;
 	}
 
-	/*GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
-		TEXT("TargetActorRotation: %s"), *TargetActorRotation.ToString()));
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(
-		TEXT("ActorRotation: %s"), *GetActorRotation().ToString()));*/
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(
-		TEXT("CurrentFOV: %f"), CameraComp->FieldOfView));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetPlayerStateString() );
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
 		TEXT("HP: %f"), CurHP));
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
-		TEXT("CurrentSpeed: %lf"), GetVelocity().Size()));
-
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -272,7 +259,6 @@ void AKratos::OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->RollMontage)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnRollMontageEnded"));
 		State = EPlayerState::Idle;
 		bIsDodging = false;
 	}
@@ -280,11 +266,19 @@ void AKratos::OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 
 void AKratos::OnGuardMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (bInterrupted)
+	if (Montage == Anim->GuardMontage)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnGuardMontageEnded On Interrupted"));
-		if (Anim->Montage_IsPlaying(Anim->GuardMontage)) return;
-		State = EPlayerState::Idle;
+		if (bInterrupted)
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnGuardMontageEnded On Interrupted"));
+			if (Anim->Montage_IsPlaying(Anim->GuardMontage)) return;
+			State = EPlayerState::Idle;
+		}
+		else
+		{
+			State = EPlayerState::Idle;
+		}
+
 	}
 }
 
@@ -392,10 +386,10 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		int8 sectionIdx = 3;
 		if (PrevDirection.X == 0)
 		{
-			if (PrevDirection.Y == 1)
-				sectionIdx = 1;
-			else
+			if (PrevDirection.Y == -1)
 				sectionIdx = 0;
+			else
+				sectionIdx = 1;
 		}
 		else
 		{
@@ -429,6 +423,7 @@ void AKratos::OnMyActionRunOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
+	if (bParrying) return;
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
@@ -439,13 +434,12 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 
 void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 {
+	bParrying = false;
 	if (State == EPlayerState::Guard || State == EPlayerState::GuardStart)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
-		Anim->Montage_Stop(0.1f, Anim->GuardMontage);
-		Anim->JumpToGuardMontageSection(TEXT("Guard_End"));
+		Anim->Montage_Stop(0, Anim->GuardMontage);
 		//State = EPlayerState::GuardEnd;
-		State = EPlayerState::Idle;
 	}
 }
 
@@ -552,7 +546,7 @@ void AKratos::AttackStartComboState()
 {
 	CanNextCombo = true;
 	bIsComboInputOn = false;
-	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, MaxCombo);
+	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, 4);
 }
 
 void AKratos::AttackEndComboState()
@@ -563,25 +557,34 @@ void AKratos::AttackEndComboState()
 }
 
 
-void AKratos::Damage(int DamageValue, EAttackType AttackType)
+void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 {
 	if (State == EPlayerState::Dodge)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
-		return;
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
 	}
-
-	if (State == EPlayerState::Guard)
+	else if (State == EPlayerState::Guard)
 	{
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Guard Success"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("가드"));
 	}
 	else if (State == EPlayerState::GuardStart)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(1, 1, 1));
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Parrying!!!!"));
+		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+			{
+				UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+			}, 0.02f, false);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("패링!!!!"));
+		bParrying = true;
+		State = EPlayerState::Dodge;
 	}
-	//State = EPlayerState::Hit;
-	CurHP -= DamageValue;
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Player Hit!"));
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Damage!"), DamageValue));
+		CurHP -= DamageValue;
+	}
 }

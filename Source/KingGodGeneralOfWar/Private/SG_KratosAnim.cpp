@@ -89,7 +89,6 @@ void USG_KratosAnim::JumpToRollMontageSection(int32 NewSection)
 
 void USG_KratosAnim::JumpToGuardMontageSection(FString SectionName)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FName(*FString(SectionName)).ToString());
 	Montage_JumpToSection(FName(*FString(SectionName)));
 }
 
