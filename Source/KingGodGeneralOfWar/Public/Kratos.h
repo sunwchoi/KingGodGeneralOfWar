@@ -135,7 +135,7 @@ public:
 	void AttackEndComboState();
 
 	UFUNCTION()
-	void Damage(int DamageValue, EHitType AttackType);
+	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
 
 	FString GetPlayerStateString();
 	void PlayerMove();

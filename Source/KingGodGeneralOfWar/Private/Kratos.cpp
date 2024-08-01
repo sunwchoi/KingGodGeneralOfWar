@@ -29,6 +29,7 @@ const float DODGE_DELAY = 0.5f;
 const float WALK_FOV = 90;
 const float RUN_FOV = 105;
 const float GUARD_FOV = 70;
+const float AIM_FOV = 60;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -173,6 +174,9 @@ void AKratos::Tick(float DeltaTime)
 	case EPlayerState::GuardStart:
 	case EPlayerState::Guard:
 		TargetFOV = GUARD_FOV;
+		break;
+	case EPlayerState::Aim:
+		TargetFOV = AIM_FOV;
 		break;
 	default:
 		TargetFOV = WALK_FOV;
@@ -529,7 +533,6 @@ void AKratos::OnMyActionAimOn(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		State = EPlayerState::Aim;
-		TargetFOV = 60;
 	}
 }
 
@@ -538,7 +541,6 @@ void AKratos::OnMyActionAimOff(const FInputActionValue& value)
 	if (State == EPlayerState::Aim)
 	{
 		State = EPlayerState::Idle;
-		TargetFOV = 90;
 	}
 }
 
