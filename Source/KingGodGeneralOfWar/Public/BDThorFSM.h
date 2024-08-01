@@ -126,7 +126,7 @@ public:
 
 	//공격 대기 시간, 토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float BDAttackDelayTime = 0.5f;
+	float BDAttackDelayTime = 3.0f;
 
 	//피격 시 데미지 함수, DamageNum 데미지 수치
 	UFUNCTION()
@@ -140,8 +140,5 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FTimerHandle StateTimerHandle; //상태 변경 전의 딜레이 주기 위한 변수
-
-	UFUNCTION()
-	void BDTransitionToMoveState();
 		
 };

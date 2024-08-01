@@ -6,6 +6,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/ArrowComponent.h"
 #include "Kratos.h"
+#include "CSW/AwakenThor.h"
+#include "CSW/AwakenThorFSM.h"
+#include "BDThor.h"
+#include "BDThorFSM.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 // Sets default values
 AAxe::AAxe()
@@ -44,27 +48,24 @@ void AAxe::Tick(float DeltaTime)
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-	TArray<AActor*> ActorsToIgnore;
-	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::ForDuration;
-	FHitResult OutHit;
-	bool bIgnoreSelf = false;
-	FLinearColor TraceColor = FLinearColor::White;
-	FLinearColor TraceHitColor = FLinearColor::Red;
-	float DrawTime = 3.0f;
-	FCollisionObjectQueryParams ObjectQueryParams;
-	
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.ImpactPoint.ToString());
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, SweepResult.BoneName.ToString());
-	
-	//UKismetSystemLibrary::LineTraceSingle(GetWorld(), SweepResult.ImpactPoint, OtherActor->GetActorLocation(),
-	//	ETraceTypeQuery::TraceTypeQuery1, true, ActorsToIgnore, DrawDebugType, OutHit, bIgnoreSelf, TraceColor, TraceHitColor, DrawTime);
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
-	FTimerHandle handle;
-
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
+	auto* Thor = Cast<ABDThor>(OtherActor);
+	if (Thor)
+	{
+		//
+	}
+	else
+	{
+		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
+		AwakenThor->getFSM()->SetDamage();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
+	}
+
 	auto* player = Cast<AKratos>(GetOwner());
-	if (player)
-		player->CameraShakeOnAttack();
+	if (player)		player->CameraShakeOnAttack();
+
+	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);

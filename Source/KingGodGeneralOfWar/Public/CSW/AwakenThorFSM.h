@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kratos.h"
 #include "Components/ActorComponent.h"
 #include "AwakenThorFSM.generated.h"
 
@@ -61,6 +62,9 @@ public:
 	void ReadyPoundAttack();
 	void StartPoundAttack();
 	void StartClapAttack();
+	void StartKickAttack();
+
+	void SetDamage();
 
 
 private:
@@ -69,7 +73,7 @@ private:
 	EAwakenThorState State = EAwakenThorState::Idle;
 
 	UPROPERTY(VisibleAnywhere, Category=FSM)
-	ACharacter* Target;
+	AKratos* Target;
 	
 	UPROPERTY()
 	class AAwakenThor* Me;
@@ -87,7 +91,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	bool bPlay;
 
-	TArray<FVector> AttackZone;
+	TArray<std::pair<FVector, float>> AttackZone;
 
 	EAwakenThorState AttackState;
+
+	void SphereOverlap(EHitType HitType, bool IsMelee);
 };

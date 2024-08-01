@@ -81,9 +81,16 @@ void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
 
 void UAwakenThorAnim::AnimNotify_KickStart()
 {
+	Fsm->StartKickAttack();
 }
 
 void UAwakenThorAnim::AnimNotify_KickEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
+void UAwakenThorAnim::AnimNotify_HitEnd()
 {
 	AnimState = EAwakenThorState::Idle;
 	Fsm->SetState(EAwakenThorState::Idle);
