@@ -9,8 +9,6 @@
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
 
-const int8 MaxCombo = 4;
-
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -31,10 +29,15 @@ enum class EPlayerState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EAttackType : uint8
+enum class EHitType : uint8
 {
-	Attack1 UMETA(DisplayName = "Attack1")
+	STAGGER UMETA(DisplayName = "STAGGER"),
+	NB_HIGH UMETA(DisplayName = "NB_HIGH"),
+	NB_MEDIUM UMETA(DisplayName = "STAGGER"),
+	NB_LOW UMETA(DisplayName = "NB_LOW"),
+	STUN UMETA(DisplayName = "STUN"),
 };
+
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
 {
@@ -132,7 +135,7 @@ public:
 	void AttackEndComboState();
 
 	UFUNCTION()
-	void Damage(int DamageValue, EAttackType AttackType);
+	void Damage(int DamageValue, EHitType AttackType);
 
 	FString GetPlayerStateString();
 	void PlayerMove();
@@ -224,4 +227,6 @@ private:
 	FRotator TargetActorRotation;
 	float TargetFOV = 90;
 
+	int guardHitCnt = 3;
+	bool bParrying;
 };
