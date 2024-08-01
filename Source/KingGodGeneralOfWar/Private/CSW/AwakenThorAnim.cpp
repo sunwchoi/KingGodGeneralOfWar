@@ -90,6 +90,12 @@ void UAwakenThorAnim::AnimNotify_KickEnd()
 	Fsm->SetState(EAwakenThorState::Idle);
 }
 
+void UAwakenThorAnim::AnimNotify_HitEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
 bool UAwakenThorAnim::GetIsPlay() const
 {
 	return IsPlay;

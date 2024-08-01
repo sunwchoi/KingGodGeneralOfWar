@@ -63,6 +63,8 @@ public:
 	void StartClapAttack();
 	void StartKickAttack();
 
+	void SetDamage();
+
 
 private:
 	

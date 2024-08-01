@@ -70,6 +70,9 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_KickEnd();
+
+	UFUNCTION()
+	void AnimNotify_HitEnd();
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);
