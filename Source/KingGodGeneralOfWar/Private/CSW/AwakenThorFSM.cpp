@@ -281,6 +281,14 @@ void UAwakenThorFSM::StartKickAttack()
 	SphereOverlap();
 }
 
+void UAwakenThorFSM::SetDamage()
+{
+	if (State != EAwakenThorState::Idle)
+		return ;
+	State = EAwakenThorState::Damage;
+	Anim->SetState(State);
+}
+
 void UAwakenThorFSM::SphereOverlap()
 {
 
