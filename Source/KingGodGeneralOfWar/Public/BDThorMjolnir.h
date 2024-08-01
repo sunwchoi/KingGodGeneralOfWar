@@ -37,8 +37,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class AKratos* Target; //타겟
 
+
+	// 나는 무기, 나를 가진 주인
 	UPROPERTY(EditDefaultsOnly)
-	class ABDThor* me; //나 자신
+	class ABDThor* Thor; //나 자신
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 BDThrowDamage = 10;
@@ -49,6 +51,13 @@ public:
 
 	UFUNCTION()
 	void BackMjolnir(); //묠니르 발사 후 돌아오는 함수
+
+	FTimerHandle Timerhandle; //타이머 핸들러
+
+	UFUNCTION()
+	void SetIsFly();
+
+	bool IsFly;
 
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

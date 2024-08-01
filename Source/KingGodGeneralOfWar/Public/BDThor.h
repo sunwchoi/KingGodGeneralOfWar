@@ -46,22 +46,30 @@ public:
 	UFUNCTION()
 	void EquipWeapon();
 
+	bool IsWeaponHold; //무기가 손에 잇을때 true
+
 	//망치 공격이 아닐땐 항상 허리춤에 망치 달기
 	UFUNCTION()
 	void DrawWeapon();
+
+	UFUNCTION()
+	void HiddenWeapon(); //무기 어디서도 안보이게 하기 : 무기를 던졌을 때 호출
+	void visibleWeapon(); //무기를 안보이게 했으면 다시 보이게 하기 : 무기 던지고 난 뒤에 호출
 
 	//바람 공격할 때 넣을 액터 클래스
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AWindSlash> SlashFat;
 
 	//망치 날릴때 쓸 공장
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = weapon)
 	TSubclassOf<class ABDThorMjolnir> MjolnirFactory;
 
-	UFUNCTION(BlueprintCallable, Category = Attack)
+	UFUNCTION(BlueprintCallable, Category = weapon)
 	void BDHammerThrowHit(); //망치를 Fire 하는 능력
 
 	//바람을 날려서 데미지 주기
-	UFUNCTION(BlueprintCallable, Category = Attack)
+	UFUNCTION(BlueprintCallable, Category = weapon)
 	void BDHammerWindSlash(); //바람 날리는 능력
+
+
 };

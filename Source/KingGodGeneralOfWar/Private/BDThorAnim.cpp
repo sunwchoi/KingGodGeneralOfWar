@@ -9,10 +9,24 @@ void UBDThorAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	auto ownerPawn = TryGetPawnOwner();
-	bdThor = Cast<ABDThor>(ownerPawn);
+	/*if (bdThor == nullptr || bdThor->IsValidLowLevel()) {
+		auto ownerPawn = TryGetPawnOwner();
+		bdThor = Cast<ABDThor>(ownerPawn);
 
-	bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
+	}
+
+	if (bdThorFSM == nullptr || bdThorFSM->IsValidLowLevel()) {
+		bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
+	}*/
+
+	if (!bdThor) {
+		auto ownerPawn = TryGetPawnOwner();
+		bdThor = Cast<ABDThor>(ownerPawn);
+	}
+
+	if (bdThor && !bdThorFSM) {
+		bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
+	}
 
 }
 
@@ -35,13 +49,13 @@ void UBDThorAnim::playBDHammerWind()
 
 void UBDThorAnim::AnimNotify_AnimEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
+	//UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
 	if (bdThorFSM) {
 		bdThorFSM->BDEndState(); // 애니메이션이 끝날 시 제어
-		UE_LOG(LogTemp, Warning, TEXT("Succed"));
+		//UE_LOG(LogTemp, Warning, TEXT("Succed"));
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Faild"));
+		//UE_LOG(LogTemp, Warning, TEXT("Faild"));
 	}
 }
 

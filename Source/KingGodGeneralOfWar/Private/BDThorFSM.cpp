@@ -132,16 +132,25 @@ void UBDThorFSM::BDMoveState()
 	//3. 방향으로 이동하고 싶다.
 	me->AddMovementInput(dir.GetSafeNormal());
 
-	//타깃과 가까워지면 공격 상태로 전환하고 싶다.
-	//1. 만약 거리가 공격 범위 안에 들어오면
-	if (dir.Size() < BDAttackRange) {
-		//2. 공격 상태로 전환하고 싶다.
-		//여기 더 구체화
+
+	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
+	if (BDCurrentTime > BDAttackDelayTime) {
 		mState = BDThorGeneralState::BDAttackModeChange;
 
 		//애니메이션 상태 동기화
 		anim->animState = mState;
 	}
+
+	//타깃과 가까워지면 공격 상태로 전환하고 싶다.
+	//1. 만약 거리가 공격 범위 안에 들어오면
+	//if (dir.Size() < BDAttackRange) {
+	//	//2. 공격 상태로 전환하고 싶다.
+	//	//여기 더 구체화
+	//	mState = BDThorGeneralState::BDAttackModeChange;
+
+	//	//애니메이션 상태 동기화
+	//	anim->animState = mState;
+	//}
 }
 
 void UBDThorFSM::BDAvoidanceState()
@@ -165,7 +174,7 @@ void UBDThorFSM::BDAttackModeChangeState()
 		//mState = BDThorGeneralState::BDHammerWind;  // 임시 상태
 		anim->animState = mState;
 		
-		UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
+		//UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
 		
 		BDCurrentTime = 0;
 		
@@ -207,7 +216,7 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	//만약 망치 공격일 경우
 	if (NewState == BDThorGeneralState::BDHammerThreeSwing || NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
 		//손에 망치를 들어라
-		me->EquipWeapon();
+		//me->EquipWeapon();
 	}
 	else {
 		me->DrawWeapon(); //허리에 망치를 두어라
@@ -215,7 +224,7 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 
 	// 마지막 상태 업데이트
 	LastAttackState = NewState;
-	UE_LOG(LogTemp, Warning, TEXT("Random!!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Random!!"));
 	return NewState; //상태 리턴
 }
 
@@ -256,6 +265,10 @@ void UBDThorFSM::BDHammerThrowState()
 //망치 휘두르면서 바람공격
 void UBDThorFSM::BDHammerWindState()
 {
+	if (me->IsWeaponHold == false) {
+		me->EquipWeapon(); //우선 무기를 든다.
+	}
+
 	// 현재 상태가 이미 Hammer Wind라면 함수 호출을 건너뛴다.
 	if (mState != BDThorGeneralState::BDHammerWind) {
 		return;
@@ -298,23 +311,18 @@ void UBDThorFSM::BDEndState()
 		//move로 돌아가기?
 		BDSetState(BDThorGeneralState::BDMove);
 		
-		//GetWorld()->GetTimerManager().SetTimer(StateTimerHandle, this, &UBDThorFSM::BDTransitionToMoveState, 1.0f, false);
-		UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
+		//UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
 	}
 	//else if(mState == BDThorGeneralState::)
 }
 
-void UBDThorFSM::BDTransitionToMoveState()
-{
-	BDSetState(BDThorGeneralState::BDMove);
-}
 
 //애니메이션 상태 변경
 void UBDThorFSM::BDSetState(BDThorGeneralState BDnewState)
 {
 	mState = BDnewState; //상태 지정
 	anim->animState = mState;
-	UE_LOG(LogTemp, Warning, TEXT("State changed to: %s"), *UEnum::GetValueAsString(mState));
+	//UE_LOG(LogTemp, Warning, TEXT("State changed to: %s"), *UEnum::GetValueAsString(mState));
 }
 
 
