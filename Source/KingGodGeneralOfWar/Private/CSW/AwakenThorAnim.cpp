@@ -81,6 +81,7 @@ void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
 
 void UAwakenThorAnim::AnimNotify_KickStart()
 {
+	Fsm->StartKickAttack();
 }
 
 void UAwakenThorAnim::AnimNotify_KickEnd()
