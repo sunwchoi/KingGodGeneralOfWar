@@ -114,7 +114,8 @@ void UAwakenThorFSM::IdleState()
 
 		
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		State = NextStates[idx];
+		// State = NextStates[idx];
+		State = EAwakenThorState::MeleeAttackChange;
 		if (State != EAwakenThorState::Dash)
 			Anim->SetState(State);
 		CurrentTime = 0.f;
