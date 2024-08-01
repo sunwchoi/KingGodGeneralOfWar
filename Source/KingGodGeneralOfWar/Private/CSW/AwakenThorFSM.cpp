@@ -26,7 +26,7 @@ void UAwakenThorFSM::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	ACharacter* tmp = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	AKratos* tmp = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
@@ -256,7 +256,7 @@ void UAwakenThorFSM::ReadyPoundAttack()
 
 void UAwakenThorFSM::StartPoundAttack()
 {
-	SphereOverlap();
+	SphereOverlap(EHitType::STUN, false);
 
 	
 }
@@ -268,7 +268,7 @@ void UAwakenThorFSM::StartClapAttack()
 
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
-	SphereOverlap();
+	SphereOverlap(EHitType::NB_MEDIUM, true);
 }
 
 void UAwakenThorFSM::StartKickAttack()
@@ -278,7 +278,7 @@ void UAwakenThorFSM::StartKickAttack()
 
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
-	SphereOverlap();
+	SphereOverlap(EHitType::NB_MEDIUM, true);
 }
 
 void UAwakenThorFSM::SetDamage()
@@ -289,7 +289,7 @@ void UAwakenThorFSM::SetDamage()
 	Anim->SetState(State);
 }
 
-void UAwakenThorFSM::SphereOverlap()
+void UAwakenThorFSM::SphereOverlap(EHitType HitType, bool IsMelee)
 {
 
 	TArray<AActor *> OverlappedActors;
@@ -313,6 +313,7 @@ void UAwakenThorFSM::SphereOverlap()
 			{
 				FString tmp = UEnum::GetValueAsString(State);
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
+				Target->Damage(1, HitType, IsMelee);
 			} // SetDamage
 		}
 
