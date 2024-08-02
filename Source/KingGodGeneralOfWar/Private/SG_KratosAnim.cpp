@@ -3,13 +3,18 @@
 
 #include "SG_KratosAnim.h"
 #include "Axe.h"
-
+#include "FlyingAxe.h"
 USG_KratosAnim::USG_KratosAnim()
 {
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_MeleeAttack.AM_Kratos_MeleeAttack'")
 	);
-	if (TempAttackMontage.Succeeded())	AttackMontage = TempAttackMontage.Object;
+	if (TempAttackMontage.Succeeded())	WeakAttackMontage = TempAttackMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempStrongAttackMontage(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_MeleeAttack.AM_Kratos_MeleeAttack'")
+	);
+	if (TempStrongAttackMontage.Succeeded())	StrongAttackMontage = TempStrongAttackMontage.Object;
 
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempDodgeMontage(
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Dodge.AM_Kratos_Dodge'")
@@ -31,6 +36,10 @@ USG_KratosAnim::USG_KratosAnim()
 	);
 	if (TempAxeThrowMontage.Succeeded())	AxeThrowMontage = TempAxeThrowMontage.Object;
 
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAxeWithdrawMontage(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_AxeWithdraw.AM_Kratos_AxeWithdraw'")
+	);
+	if (TempAxeWithdrawMontage.Succeeded())	AxeWithdrawMontage = TempAxeWithdrawMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -54,9 +63,14 @@ void USG_KratosAnim::UpdatePlayerState()
 		Direction = FVector::DotProduct(Player->GetActorRightVector(), velocity);
 	}
 }
-void USG_KratosAnim::PlayAttackMontage()
+void USG_KratosAnim::PlayWeakAttackMontage()
 {
-	Montage_Play(AttackMontage, 1.0f);
+	Montage_Play(WeakAttackMontage, 1.0f);
+
+}
+void USG_KratosAnim::PlayStrongAttackMontage()
+{
+	Montage_Play(StrongAttackMontage, 1.0f);
 }
 
 void USG_KratosAnim::PlayDodgeMontage()
@@ -81,9 +95,22 @@ void USG_KratosAnim::PlayAxeThrowMontage()
 	TargetRotation = Player->GetControlRotation();
 }
 
-void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
+void USG_KratosAnim::PlayAxeWithdrawMontage()
 {
-	Montage_JumpToSection(GetAttackMontageSection(NewSection), AttackMontage);
+	check(AxeWithdrawMontage);
+	if (AxeWithdrawMontage)
+		Montage_Play(AxeWithdrawMontage);
+	FlyingAxe->WithdrawAxe();
+}
+
+void USG_KratosAnim::JumpToStrongAttackMontageSection(int32 NewSection)
+{
+	Montage_JumpToSection(GetStrongAttackMontageSection(NewSection), StrongAttackMontage);
+}
+
+void USG_KratosAnim::JumpToWeakAttackMontageSection(int32 NewSection)
+{
+	Montage_JumpToSection(GetWeakAttackMontageSection(NewSection), WeakAttackMontage);
 }
 
 void USG_KratosAnim::JumpToDodgeMontageSection(int32 NewSection)
@@ -142,11 +169,15 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 			Axe->MeshComp->SetVisibility(false, true);
 			FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRotation);
 		}
-
 	}
 }
 
-FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
+FName USG_KratosAnim::GetWeakAttackMontageSection(int32 Section)
+{
+	return FName(*FString::Printf(TEXT("Attack%d"), Section));
+}
+
+FName USG_KratosAnim::GetStrongAttackMontageSection(int32 Section)
 {
 	return FName(*FString::Printf(TEXT("Attack%d"), Section));
 }

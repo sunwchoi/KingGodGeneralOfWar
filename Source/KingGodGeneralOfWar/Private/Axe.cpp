@@ -79,10 +79,4 @@ void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
 }
 
-void AAxe::AxeThrowAttack(FRotator TargetRotatation)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("도끼 날리기"));
-	FActorSpawnParameters params;
-	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-}
 

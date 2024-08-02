@@ -25,13 +25,16 @@ public:
 	USG_KratosAnim();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	void PlayAttackMontage();
+	void PlayWeakAttackMontage();
+	void PlayStrongAttackMontage();
 	void PlayDodgeMontage();
 	void PlayRollMontage();
 	void PlayGuardMontage();
 	void PlayAxeThrowMontage();
+	void PlayAxeWithdrawMontage();
 
-	void JumpToAttackMontageSection(int32 NewSection);
+	void JumpToStrongAttackMontageSection(int32 NewSection);
+	void JumpToWeakAttackMontageSection(int32 NewSection);
 	void JumpToDodgeMontageSection(int32 NewSection);
 	void JumpToRollMontageSection(int32 NewSection);
 	void JumpToGuardMontageSection(FString SectionName);
@@ -51,7 +54,10 @@ public:
 	float Speed;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage ;
+	UAnimMontage* WeakAttackMontage ;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* StrongAttackMontage ;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DodgeMontage ;
@@ -64,6 +70,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AxeThrowMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AxeWithdrawMontage;
 private:
 
 	UFUNCTION()
@@ -84,7 +93,8 @@ private:
 	UFUNCTION()
 	void AnimNotify_HideAxe();
 
-	FName GetAttackMontageSection(int32 Section);
+	FName GetWeakAttackMontageSection(int32 Section);
+	FName GetStrongAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetDodgeMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);

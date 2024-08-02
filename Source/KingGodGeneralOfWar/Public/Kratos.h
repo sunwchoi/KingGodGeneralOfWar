@@ -91,10 +91,16 @@ public:
 	class UInputAction* IA_LockOn;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Attack;
+	class UInputAction* IA_WeakAttack;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_StrongAttack;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Aim;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_WithdrawAxe;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -124,7 +130,10 @@ public:
 	void OnMyActionIdle(const FInputActionValue& value);
 
 	UFUNCTION()
-	void OnMyActionAttack(const FInputActionValue& value);
+	void OnMyActionWeakAttack(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionStrongAttack(const FInputActionValue& value);
 
 	UFUNCTION()
 	void OnMyActionAimOn(const FInputActionValue& value);
@@ -132,8 +141,16 @@ public:
 	UFUNCTION()
 	void OnMyActionAimOff(const FInputActionValue& value);
 
-	void AttackStartComboState();
-	void AttackEndComboState();
+	UFUNCTION()
+	void OnMyActionWithdrawAxe(const FInputActionValue& value);
+
+	// 약공격 콤보
+	void WeakAttackStartComboState();
+	void WeakAttackEndComboState();
+
+	// 강공격 콤보
+	void StrongAttackStartComboState();
+	void StrongWeakAttackEndComboState();
 
 	UFUNCTION()
 	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
@@ -175,7 +192,10 @@ public:
 	void LockTargetFunc(float DeltaTime);
 
 	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnStrongAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+	UFUNCTION()
+	void OnWeakAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
 	void OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -186,14 +206,26 @@ public:
 	UFUNCTION()
 	void OnGuardMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool CanNextCombo;
+	bool CanNextWeakCombo;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool bIsComboInputOn;
+	bool bIsWeakComboInputOn;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	int CurrentCombo;
+	int CurrentWeakCombo;
 
+	/// <summary>
+	/// 강공격 콤보를 위한 bool 변수 및 콤보 카운트
+	/// </summary>
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool CanNextStrongCombo;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool bIsStrongComboInputOn;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+
+	int CurrentStrongCombo;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AAxe> AxeFactory;
 

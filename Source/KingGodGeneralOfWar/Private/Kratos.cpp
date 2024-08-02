@@ -79,9 +79,12 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Guard, ETriggerEvent::Triggered, this, &AKratos::OnMyActionGuardOn);
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
 		input->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AKratos::OnMyActionLockOn);
-		input->BindAction(IA_Attack, ETriggerEvent::Started, this, &AKratos::OnMyActionAttack);
+
+		input->BindAction(IA_WeakAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionWeakAttack);
+		input->BindAction(IA_StrongAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionStrongAttack);
 		input->BindAction(IA_Aim, ETriggerEvent::Triggered, this, &AKratos::OnMyActionAimOn);
 		input->BindAction(IA_Aim, ETriggerEvent::Completed, this, &AKratos::OnMyActionAimOff);
+		input->BindAction(IA_WithdrawAxe, ETriggerEvent::Started, this, &AKratos::OnMyActionWithdrawAxe);
 	}
 }
 void AKratos::PostInitializeComponents()
@@ -91,7 +94,8 @@ void AKratos::PostInitializeComponents()
 	if (Anim)
 	{
 		// 공격 몽타주가 끝나면 실행할 함수: OnAttackMontageEnded
-		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnStrongAttackMontageEnded);
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnWeakAttackMontageEnded);
 
 		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
@@ -107,14 +111,14 @@ void AKratos::PostInitializeComponents()
 		
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
 			{
-				if (CurrentCombo == 3)
+				if (CurrentStrongCombo == 3)
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				else
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 			});
 		Anim->OnAttackEndCheck.AddLambda([this]() -> void
 			{
-				if (CurrentCombo == 3)
+				if (CurrentStrongCombo == 3)
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				else
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
@@ -122,12 +126,12 @@ void AKratos::PostInitializeComponents()
 			});
 		Anim->OnNextAttackCheck.AddLambda([this]() -> void
 			{
-				CanNextCombo = false;
+				CanNextWeakCombo = false;
 
-				if (bIsComboInputOn)
+				if (bIsStrongComboInputOn)
 				{
-					AttackStartComboState();
-					Anim->JumpToAttackMontageSection(CurrentCombo);
+					StrongAttackStartComboState();
+					Anim->JumpToStrongAttackMontageSection(CurrentWeakCombo);
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -251,13 +255,24 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 	}
 }
 
-void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AKratos::OnStrongAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == Anim->AttackMontage)
+	if (Montage == Anim->StrongAttackMontage)
 	{
 		State = EPlayerState::Idle;
-		CanNextCombo = false;
-		CurrentCombo = 0;
+		CanNextStrongCombo = false;
+		CurrentStrongCombo = 0;
+		bIsAttacking = false;
+	}
+}
+
+void AKratos::OnWeakAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == Anim->WeakAttackMontage)
+	{
+		State = EPlayerState::Idle;
+		CanNextWeakCombo = false;
+		CurrentWeakCombo = 0;
 		bIsAttacking = false;
 	}
 }
@@ -515,13 +530,14 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 		State = EPlayerState::Idle;
 }
 
-void AKratos::OnMyActionAttack(const FInputActionValue& value)
+
+void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 {
 	if (bIsAttacking)
 	{
-		if (CanNextCombo)
+		if (CanNextWeakCombo)
 		{
-			bIsComboInputOn = true;
+			bIsWeakComboInputOn = true;
 		}
 		return;
 	}
@@ -531,17 +547,41 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 	{
 		State = EPlayerState::MeleeAttack;
 
-		AttackStartComboState();
-		Anim->PlayAttackMontage();
+		WeakAttackStartComboState();
+		Anim->PlayWeakAttackMontage();
 		//rrentWeapon->
-		Anim->JumpToAttackMontageSection(CurrentCombo);
+		Anim->JumpToWeakAttackMontageSection(CurrentWeakCombo);
 		bIsAttacking = true;
 	}
 	else if (State == EPlayerState::Aim)
 	{
 		Anim->PlayAxeThrowMontage();
-		CurrentWeapon->AxeThrowAttack(GetControlRotation());
 	}
+
+}
+
+void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
+{
+	if (bIsAttacking)
+	{
+		if (CanNextStrongCombo)
+		{
+			bIsStrongComboInputOn = true;
+		}
+		return;
+	}
+
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
+		|| State == EPlayerState::Run)
+	{
+		State = EPlayerState::MeleeAttack;
+
+		StrongAttackStartComboState();
+		Anim->PlayStrongAttackMontage();
+		Anim->JumpToStrongAttackMontageSection(CurrentWeakCombo);
+		bIsAttacking = true;
+	}
+	
 }
 
 void AKratos::OnMyActionAimOn(const FInputActionValue& value)
@@ -560,18 +600,33 @@ void AKratos::OnMyActionAimOff(const FInputActionValue& value)
 	}
 }
 
-void AKratos::AttackStartComboState()
+void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 {
-	CanNextCombo = true;
-	bIsComboInputOn = false;
-	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, 4);
+	Anim->PlayAxeWithdrawMontage();
 }
 
-void AKratos::AttackEndComboState()
+void AKratos::WeakAttackStartComboState()
 {
-	bIsComboInputOn = false;
-	CanNextCombo = false;
-	CurrentCombo = 0;
+	CanNextWeakCombo = true;
+	bIsWeakComboInputOn = false;
+	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
+}
+
+void AKratos::WeakAttackEndComboState()
+{
+	bIsWeakComboInputOn = false;
+	CanNextWeakCombo = false;
+	CurrentWeakCombo = 0;
+}
+
+void AKratos::StrongAttackStartComboState()
+{
+
+}
+
+void AKratos::StrongWeakAttackEndComboState()
+{
+
 }
 
 
