@@ -111,7 +111,7 @@ void AKratos::PostInitializeComponents()
 					else 
 						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
-				else if (State == EPlayerState::DashAttack)
+				else
 				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
@@ -125,7 +125,7 @@ void AKratos::PostInitializeComponents()
 					else
 						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
-				else if (State == EPlayerState::DashAttack)
+				else
 				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
@@ -138,7 +138,7 @@ void AKratos::PostInitializeComponents()
 				if (bIsStrongComboInputOn)
 				{
 					StrongAttackStartComboState();
-					Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
+					Anim->JumpToAttackMontageSection(CurrentStrongCombo);
 				}
 			});
 		Anim->OnNextWeakAttackCheck.AddLambda([this]() -> void
@@ -148,7 +148,7 @@ void AKratos::PostInitializeComponents()
 				if (bIsWeakComboInputOn)
 				{
 					WeakAttackStartComboState();
-					Anim->JumpToWeakAttackMontageSection(CurrentWeakCombo);
+					Anim->JumpToAttackMontageSection(CurrentWeakCombo);
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -221,6 +221,9 @@ void AKratos::Tick(float DeltaTime)
 	{
 		TargetFOV -= 10;
 	}
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("ComboInput: %d"), bIsWeakComboInputOn));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("CurrentWeakCombo: %d"), CurrentWeakCombo));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("bIsAttacking: %d"), bIsAttacking));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
@@ -586,13 +589,18 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 
 			WeakAttackStartComboState();
 			Anim->PlayWeakAttackMontage();
-			Anim->JumpToWeakAttackMontageSection(1);
+			Anim->JumpToAttackMontageSection(1);
 			bIsAttacking = true;
 		}
 		// 룬 공격
 		else
 		{
+			State = EPlayerState::RuneAttack;
+
+			WeakAttackStartComboState();
 			Anim->PlayRuneAttackMontage();
+			Anim->JumpToAttackMontageSection(1);
+			bIsAttacking = true;
 		}
 	}
 	// 도끼 던지기
@@ -629,7 +637,7 @@ void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 
 		StrongAttackStartComboState();
 		Anim->PlayStrongAttackMontage();
-		Anim->JumpToStrongAttackMontageSection(1);
+		Anim->JumpToAttackMontageSection(1);
 		bIsAttacking = true;
 	}
 	

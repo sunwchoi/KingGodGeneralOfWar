@@ -50,7 +50,7 @@ USG_KratosAnim::USG_KratosAnim()
 	);
 	if (TempRuneBaseMontage.Succeeded())	RuneBaseMontage = TempRuneBaseMontage.Object;
 
-	
+
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRuneAttackMontage(
 		TEXT("/ Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneAttack.AM_Kratos_RuneAttack'")
 	);
@@ -120,7 +120,7 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 			check(AxeWithdrawMontage);
 			if (AxeWithdrawMontage)
 				Montage_Play(AxeWithdrawMontage);
-			
+
 		}, 1.15f, false);
 
 }
@@ -140,14 +140,23 @@ void USG_KratosAnim::PlayRuneAttackMontage()
 	Montage_Play(RuneAttackMontage);
 }
 
-void USG_KratosAnim::JumpToStrongAttackMontageSection(int32 NewSection)
+void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
 {
-	Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
-}
-
-void USG_KratosAnim::JumpToWeakAttackMontageSection(int32 NewSection)
-{
-	Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
+	if (Montage_IsPlaying(StrongAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
+	else if (Montage_IsPlaying(WeakAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
+	else if (Montage_IsPlaying(RuneAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), RuneAttackMontage);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
 }
 
 void USG_KratosAnim::JumpToDodgeMontageSection(FString SectionName)

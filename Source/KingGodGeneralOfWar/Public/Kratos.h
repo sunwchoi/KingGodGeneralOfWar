@@ -21,6 +21,7 @@ enum class EPlayerState : uint8
 	MeleeAttack UMETA(DisplayName = "MeleeAttack"),
 	Aim UMETA(DisplayName = "Aim"),
 	DashAttack UMETA(DisplayName = "DashAttack"),
+	RuneAttack UMETA(DisplayName = "RuneAttack"),
 	GuardStart UMETA(DisplayName = "GuardStart"),
 	Guard UMETA(DisplayName = "Guard"),
 	GuardHit UMETA(DisplayName = "GuardHit"),

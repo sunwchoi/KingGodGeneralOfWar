@@ -39,8 +39,7 @@ public:
 	void PlayDashAttackMontage();
 	void PlayRuneAttackMontage();
 
-	void JumpToStrongAttackMontageSection(int32 NewSection);
-	void JumpToWeakAttackMontageSection(int32 NewSection);
+	void JumpToAttackMontageSection(int32 NewSection);
 	void JumpToDodgeMontageSection(FString SectionName);
 	void JumpToRollMontageSection(int32 NewSection);
 	void JumpToGuardMontageSection(FString SectionName);
