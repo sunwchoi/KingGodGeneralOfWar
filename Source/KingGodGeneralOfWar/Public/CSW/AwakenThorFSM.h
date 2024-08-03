@@ -13,6 +13,9 @@ enum class EAwakenThorState : uint8
 	Idle,
 	Move,
 	Dash,
+	LeftTeleport,
+	RightTeleport,
+	BackTeleport,
 	Teleport,
 	MeleeAttackChange,
 	RangedAttackChange,
@@ -57,6 +60,7 @@ public:
 	void DamageState();
 	void DieState();
 
+	void LookTeleportDirection();
 	void ThrowForTeleport();
 	void Teleport();
 	void ReadyPoundAttack();
@@ -93,7 +97,7 @@ private:
 
 	TArray<std::pair<FVector, float>> AttackZone;
 
-	EAwakenThorState AttackState;
+	
 
 	void SphereOverlap(EHitType HitType, bool IsMelee);
 };

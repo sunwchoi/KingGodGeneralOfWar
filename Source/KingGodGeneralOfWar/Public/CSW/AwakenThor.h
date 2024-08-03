@@ -32,7 +32,7 @@ public:
 	void Move(FVector NewLoc);
 
 	UFUNCTION(BlueprintCallable)
-	void ThrowForTeleport(FVector Target);
+	void ThrowForTeleport(FVector Direction);
 
 	UFUNCTION(BlueprintCallable)
 	void Teleport(FVector Target);

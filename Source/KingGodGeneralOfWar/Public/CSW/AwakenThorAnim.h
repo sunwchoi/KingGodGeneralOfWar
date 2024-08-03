@@ -37,6 +37,7 @@ public:
 	void PlayPoundAttackAnim(FName SectionName);
 
 	void SetState(EAwakenThorState AnimState);
+	EAwakenThorState GetState() const;
 
 	UFUNCTION()
 	void AnimNotify_AwakenThorTeleport_Play();

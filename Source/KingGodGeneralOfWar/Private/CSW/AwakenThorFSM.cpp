@@ -38,7 +38,12 @@ void UAwakenThorFSM::BeginPlay()
 void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
+	FString state = UEnum::GetValueAsString(State);
+	FString anim = UEnum::GetValueAsString(Anim->GetState());
+
+	// UE_LOG(LogTemp, Warning, TEXT("state: %s, \n anim: %s"), *state, *anim);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Me->GetCharacterMovement()->MaxWalkSpeed);
 	switch (State)
 	{
 	case EAwakenThorState::Idle:
@@ -49,6 +54,9 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		break;
 	case EAwakenThorState::Dash:
 		DashState();
+		break;
+	case EAwakenThorState::Teleport:
+		TeleportState();
 		break;
 	case EAwakenThorState::MeleeAttackChange:
 		MeleeAttackChangeState();
@@ -109,9 +117,14 @@ void UAwakenThorFSM::IdleState()
 		
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		// State = NextStates[idx];
-		State = EAwakenThorState::MeleeAttackChange;
+		State = EAwakenThorState::Teleport;
 		if (State != EAwakenThorState::Dash)
-			Anim->SetState(State);
+		{
+			if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport)
+				Anim->SetState(EAwakenThorState::Teleport);
+			else 
+				Anim->SetState(State);
+		}
 		CurrentTime = 0.f;
 	}
 }
@@ -134,7 +147,7 @@ void UAwakenThorFSM::DashState()
 	Me->AddMovementInput(dir);
 	
 	UE_LOG(LogTemp, Warning, TEXT("Dash"));
-	if (dist < 300.f)
+	if (dist < 200.f)
 	{
 		Me->GetCharacterMovement()->MaxWalkSpeed = 50.f;
 		State = EAwakenThorState::MeleeAttackChange;
@@ -155,7 +168,6 @@ void UAwakenThorFSM::DashState()
 
 void UAwakenThorFSM::TeleportState()
 {
-	
 }
 
 void UAwakenThorFSM::MeleeAttackChangeState()
@@ -166,7 +178,6 @@ void UAwakenThorFSM::MeleeAttackChangeState()
 	};
 
 	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
-	AttackState = AttackStates[idx];
 	
 	State = AttackStates[idx];
 	Anim->SetState(State);
@@ -179,7 +190,6 @@ void UAwakenThorFSM::RangedAttackChangeState()
 	};
 
 	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
-	AttackState = AttackStates[idx];
 	
 	State = AttackStates[idx];
 	Anim->SetState(State);
@@ -205,21 +215,34 @@ void UAwakenThorFSM::DieState()
 {
 }
 
+void UAwakenThorFSM::LookTeleportDirection()
+{
+	FVector dir;
+	
+	if (State == EAwakenThorState::LeftTeleport)
+		dir = Me->GetActorRightVector() * -1;
+	else if (State == EAwakenThorState::BackTeleport)
+		dir = Me->GetActorForwardVector() * -1;
+	else if (State == EAwakenThorState::RightTeleport)
+		dir = Me->GetActorRightVector();
+	else
+		dir = Me->GetActorForwardVector();
+
+	Me->SetActorRotation(dir.Rotation());
+}
+
 void UAwakenThorFSM::ThrowForTeleport()
 {
-	auto* camera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 800;
-
-	Me->ThrowForTeleport(target);
+	
+	Me->ThrowForTeleport(Me->GetActorForwardVector());
 }
 
 void UAwakenThorFSM::Teleport()
 {
-	auto* camera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	FVector target = camera->GetCameraLocation() + camera->GetActorForwardVector() * 400;
-	target.Z = 0;
-	
-	Me->Teleport(target);
+	if (State == EAwakenThorState::Teleport)
+		Me->Teleport(Target->GetActorLocation() + Target->GetActorForwardVector() * 200);
+	else
+		Me->Teleport(Me->GetActorLocation() + Me->GetActorForwardVector() * 1000);
 }
 
 

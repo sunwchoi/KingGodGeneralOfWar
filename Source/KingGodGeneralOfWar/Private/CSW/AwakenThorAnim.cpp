@@ -31,15 +31,20 @@ void UAwakenThorAnim::SetState(EAwakenThorState State)
 	AnimState = State;
 }
 
+EAwakenThorState UAwakenThorAnim::GetState() const
+{
+	return AnimState;
+}
+
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Play()
 {
-
+	Fsm->LookTeleportDirection();
 }
 
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_End()
 {
-	AnimState = EAwakenThorState::RangedAttackChange;
-	Fsm->SetState(EAwakenThorState::RangedAttackChange);
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
 }
 
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Throw()
