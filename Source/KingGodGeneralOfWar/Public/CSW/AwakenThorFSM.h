@@ -20,6 +20,7 @@ enum class EAwakenThorState : uint8
 	MeleeAttackChange,
 	RangedAttackChange,
 	PoundAttack,
+	JumpAttack,
 	ClapAttack,
 	KickAttack,
 	Damage,
@@ -54,6 +55,7 @@ public:
 	void TeleportState();
 	void MeleeAttackChangeState();
 	void RangedAttackChangeState();
+	void JumpAttackState();
 	void PoundAttackState();
 	void KickAttackState();
 	void ClapAttackState();
@@ -67,8 +69,12 @@ public:
 	void StartPoundAttack();
 	void StartClapAttack();
 	void StartKickAttack();
+	void ReadyJumpAttack();
+	void StartJumpAttack();
+	void StartFallAttack();
 
 	void SetDamage();
+	void SetJump(bool Value);
 
 
 private:
@@ -96,6 +102,8 @@ private:
 	bool bPlay;
 
 	TArray<std::pair<FVector, float>> AttackZone;
+
+	bool bJump;
 
 	
 

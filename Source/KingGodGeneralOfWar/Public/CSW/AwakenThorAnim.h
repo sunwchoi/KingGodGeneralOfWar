@@ -74,6 +74,21 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_HitEnd();
+
+	UFUNCTION()
+	void AnimNotify_JumpAttackStart();
+
+	UFUNCTION()
+	void AnimNotify_JumpAttackReady();
+
+	UFUNCTION()
+	void AnimNotify_JumpAttackJump();
+
+	UFUNCTION()
+	void AnimNotify_JumpAttackFall();
+	
+	UFUNCTION()
+	void AnimNotify_JumpAttackEnd();
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);
