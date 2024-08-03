@@ -7,6 +7,12 @@
 #include "Kratos.h"
 #include "Axe.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "CSW/AwakenThor.h"
+#include "CSW/AwakenThorFSM.h"
+#include "BDThor.h"
+#include "BDThorFSM.h"
+#include "Kismet/GameplayStatics.h"
+const float LerpInit = 0.02;
 // Sets default values
 AFlyingAxe::AFlyingAxe()
 {
@@ -39,56 +45,116 @@ void AFlyingAxe::BeginPlay()
 {
 	Super::BeginPlay();
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AFlyingAxe::FlyingAxeOnComponentBeginOverlap);
-
+	Player = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	LerpAlpha = LerpInit;
 }
 
 // Called every frame
 void AFlyingAxe::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!Player) return;
 
-	if (!isHit && !isWithdraw)
+	// 날아가는 중
+	if (!(isHit || isWithdraw))
 	{
 		SetActorLocation(GetActorLocation() + DirectionArrowComp->GetForwardVector() * MoveSpeed * DeltaTime);
 
-		FQuat quat = FRotator(-30, 1, 1).Quaternion();
+		FQuat quat = FRotator(-45, 1, 1).Quaternion();
 		SubMeshComp->AddRelativeRotation(quat);
 	}
+	// 회수 중
 	else if (isWithdraw)
 	{
-		FTransform CurTransform = GetActorTransform();
-		if (FVector::Dist(CurTransform.GetLocation(), TargetTransform.GetLocation()) < 10)
+		// 회수: 플레이어에게 돌아오는 모션
+		if (!isRising)
 		{
-			auto* player = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
+			TargetLocation = Player->GetMesh()->GetSocketLocation(TEXT("hand_rAxeSocket"));
+		}
+
+		if (FVector::Dist(GetActorLocation(), TargetLocation) < 30)
+		{
 			if (isRising)
 			{
-				TargetTransform = player->GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket"));
 				isRising = false;
-				mult = 12;
+				LerpAlpha = LerpInit;
+				CurLocation = GetActorLocation();
 			}
 			else
 			{
-				player->CurrentWeapon->MeshComp->SetVisibility(true, true);
+				Player->CurrentWeapon->MeshComp->SetVisibility(true, true);
+				Player->bAxeGone = false;
 				this->Destroy();
 			}
-			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("플레이어로 오도록 전환"));
 		}
-		SetActorTransform(UKismetMathLibrary::TLerp(CurTransform, TargetTransform, DeltaTime * mult));
+		else
+		{
+			if (isRising)
+			{
+				FQuat quat = FRotator(-10, 0, 0).Quaternion();
+				SubMeshComp->AddRelativeRotation(quat);
+				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 4));
+			}
+			else
+			{
+				FQuat quat = FRotator(WithdrawRotationScale, 0.1f, 0.1f).Quaternion();
+				WithdrawRotationScale -= 0.33;
+				SubMeshComp->AddRelativeRotation(quat);
+				SetActorLocation(FMath::Lerp(CurLocation, TargetLocation, LerpAlpha));
+			}
+		}
+		LerpAlpha += LerpInit;
+		if (LerpAlpha >= 1)
+		{
+			CurLocation = GetActorLocation();
+			LerpAlpha = 0.9;
+		}
 	}
 }
 
 void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, OtherActor->GetName());
 	isHit = true;
-	SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());
+	ABDThor* Thor = Cast<ABDThor>(OtherActor);
+	AAwakenThor* AwakenThor = Cast<AAwakenThor>(OtherActor);
+	if (nullptr == Thor)
+	{
+		if (nullptr == AwakenThor)
+		{
+			SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());
+			return;
+		}
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Thor Hit"));
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.05f);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, 0.0005f, false);
+	if (Thor)
+	{
+		Thor->fsm->Damage(10);
+	}
+	else
+	{
+		AwakenThor->getFSM()->SetDamage();
+	}
+
+	if (!isWithdraw)
+	{
+		SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());
+	}
 }
 
 void AFlyingAxe::WithdrawAxe()
 {
-	TargetTransform = WithdrawTargetPosition->GetComponentTransform();
+	TargetLocation = WithdrawTargetPosition->GetComponentLocation();
 	SubMeshComp->SetRelativeRotation(WithdrawRotation->GetRelativeRotation());
 	isWithdraw = true;
 	isRising = true;
+	CurLocation = GetActorLocation();
+
 }
 

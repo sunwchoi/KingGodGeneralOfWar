@@ -41,17 +41,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* WithdrawRotation;
 
-	float MoveSpeed = 2000.0f;
+	float MoveSpeed = 4000.0f;
 	float RotationSpeed = 90.0f;
 
 	UFUNCTION()
 	void FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	FVector TargetLocation;
+	FVector CurLocation;
+
 	bool isHit;
 	bool isWithdraw;
 	bool isRising;
 	void WithdrawAxe();
-	float mult = 6;
+	float LerpAlpha;
+	float WithdrawRotationScale = -20;
+	class AKratos* Player;
 
-	FTransform TargetTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* BloodVFXFactory;
+
 };

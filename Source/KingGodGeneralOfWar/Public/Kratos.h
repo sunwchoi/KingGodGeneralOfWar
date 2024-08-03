@@ -252,6 +252,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ParryVFX;
 
+	bool bAxeGone;
 private:
 	bool bIsAttacking;
 	bool bIsDodging;

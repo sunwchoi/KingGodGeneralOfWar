@@ -7,7 +7,7 @@
 USG_KratosAnim::USG_KratosAnim()
 {
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
-		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_MeleeAttack.AM_Kratos_MeleeAttack'")
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_WeakAttack.AM_Kratos_WeakAttack'")
 	);
 	if (TempAttackMontage.Succeeded())	WeakAttackMontage = TempAttackMontage.Object;
 
@@ -97,25 +97,32 @@ void USG_KratosAnim::PlayAxeThrowMontage()
 
 void USG_KratosAnim::PlayAxeWithdrawMontage()
 {
-	check(AxeWithdrawMontage);
-	if (AxeWithdrawMontage)
-		Montage_Play(AxeWithdrawMontage);
 	FlyingAxe->WithdrawAxe();
+
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			check(AxeWithdrawMontage);
+			if (AxeWithdrawMontage)
+				Montage_Play(AxeWithdrawMontage);
+			
+		}, 1.15f, false);
+
 }
 
 void USG_KratosAnim::JumpToStrongAttackMontageSection(int32 NewSection)
 {
-	Montage_JumpToSection(GetStrongAttackMontageSection(NewSection), StrongAttackMontage);
+	Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
 }
 
 void USG_KratosAnim::JumpToWeakAttackMontageSection(int32 NewSection)
 {
-	Montage_JumpToSection(GetWeakAttackMontageSection(NewSection), WeakAttackMontage);
+	Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
 }
 
-void USG_KratosAnim::JumpToDodgeMontageSection(int32 NewSection)
+void USG_KratosAnim::JumpToDodgeMontageSection(FString SectionName)
 {
-	Montage_JumpToSection(GetDodgeMontageSection(NewSection), DodgeMontage);
+	Montage_JumpToSection(FName(*SectionName), DodgeMontage);
 }
 
 void USG_KratosAnim::JumpToRollMontageSection(int32 NewSection)
@@ -172,15 +179,11 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 	}
 }
 
-FName USG_KratosAnim::GetWeakAttackMontageSection(int32 Section)
+FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
 {
 	return FName(*FString::Printf(TEXT("Attack%d"), Section));
 }
 
-FName USG_KratosAnim::GetStrongAttackMontageSection(int32 Section)
-{
-	return FName(*FString::Printf(TEXT("Attack%d"), Section));
-}
 
 FName USG_KratosAnim::GetRollMontageSection(int32 Section)
 {
@@ -189,12 +192,6 @@ FName USG_KratosAnim::GetRollMontageSection(int32 Section)
 	return SectionName;
 }
 
-FName USG_KratosAnim::GetDodgeMontageSection(int32 Section)
-{
-	TArray<FString> RollSectionName = { TEXT("Left") , TEXT("Right") , TEXT("Forward") ,TEXT("Back") };
-	FName SectionName(*FString::Printf(TEXT("Dodge_%s"), *RollSectionName[Section]));
-	return SectionName;
-}
 
 FName USG_KratosAnim::GetGuardMontageSection(int32 Section)
 {

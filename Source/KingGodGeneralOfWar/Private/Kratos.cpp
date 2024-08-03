@@ -111,8 +111,10 @@ void AKratos::PostInitializeComponents()
 		
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
 			{
+				// 방패 공격 : 강공격 콤보 3번쨰
 				if (CurrentStrongCombo == 3)
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				// 도끼 공격
 				else
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 			});
@@ -131,7 +133,7 @@ void AKratos::PostInitializeComponents()
 				if (bIsStrongComboInputOn)
 				{
 					StrongAttackStartComboState();
-					Anim->JumpToStrongAttackMontageSection(CurrentWeakCombo);
+					Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -352,21 +354,12 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 	// 움직임은 유휴, 이동, 달리기가능
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		if (State == EPlayerState::Guard)
-			State = EPlayerState::Guard;
-		else
-			State = EPlayerState::Move;
+		State = EPlayerState::Move;
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
 		Direction.Normalize();
-		//Direction.Normalize();
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
-
-		// 캐릭터 현재 회전 가져오기ㅠㅑㅜAKratos::OnMyActionAttack
-		//FRotator Rotation = GetControlRotation();
 		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
-		//SetActorRotation(YawRotation);
 	}
 	else if (State == EPlayerState::Dodge)
 	{
@@ -394,23 +387,48 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		State = EPlayerState::Dodge;
 		bIsDodging = true;
 
-		int8 sectionIdx = 3;
-		if (PrevDirection.X == 0)
+		FString DodgeDirString;
+		float absX = abs(PrevDirection.X), absY = abs(PrevDirection.Y);
+		float DodgeCoef = 2000;
+
+		if (absX <= 0.1)
 		{
-			if (PrevDirection.Y == 1)
-				sectionIdx = 1;
+			if (PrevDirection.Y >= 0.9)
+				DodgeDirString = TEXT("R");
 			else
-				sectionIdx = 0;
+				DodgeDirString = TEXT("L");
+		}
+		else if (absY <= 0.1)
+		{
+			if (PrevDirection.X >= 0.9)
+				DodgeDirString = TEXT("F");
+			else
+			{
+				DodgeDirString = TEXT("B");
+				DodgeCoef = 1500;
+			}
+		}
+		else if (PrevDirection.X >= 0.5)
+		{
+			if (PrevDirection.Y >= 0.5)
+				DodgeDirString = TEXT("RF");
+			else
+				DodgeDirString = TEXT("LF");
 		}
 		else
 		{
-			if (PrevDirection.X == 1)
-				sectionIdx = 2;
+			if (PrevDirection.Y >= 0.5)
+				DodgeDirString = TEXT("RB");
 			else
-				sectionIdx = 3;
+				DodgeDirString = TEXT("LB");
+			DodgeCoef = 1500;
 		}
+		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
+		FVector DodgeDirection = UKismetMathLibrary::TransformDirection(T, PrevDirection);
+		DodgeDirection.Z = 0;
+		LaunchCharacter(DodgeDirection * DodgeCoef, true, false);
 		Anim->PlayDodgeMontage();
-		Anim->JumpToDodgeMontageSection(sectionIdx);
+		Anim->JumpToDodgeMontageSection(DodgeDirString);
 	}
 	else if (State == EPlayerState::Dodge)
 	{
@@ -533,6 +551,7 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 
 void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 {
+	if (bAxeGone) return;
 	if (bIsAttacking)
 	{
 		if (CanNextWeakCombo)
@@ -555,6 +574,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 	}
 	else if (State == EPlayerState::Aim)
 	{
+		bAxeGone = true;
 		Anim->PlayAxeThrowMontage();
 	}
 
@@ -562,6 +582,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 
 void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 {
+	if (bAxeGone) return;
 	if (bIsAttacking)
 	{
 		if (CanNextStrongCombo)
@@ -578,7 +599,7 @@ void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 
 		StrongAttackStartComboState();
 		Anim->PlayStrongAttackMontage();
-		Anim->JumpToStrongAttackMontageSection(CurrentWeakCombo);
+		Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
 		bIsAttacking = true;
 	}
 	
@@ -621,12 +642,16 @@ void AKratos::WeakAttackEndComboState()
 
 void AKratos::StrongAttackStartComboState()
 {
-
+	CanNextStrongCombo = true;
+	bIsStrongComboInputOn = false;
+	CurrentStrongCombo = FMath::Clamp<int8>(CurrentStrongCombo + 1, 1, 4);
 }
 
 void AKratos::StrongWeakAttackEndComboState()
 {
-
+	bIsStrongComboInputOn = false;
+	CanNextStrongCombo = false;
+	CurrentStrongCombo = 0;
 }
 
 
