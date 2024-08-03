@@ -40,6 +40,15 @@ USG_KratosAnim::USG_KratosAnim()
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_AxeWithdraw.AM_Kratos_AxeWithdraw'")
 	);
 	if (TempAxeWithdrawMontage.Succeeded())	AxeWithdrawMontage = TempAxeWithdrawMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempDashAttackMontage(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_DashAttack.AM_Kratos_DashAttack'")
+	);
+	if (TempDashAttackMontage.Succeeded())	DashAttackMontage = TempDashAttackMontage.Object;
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRuneBaseMontage(
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneBase.AM_Kratos_RuneBase'")
+	);
+	if (TempRuneBaseMontage.Succeeded())	RuneBaseMontage = TempRuneBaseMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -148,6 +157,11 @@ void USG_KratosAnim::AnimNotify_AttackEndCheck()
 void USG_KratosAnim::AnimNotify_NextAttackCheck()
 {
 	OnNextAttackCheck.Broadcast();
+}
+
+void USG_KratosAnim::AnimNotify_NextWeakAttackCheck()
+{
+	OnNextWeakAttackCheck.Broadcast();
 }
 
 void USG_KratosAnim::AnimNotify_MovableCheck()

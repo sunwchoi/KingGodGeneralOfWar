@@ -192,19 +192,8 @@ public:
 	void LockTargetFunc(float DeltaTime);
 
 	UFUNCTION()
-	void OnStrongAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	
-	UFUNCTION()
-	void OnWeakAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted);
 
-	UFUNCTION()
-	void OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION()
-	void OnRollMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION()
-	void OnGuardMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool CanNextWeakCombo;
 
