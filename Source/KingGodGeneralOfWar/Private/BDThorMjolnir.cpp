@@ -12,7 +12,7 @@
 // Sets default values
 ABDThorMjolnir::ABDThorMjolnir()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//충돌 설정
@@ -38,18 +38,18 @@ ABDThorMjolnir::ABDThorMjolnir()
 	MovementComp->SetUpdatedComponent(MjoCol);
 
 	//스피드 설정
-	MovementComp->InitialSpeed = 2000.0f; //원래는 1500
-	MovementComp->MaxSpeed = 2000.0f;
+	MovementComp->InitialSpeed = 1500.0f; //원래는 1500
+	MovementComp->MaxSpeed = 1500.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bShouldBounce = false;
-	MovementComp->ProjectileGravityScale = 0.0f; 
+	MovementComp->ProjectileGravityScale = 0.0f;
 
 	//월드에서 플레이어 찾아오기
 	//auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AKratos::StaticClass());
 	////AKratos 타입으로 캐스팅
 	//Target = Cast<AKratos>(actor);
 	////소유 객체 가져오기
-	
+
 	//me = Cast<ABDThor>(GetOwner());
 	Thor = nullptr; // null로 초기화하고 BeginPlay에서 설정
 
@@ -59,25 +59,23 @@ ABDThorMjolnir::ABDThorMjolnir()
 void ABDThorMjolnir::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	//OnOverlap 이벤트 연결
 	MjoCol->OnComponentBeginOverlap.AddDynamic(this, &ABDThorMjolnir::OnOverlap);
 
 	// 소유 객체 가져오기
 	//me = Cast<ABDThor>(GetOwner());
 	Thor = Cast<ABDThor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass()));
-	if ( Thor )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Owner set successfully"));
 
-		// 테스트 타이머 설정
-		GetWorld()->GetTimerManager().SetTimer(Timerhandle, this, &ABDThorMjolnir::BackMjolnir, 5.0f, false);
-		//UE_LOG(LogTemp, Warning, TEXT("Test timer set for BackMjolnir in BeginPlay"));
+	if (Thor) {
+		UE_LOG(LogTemp, Warning, TEXT("Thor found in BeginPlay"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Owner is null"));
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Thor is null in BeginPlay"));
 	}
+
+	bReturning = false;
+	bCreateTrue = false;
 }
 
 // Called every frame
@@ -85,83 +83,79 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	////날아가는 중이면서 돌아올 수 있는 상태
+	//if (bReturning && bIsFly) {
+	//	//타겟 위치를 토르의 왼손 소켓위치로 설정
+	//	HandLocation = Thor->GetMesh()->GetSocketLocation(TEXT("BDMjolnirHand")) - GetActorLocation();
+	//}
+	////망치가 플레이어에게 돌아
+	//if (FVector::Dist(GetActorLocation(), HandLocation) < 200) {
+	//	if (bReturning) {
+	//		bReturning = false;
+
+	//	}
+	//}
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("bReturning: %s, bIsFly: %s"), bReturning ? TEXT("true") : TEXT("false"), bIsFly ? TEXT("true") : TEXT("false")));
+
+
+	if (!bReturning && bCreateTrue) {
+		MovementComp->Velocity = Thor->GetActorForwardVector() * MovementComp->InitialSpeed;
+	}
+	else if (bReturning && bCreateTrue)
+	{
+		FVector HandLocation = Thor->GetMesh()->GetSocketLocation(TEXT("BDMjolnirHand"));
+		FVector CurrentLocation = GetActorLocation();
+		FVector Direction = (HandLocation - CurrentLocation).GetSafeNormal();
+
+
+		//SetActorLocation(GetActorLocation() + Direction * Speed * GetWorld()->DeltaTimeSeconds);
+
+		MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("call tick"));
+
+		//FVector NewLocation = CurrentLocation + Direction * Speed * DeltaTime;
+		//SetActorLocation(NewLocation);
+
+		float Distance = FVector::Dist(GetActorLocation(), HandLocation);
+
+		if (Distance < 200.0f) // 거리 체크
+		{
+			this->Destroy(); // 자신을 파괴
+			UE_LOG(LogTemp, Warning, TEXT("Destroy"));
+			Thor->visibleWeapon(); // 무기 다시 보이게 하기
+			UE_LOG(LogTemp, Warning, TEXT("Mjolnir Back"));
+
+			bReturning = false;
+			bCreateTrue = false;
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, "), bReturning ? TEXT("true") : TEXT("false"));
+
 }
 
 void ABDThorMjolnir::FireInDirection(const FVector& ShootDirection)
 {
+	//묠니르가 전혀 스폰되지 않은 상태일때만
+	if (!bCreateTrue) { 
+		// MjoCol과 MjolnirMesh를 -90도로 회전시킴
+		FRotator NewRotation = FRotator(0, -90, 90);
+		MjoCol->SetRelativeRotation(NewRotation);
+		MjolnirMesh->SetRelativeRotation(NewRotation);
 
-	// MjoCol과 MjolnirMesh를 -90도로 회전시킴
-	FRotator NewRotation = FRotator(0, -90, 90);
-	MjoCol->SetRelativeRotation(NewRotation);
-	MjolnirMesh->SetRelativeRotation(NewRotation);
-
-	MovementComp->Velocity = ShootDirection * MovementComp->InitialSpeed;
-
-	Thor->HiddenWeapon();
-
-	if (GetWorld())
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("GetWorld() is valid"));
-
-		//// 월드와 타이머 관리자 유효성 확인
-		//if (GetWorld()->GetTimerManager().IsTimerActive(Timerhandle))
-		//{
-		//	//UE_LOG(LogTemp, Warning, TEXT("Clearing existing timer"));
-		//	GetWorld()->GetTimerManager().ClearTimer(Timerhandle);
-		//}
-
-		GetWorld()->GetTimerManager().SetTimer(Timerhandle, this, &ABDThorMjolnir::BackMjolnir, 1.0f, false);
-		//UE_LOG(LogTemp, Warning, TEXT("Timer set for BackMjolnir"));
+		Thor->HiddenWeapon();
+		bCreateTrue = true;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GetWorld() is null"));
-	}
-
-	// 일정 시간이 지나면 BackMjolnir 함수를 호출하도록 타이머 설정
-	//GetWorld()->GetTimerManager().SetTimer(Timerhandle, this, &ABDThorMjolnir::BackMjolnir, 3.0f, false);
 
 }
 
 //묠니르 발사 후 다시 손에 돌아오는 함수
 void ABDThorMjolnir::BackMjolnir()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("BackMjolnir called"));
-	if (Thor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Returning Mjolnir"));
-		FVector Direction = (Thor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-		MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("BackMjolnir called"));
+	bReturning = true;
 
-		FTimerHandle tmp;
-		GetWorld()->GetTimerManager().SetTimer(tmp, [&, this]() {
-			FVector Direction = (Thor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-			MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
-			//묠니르의 거리가 가까워질때 
-			FVector DistanceVector = Thor->GetActorLocation() - GetActorLocation();
-			float Distance = DistanceVector.Size();
-
-			if (Distance < 50.0f) // 거리 체크
-			{
-				if (IsFly) {
-					this->Destroy(); // 자신을 파괴
-					GetWorld()->GetTimerManager().ClearTimer(tmp); // 타이머 멈추기
-					UE_LOG(LogTemp, Warning, TEXT("Destory"));
-					Thor->visibleWeapon(); // 무기 다시 보이게 하기
-				}
-			}
-
-			}, 0.1f, true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Owner (me) is null in BackMjolnir"));
-	}
-}
-
-void ABDThorMjolnir::SetIsFly()
-{
-	IsFly = true;
 }
 
 //묠니르가 부딪혔을 때 나오는 함수

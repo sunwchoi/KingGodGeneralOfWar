@@ -25,13 +25,17 @@ public:
 	USG_KratosAnim();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	void PlayAttackMontage();
+	void PlayWeakAttackMontage();
+	void PlayStrongAttackMontage();
 	void PlayDodgeMontage();
 	void PlayRollMontage();
 	void PlayGuardMontage();
+	void PlayAxeThrowMontage();
+	void PlayAxeWithdrawMontage();
 
-	void JumpToAttackMontageSection(int32 NewSection);
-	void JumpToDodgeMontageSection(int32 NewSection);
+	void JumpToStrongAttackMontageSection(int32 NewSection);
+	void JumpToWeakAttackMontageSection(int32 NewSection);
+	void JumpToDodgeMontageSection(FString SectionName);
 	void JumpToRollMontageSection(int32 NewSection);
 	void JumpToGuardMontageSection(FString SectionName);
 
@@ -50,7 +54,10 @@ public:
 	float Speed;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage ;
+	UAnimMontage* WeakAttackMontage ;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* StrongAttackMontage ;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DodgeMontage ;
@@ -60,6 +67,12 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* GuardMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AxeThrowMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AxeWithdrawMontage;
 private:
 
 	UFUNCTION()
@@ -76,9 +89,18 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_GuardLoopStartCheck();
+	
+	UFUNCTION()
+	void AnimNotify_HideAxe();
 
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
-	FName GetDodgeMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
+
+	class AFlyingAxe* FlyingAxe;
+
+	FRotator TargetRotation;
 };

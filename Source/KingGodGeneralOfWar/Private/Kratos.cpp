@@ -15,6 +15,8 @@
 #include "SG_Shield.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -45,6 +47,20 @@ AKratos::AKratos()
 
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
+
+	if (AimWidgetClass)
+		AimWidget = CreateWidget<UUserWidget>(GetWorld(), AimWidgetClass);
+
+	if (AimWidget)
+	{
+		AimWidget->AddToViewport();
+		AimWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	/*ConstructorHelpers::FObjectFinder<UWidgetComponent>TempAimWidgetComp(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/JSG/UI/WBP_Aim.WBP_Aim'"));
+	if (TempAimWidgetComp.Succeeded())
+	{
+		AimWidgetComp = TempAimWidgetComp.Object;
+	}*/
 }
 // Called to bind functionality to input
 void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -63,9 +79,12 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Guard, ETriggerEvent::Triggered, this, &AKratos::OnMyActionGuardOn);
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
 		input->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AKratos::OnMyActionLockOn);
-		input->BindAction(IA_Attack, ETriggerEvent::Started, this, &AKratos::OnMyActionAttack);
+
+		input->BindAction(IA_WeakAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionWeakAttack);
+		input->BindAction(IA_StrongAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionStrongAttack);
 		input->BindAction(IA_Aim, ETriggerEvent::Triggered, this, &AKratos::OnMyActionAimOn);
 		input->BindAction(IA_Aim, ETriggerEvent::Completed, this, &AKratos::OnMyActionAimOff);
+		input->BindAction(IA_WithdrawAxe, ETriggerEvent::Started, this, &AKratos::OnMyActionWithdrawAxe);
 	}
 }
 void AKratos::PostInitializeComponents()
@@ -75,7 +94,8 @@ void AKratos::PostInitializeComponents()
 	if (Anim)
 	{
 		// 공격 몽타주가 끝나면 실행할 함수: OnAttackMontageEnded
-		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnAttackMontageEnded);
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnStrongAttackMontageEnded);
+		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnWeakAttackMontageEnded);
 
 		// 닷지 몽타주가 끝나면 실행할 함수: OnDodgeMontageEnded
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnDodgeMontageEnded);
@@ -91,14 +111,16 @@ void AKratos::PostInitializeComponents()
 		
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
 			{
-				if (CurrentCombo == 3)
+				// 방패 공격 : 강공격 콤보 3번쨰
+				if (CurrentStrongCombo == 3)
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				// 도끼 공격
 				else
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 			});
 		Anim->OnAttackEndCheck.AddLambda([this]() -> void
 			{
-				if (CurrentCombo == 3)
+				if (CurrentStrongCombo == 3)
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				else
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
@@ -106,12 +128,12 @@ void AKratos::PostInitializeComponents()
 			});
 		Anim->OnNextAttackCheck.AddLambda([this]() -> void
 			{
-				CanNextCombo = false;
+				CanNextWeakCombo = false;
 
-				if (bIsComboInputOn)
+				if (bIsStrongComboInputOn)
 				{
-					AttackStartComboState();
-					Anim->JumpToAttackMontageSection(CurrentCombo);
+					StrongAttackStartComboState();
+					Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -124,7 +146,6 @@ void AKratos::PostInitializeComponents()
 void AKratos::BeginPlay()
 {
 	Super::BeginPlay();
-
 	CurHP = MaxHP;
 	// 1. 컨트롤러를 가져와서 PlayerController인지 캐스팅해본다.
 	auto* pc = Cast<APlayerController>(Controller);
@@ -236,13 +257,24 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 	}
 }
 
-void AKratos::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AKratos::OnStrongAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == Anim->AttackMontage)
+	if (Montage == Anim->StrongAttackMontage)
 	{
 		State = EPlayerState::Idle;
-		CanNextCombo = false;
-		CurrentCombo = 0;
+		CanNextStrongCombo = false;
+		CurrentStrongCombo = 0;
+		bIsAttacking = false;
+	}
+}
+
+void AKratos::OnWeakAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == Anim->WeakAttackMontage)
+	{
+		State = EPlayerState::Idle;
+		CanNextWeakCombo = false;
+		CurrentWeakCombo = 0;
 		bIsAttacking = false;
 	}
 }
@@ -322,21 +354,12 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 	// 움직임은 유휴, 이동, 달리기가능
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		if (State == EPlayerState::Guard)
-			State = EPlayerState::Guard;
-		else
-			State = EPlayerState::Move;
+		State = EPlayerState::Move;
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
 		Direction.Normalize();
-		//Direction.Normalize();
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Direction.ToString());
-
-		// 캐릭터 현재 회전 가져오기ㅠㅑㅜAKratos::OnMyActionAttack
-		//FRotator Rotation = GetControlRotation();
 		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
-		//SetActorRotation(YawRotation);
 	}
 	else if (State == EPlayerState::Dodge)
 	{
@@ -364,23 +387,48 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		State = EPlayerState::Dodge;
 		bIsDodging = true;
 
-		int8 sectionIdx = 3;
-		if (PrevDirection.X == 0)
+		FString DodgeDirString;
+		float absX = abs(PrevDirection.X), absY = abs(PrevDirection.Y);
+		float DodgeCoef = 2000;
+
+		if (absX <= 0.1)
 		{
-			if (PrevDirection.Y == 1)
-				sectionIdx = 1;
+			if (PrevDirection.Y >= 0.9)
+				DodgeDirString = TEXT("R");
 			else
-				sectionIdx = 0;
+				DodgeDirString = TEXT("L");
+		}
+		else if (absY <= 0.1)
+		{
+			if (PrevDirection.X >= 0.9)
+				DodgeDirString = TEXT("F");
+			else
+			{
+				DodgeDirString = TEXT("B");
+				DodgeCoef = 1500;
+			}
+		}
+		else if (PrevDirection.X >= 0.5)
+		{
+			if (PrevDirection.Y >= 0.5)
+				DodgeDirString = TEXT("RF");
+			else
+				DodgeDirString = TEXT("LF");
 		}
 		else
 		{
-			if (PrevDirection.X == 1)
-				sectionIdx = 2;
+			if (PrevDirection.Y >= 0.5)
+				DodgeDirString = TEXT("RB");
 			else
-				sectionIdx = 3;
+				DodgeDirString = TEXT("LB");
+			DodgeCoef = 1500;
 		}
+		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
+		FVector DodgeDirection = UKismetMathLibrary::TransformDirection(T, PrevDirection);
+		DodgeDirection.Z = 0;
+		LaunchCharacter(DodgeDirection * DodgeCoef, true, false);
 		Anim->PlayDodgeMontage();
-		Anim->JumpToDodgeMontageSection(sectionIdx);
+		Anim->JumpToDodgeMontageSection(DodgeDirString);
 	}
 	else if (State == EPlayerState::Dodge)
 	{
@@ -500,13 +548,15 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 		State = EPlayerState::Idle;
 }
 
-void AKratos::OnMyActionAttack(const FInputActionValue& value)
+
+void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 {
+	if (bAxeGone) return;
 	if (bIsAttacking)
 	{
-		if (CanNextCombo)
+		if (CanNextWeakCombo)
 		{
-			bIsComboInputOn = true;
+			bIsWeakComboInputOn = true;
 		}
 		return;
 	}
@@ -516,16 +566,43 @@ void AKratos::OnMyActionAttack(const FInputActionValue& value)
 	{
 		State = EPlayerState::MeleeAttack;
 
-		AttackStartComboState();
-		Anim->PlayAttackMontage();
+		WeakAttackStartComboState();
+		Anim->PlayWeakAttackMontage();
 		//rrentWeapon->
-		Anim->JumpToAttackMontageSection(CurrentCombo);
+		Anim->JumpToWeakAttackMontageSection(CurrentWeakCombo);
 		bIsAttacking = true;
 	}
 	else if (State == EPlayerState::Aim)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("도끼 날리기"));
+		bAxeGone = true;
+		Anim->PlayAxeThrowMontage();
 	}
+
+}
+
+void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
+{
+	if (bAxeGone) return;
+	if (bIsAttacking)
+	{
+		if (CanNextStrongCombo)
+		{
+			bIsStrongComboInputOn = true;
+		}
+		return;
+	}
+
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
+		|| State == EPlayerState::Run)
+	{
+		State = EPlayerState::MeleeAttack;
+
+		StrongAttackStartComboState();
+		Anim->PlayStrongAttackMontage();
+		Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
+		bIsAttacking = true;
+	}
+	
 }
 
 void AKratos::OnMyActionAimOn(const FInputActionValue& value)
@@ -544,18 +621,37 @@ void AKratos::OnMyActionAimOff(const FInputActionValue& value)
 	}
 }
 
-void AKratos::AttackStartComboState()
+void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 {
-	CanNextCombo = true;
-	bIsComboInputOn = false;
-	CurrentCombo = FMath::Clamp<int8>(CurrentCombo + 1, 1, 4);
+	Anim->PlayAxeWithdrawMontage();
 }
 
-void AKratos::AttackEndComboState()
+void AKratos::WeakAttackStartComboState()
 {
-	bIsComboInputOn = false;
-	CanNextCombo = false;
-	CurrentCombo = 0;
+	CanNextWeakCombo = true;
+	bIsWeakComboInputOn = false;
+	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
+}
+
+void AKratos::WeakAttackEndComboState()
+{
+	bIsWeakComboInputOn = false;
+	CanNextWeakCombo = false;
+	CurrentWeakCombo = 0;
+}
+
+void AKratos::StrongAttackStartComboState()
+{
+	CanNextStrongCombo = true;
+	bIsStrongComboInputOn = false;
+	CurrentStrongCombo = FMath::Clamp<int8>(CurrentStrongCombo + 1, 1, 4);
+}
+
+void AKratos::StrongWeakAttackEndComboState()
+{
+	bIsStrongComboInputOn = false;
+	CanNextStrongCombo = false;
+	CurrentStrongCombo = 0;
 }
 
 

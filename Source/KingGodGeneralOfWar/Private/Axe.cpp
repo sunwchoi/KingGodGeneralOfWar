@@ -11,6 +11,7 @@
 #include "BDThor.h"
 #include "BDThorFSM.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "FlyingAxe.h"
 // Sets default values
 AAxe::AAxe()
 {
@@ -48,12 +49,12 @@ void AAxe::Tick(float DeltaTime)
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	if (Thor)
 	{
-		//
+		Thor->fsm->Damage(10);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
 	}
 	else
 	{
@@ -65,15 +66,17 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	auto* player = Cast<AKratos>(GetOwner());
 	if (player)		player->CameraShakeOnAttack();
 
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.04f);
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.001f, false);
+		}, 0.002f, false);
 }
 
 void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
 }
+
 

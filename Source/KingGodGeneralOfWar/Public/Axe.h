@@ -39,4 +39,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UProjectileMovementComponent* MovementComp;
+
+
 };
