@@ -63,16 +63,12 @@ void AAwakenThor::Move(FVector NewLoc)
 	GetWorld()->GetTimerManager().SetTimer(tmpHandle, tmpDel, 1.f, false);
 }
 
-void AAwakenThor::ThrowForTeleport(FVector Target)
+void AAwakenThor::ThrowForTeleport(FVector Direction)
 {
 	Mjolnir->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	Target.Z = 0;
-	FVector me = GetActorLocation();
-	me.Z = 0;
-	FVector dir = Target - me;
-	dir *= 3;
-	Mjolnir->SetRelativeRotation(dir.Rotation() - FRotator(-180, 0, 0));
-	MjolnirMoveComp->Velocity = dir;
+	Mjolnir->SetRelativeRotation(Direction.Rotation() - FRotator(-180, 0, 0));
+	Direction *= 2000;
+	MjolnirMoveComp->Velocity = Direction;
 	
 }
 
