@@ -26,7 +26,9 @@ enum class EPlayerState : uint8
 	GuardHit UMETA(DisplayName = "GuardHit"),
 	GuardStaggerd UMETA(DisplayName = "GuardStaggerd"),
 	GuardEnd UMETA(DisplayName = "GuardEnd"),
+	NoneMovable UMETA(DisplayName = "NoneMovable"),
 	Hit UMETA(DisplayName = "Hit"),
+	Parry UMETA(DisplayName = "Parry"),
 };
 
 UENUM(BlueprintType)
@@ -102,6 +104,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_WithdrawAxe;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UInputAction* IA_RuneBase;
+
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
 
@@ -143,6 +148,9 @@ public:
 
 	UFUNCTION()
 	void OnMyActionWithdrawAxe(const FInputActionValue& value);
+
+	UFUNCTION()
+	void OnMyActionRuneBase(const FInputActionValue& value);
 
 	// 약공격 콤보
 	void WeakAttackStartComboState();
@@ -256,4 +264,5 @@ private:
 
 	int guardHitCnt = 3;
 	bool bParrying;
+	bool bRuneReady;
 };

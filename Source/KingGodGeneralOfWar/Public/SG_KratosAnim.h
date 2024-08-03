@@ -35,6 +35,9 @@ public:
 	void PlayGuardMontage();
 	void PlayAxeThrowMontage();
 	void PlayAxeWithdrawMontage();
+	void PlayRuneBaseMontage();
+	void PlayDashAttackMontage();
+	void PlayRuneAttackMontage();
 
 	void JumpToStrongAttackMontageSection(int32 NewSection);
 	void JumpToWeakAttackMontageSection(int32 NewSection);
@@ -83,6 +86,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* RuneBaseMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* RuneAttackMontage;
 private:
 
 	UFUNCTION()

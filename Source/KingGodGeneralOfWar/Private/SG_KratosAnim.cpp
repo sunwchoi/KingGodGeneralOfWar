@@ -49,6 +49,12 @@ USG_KratosAnim::USG_KratosAnim()
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneBase.AM_Kratos_RuneBase'")
 	);
 	if (TempRuneBaseMontage.Succeeded())	RuneBaseMontage = TempRuneBaseMontage.Object;
+
+	
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRuneAttackMontage(
+		TEXT("/ Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneAttack.AM_Kratos_RuneAttack'")
+	);
+	if (TempRuneAttackMontage.Succeeded())	RuneAttackMontage = TempRuneAttackMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -117,6 +123,21 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 			
 		}, 1.15f, false);
 
+}
+
+void USG_KratosAnim::PlayRuneBaseMontage()
+{
+	Montage_Play(RuneBaseMontage);
+}
+
+void USG_KratosAnim::PlayDashAttackMontage()
+{
+	Montage_Play(DashAttackMontage);
+}
+
+void USG_KratosAnim::PlayRuneAttackMontage()
+{
+	Montage_Play(RuneAttackMontage);
 }
 
 void USG_KratosAnim::JumpToStrongAttackMontageSection(int32 NewSection)
