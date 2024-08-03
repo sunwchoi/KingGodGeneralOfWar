@@ -117,6 +117,7 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 	isHit = true;
 	ABDThor* Thor = Cast<ABDThor>(OtherActor);
 	AAwakenThor* AwakenThor = Cast<AAwakenThor>(OtherActor);
+	CapsuleComp->SetupAttachment(OverlappedComponent);
 	if (nullptr == Thor)
 	{
 		if (nullptr == AwakenThor)
@@ -127,6 +128,9 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Thor Hit"));
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
+	this->AttachToComponent(Cast<ACharacter>(OtherActor)->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+	this->SetActorEnableCollision(false); // 충돌 비활성화
+
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.05f);
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
@@ -155,6 +159,7 @@ void AFlyingAxe::WithdrawAxe()
 	isWithdraw = true;
 	isRising = true;
 	CurLocation = GetActorLocation();
-
+	this->SetActorEnableCollision(true); // 충돌 비활성화
+	this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
 

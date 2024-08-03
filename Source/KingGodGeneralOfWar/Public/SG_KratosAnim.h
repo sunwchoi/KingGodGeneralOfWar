@@ -10,6 +10,9 @@
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackEndCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnNextWeakAttackCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnWeakAttackHitCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnWeakAttackEndCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnMovableChekcDelegate);
 /**
  * 
@@ -42,6 +45,7 @@ public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
 	FOnAttackEndCheckDelegate OnAttackEndCheck;
+	FOnNextWeakAttackCheckDelegate OnNextWeakAttackCheck;
 	FOnMovableChekcDelegate OnMovableCheck;
 	UFUNCTION(BlueprintCallable)
 	void UpdatePlayerState();
@@ -73,6 +77,12 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AxeWithdrawMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* DashAttackMontage;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* RuneBaseMontage;
 private:
 
 	UFUNCTION()
@@ -83,6 +93,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck() ;
+
+	UFUNCTION()
+	void AnimNotify_NextWeakAttackCheck();
 
 	UFUNCTION()
 	void AnimNotify_MovableCheck();
