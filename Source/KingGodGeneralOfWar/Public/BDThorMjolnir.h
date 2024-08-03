@@ -52,12 +52,15 @@ public:
 	UFUNCTION()
 	void BackMjolnir(); //묠니르 발사 후 돌아오는 함수
 
+	bool bReturning; //BDHammerThrow인 상태
+	bool bCreateTrue; //false일때는 생성 가능, true 일때는 생성 불가능
+
+	UPROPERTY(EditDefaultsOnly)
+	float Speed = 100.0f;
+
+
+
 	FTimerHandle Timerhandle; //타이머 핸들러
-
-	UFUNCTION()
-	void SetIsFly();
-
-	bool IsFly;
 
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
