@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kratos.h"
 #include "WindSlash.h"
+#include "BDThorMjolnir.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -26,15 +27,14 @@ ABDThor::ABDThor()
 	}
 
 	//무기 데이터 로드
-	//BDWeapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BDWeapon"));
-	//BDWeapon->SetupAttachment(GetMesh(), FName("BDMjolnirHips"));
-	//BDWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); //임시 코드
+	BDWeapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BDWeapon"));
+	BDWeapon->SetupAttachment(GetMesh(), FName("BDMjolnirHips"));
 
-	//ConstructorHelpers::FObjectFinder<UStaticMesh> WeaponMesh(TEXT("/Script/Engine.StaticMesh'/Game/Bada/Asset/Model/weapon/BDMjolnir.BDMjolnir'"));
-	//if (WeaponMesh.Succeeded()) {
-	//	BDWeapon->SetStaticMesh(WeaponMesh.Object);
-
-	//}
+	ConstructorHelpers::FObjectFinder<UStaticMesh> WeaponMesh(TEXT("/Script/Engine.StaticMesh'/Game/Bada/Asset/Model/weapon/BDMjolnir.BDMjolnir'"));
+	if (WeaponMesh.Succeeded()) {
+		BDWeapon->SetStaticMesh(WeaponMesh.Object);
+		BDWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); //임시 코드
+	}
 
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
@@ -54,14 +54,7 @@ void ABDThor::BeginPlay()
 	GetCharacterMovement()->bOrientRotationToMovement = true; //플레이어 방향으로 바라보기
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
-	//BDWeapon->SetVisibility(true);
-
-	if (GetWorld()) {
-		CurrentWeapon = Cast <ABDThorMjolnir>(GetWorld()->SpawnActor<ABDThorMjolnir>(WeaponClass));
-		if (CurrentWeapon) {
-			CurrentWeapon->MjolnirMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("BDMjolnirHips"));
-		}
-	}
+	visibleWeapon();
 	
 }
 
@@ -84,12 +77,11 @@ void ABDThor::EquipWeapon()
 {
 	if (this) {
 		IsWeaponHold = true;
-		CurrentWeapon->MjolnirMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("BDMjolnirHand"));
-		CurrentWeapon->MjolnirMesh->SetVisibility(true);
+		BDWeapon->SetVisibility(true);
+		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirHand"));
 		UE_LOG(LogTemp, Warning, TEXT("Equip Weapon"));
 	}
 }
-
 
 
 //무기 위치를 허리로 변경하는 함수
@@ -97,7 +89,8 @@ void ABDThor::DrawWeapon()
 {
 	if (this) {
 		IsWeaponHold = false;
-		CurrentWeapon->MjolnirMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("BDMjolnirHips"));
+		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirHips"));
+		BDWeapon->SetVisibility(true);
 	}
 }
 
@@ -105,16 +98,15 @@ void ABDThor::HiddenWeapon()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Hidden"));
 	if (this) {
-		CurrentWeapon->MjolnirMesh->SetVisibility(false); //메쉬 안보이게 하기
+		BDWeapon->SetVisibility(false); //메쉬 안보이게 하기
 	}
 }
 
 void ABDThor::visibleWeapon()
 {
 	if (this) {
-		CurrentWeapon->MjolnirMesh->SetVisibility(true); //메쉬 안보이게 하기
+		BDWeapon->SetVisibility(true); //메쉬 안보이게 하기
 		UE_LOG(LogTemp, Warning, TEXT("Visible"));
-		
 	}
 }
 
@@ -127,7 +119,6 @@ void ABDThor::BDHammerThrowHit()
 	{
 		//FVector LaunchDirection = (fsm->Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
 		FVector LaunchDirection = GetActorForwardVector();
-		Mjolnir->SetIsFly(); //날아가는 무기인지 확인하기
 		Mjolnir->FireInDirection(LaunchDirection);
 		UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
 	}
@@ -139,8 +130,6 @@ void ABDThor::BDHammerThrowHit()
 //바람 슬래쉬
 void ABDThor::BDHammerWindSlash()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("exex"));
-
 	//바람 액터 스폰해서 공격
 	FActorSpawnParameters parm;
 	parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

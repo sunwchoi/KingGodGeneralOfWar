@@ -124,16 +124,20 @@ public:
 	//경과 시간
 	float BDCurrentTime = 0;
 
-	//공격 대기 시간, 토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
+	//공격 랜덤을 선택하기 전의 대기 시간
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float BDAttackDelayTime = 3.0f;
+	float BDAttackDelayTime = 0.3f;
+
+	//토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float BDDelayTime = 1.0f;
 
 	//피격 시 데미지 함수, DamageNum 데미지 수치
 	UFUNCTION()
 	void Damage(float DamageNum);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
-	float BDMaxHp = 300.0f;
+	float BDMaxHp = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;

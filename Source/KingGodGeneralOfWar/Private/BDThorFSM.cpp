@@ -42,14 +42,6 @@ void UBDThorFSM::BeginPlay()
 
 }
 
-// Called when the montage ends
-//void UBDThorFSM::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-//{
-//	if (Montage == anim->BDHammerThrowMontage || Montage == anim->BDHammerWindMontage || Montage == anim->BDHammerThreeSwingMontage) {
-//		BDEndState();
-//	}
-//}
-
 
 // Called every frame
 void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -98,6 +90,10 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 void UBDThorFSM::Damage(float DamageNum)
 {
 	BDCurrentHP -= DamageNum;
+
+	//피격 상태로 변경한다.
+	mState = BDThorGeneralState::BDDamage;
+
 	//UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
 
 }
@@ -134,11 +130,12 @@ void UBDThorFSM::BDMoveState()
 
 
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
-	if (BDCurrentTime > BDAttackDelayTime) {
+	if (BDCurrentTime > BDDelayTime) {
 		mState = BDThorGeneralState::BDAttackModeChange;
 
 		//애니메이션 상태 동기화
 		anim->animState = mState;
+		BDCurrentTime = 0;
 	}
 
 	//타깃과 가까워지면 공격 상태로 전환하고 싶다.
@@ -165,6 +162,10 @@ void UBDThorFSM::BDAttackModeChangeState()
 {
 	//일정시간에 다양한 패턴으로 넘어가야한다.
 
+	//우선은 애니메이션은 대기 or 움직임 or 회피 애니메이션을 재생한다.
+	//우선은 대기 상태 애니메이션 재생으로 지정
+	anim->playBDAttackRandomState();
+
 	//1. 시간이 흐르고
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
 	//2. 공격 시간이 되면
@@ -177,7 +178,6 @@ void UBDThorFSM::BDAttackModeChangeState()
 		//UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
 		
 		BDCurrentTime = 0;
-		
 	}
 
 	//타깃이 공격을 받으면 다시 이동으로 변하고 싶다.
@@ -197,6 +197,9 @@ void UBDThorFSM::BDAttackModeChangeState()
 //공격 패턴을 랜덤으로 지정하는 함수
 BDThorGeneralState UBDThorFSM::RandomAttackState()
 {
+	//애니메이션 상태는 우선 몽타주를 실행한다
+
+
 	// 가능한 상태들을 배열로 저장
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
@@ -231,10 +234,11 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 void UBDThorFSM::BDDamageState()
 {
 	//피격 애니메이션 재생
+	anim->playBDDamage();
 
-	Damage(10); //데미지 
-
-
+	//공격에 따른 데미지 공격 값 달라짐
+	//Damage(10); //데미지 
+	
 	//체력이 남아있다면
 	if (BDCurrentHP > 0) {
 		//상태를 회피로 전환
@@ -280,8 +284,6 @@ void UBDThorFSM::BDHammerWindState()
 		anim->playBDHammerWind();
 		UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Wind Animation"));
 	}
-
-	//mState = BDThorGeneralState::BDDamage;
 
 }
 

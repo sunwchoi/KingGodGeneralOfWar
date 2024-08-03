@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = BDThor)
 	class ABDThor* bdThor;
 
+	UPROPERTY(EditDefaultsOnly, Category = Mjolnir)
+	class ABDThorMjolnir* Mjolnir;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
 	BDThorGeneralState animState; //FSM 상태
 
@@ -39,12 +42,36 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDHammerWindMontage;
 
+	//뒤로 회피하는 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDThorBackDodgeMontage;
+
+	//오른쪽으로 회피 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDThorRightDodgeMontage;
+
+	//피격 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDThorDamageMontage;
+
+	//피격 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDThorAttackRandomMontage;
+
 
 	//몽타주 실행
 	UFUNCTION()
 	void playBDHammerThrow();
 	UFUNCTION()
 	void playBDHammerWind();
+	UFUNCTION()
+	void playBDBackDodge();
+	UFUNCTION()
+	void playBDRightDodge();
+	UFUNCTION()
+	void playBDDamage();
+	UFUNCTION()
+	void playBDAttackRandomState();
 
 
 	UFUNCTION()
@@ -54,8 +81,10 @@ public:
 	UFUNCTION()
 	void AnimNotify_ThrowTiming();
 
-
 	UFUNCTION()
 	void AnimNotify_SlashWind();
+
+	UFUNCTION()
+	void AnimNotify_BackMjolnir();
 	
 };
