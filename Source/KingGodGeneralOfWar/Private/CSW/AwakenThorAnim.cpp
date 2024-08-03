@@ -101,6 +101,34 @@ void UAwakenThorAnim::AnimNotify_HitEnd()
 	Fsm->SetState(EAwakenThorState::Idle);
 }
 
+void UAwakenThorAnim::AnimNotify_JumpAttackReady()
+{
+	Fsm->ReadyJumpAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_JumpAttackJump()
+{
+	Owner->Jump();
+}
+
+void UAwakenThorAnim::AnimNotify_JumpAttackFall()
+{
+	Fsm->StartFallAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_JumpAttackStart()
+{
+	Fsm->StartJumpAttack();
+}
+
+
+void UAwakenThorAnim::AnimNotify_JumpAttackEnd()
+{
+	AnimState = EAwakenThorState::Idle;
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
+
 bool UAwakenThorAnim::GetIsPlay() const
 {
 	return IsPlay;
