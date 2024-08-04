@@ -94,10 +94,21 @@ void ABDThor::DrawWeapon()
 	}
 }
 
+//오른손에 들기
+void ABDThor::EquipRight()
+{
+	if (this) {
+		IsWeaponHold = true;
+		BDWeapon->SetVisibility(true);
+		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirRightHand"));
+	}
+}
+
 void ABDThor::HiddenWeapon()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Hidden"));
 	if (this) {
+		IsWeaponHold = false;
 		BDWeapon->SetVisibility(false); //메쉬 안보이게 하기
 	}
 }
@@ -105,6 +116,7 @@ void ABDThor::HiddenWeapon()
 void ABDThor::visibleWeapon()
 {
 	if (this) {
+		IsWeaponHold = true;
 		BDWeapon->SetVisibility(true); //메쉬 안보이게 하기
 		UE_LOG(LogTemp, Warning, TEXT("Visible"));
 	}

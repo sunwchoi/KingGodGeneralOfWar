@@ -46,6 +46,9 @@ public:
 	void DrawWeapon();
 
 	UFUNCTION()
+	void EquipRight();
+
+	UFUNCTION()
 	void HiddenWeapon(); //무기 어디서도 안보이게 하기 : 무기를 던졌을 때 호출
 	void visibleWeapon(); //무기를 안보이게 했으면 다시 보이게 하기 : 무기 던지고 난 뒤에 호출
 
