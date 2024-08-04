@@ -73,7 +73,7 @@ public:
 	void StartJumpAttack();
 	void StartFallAttack();
 
-	void SetDamage();
+	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::FORWARD);
 	void SetJump(bool Value);
 
 
