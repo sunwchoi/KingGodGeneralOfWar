@@ -246,11 +246,11 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 	}
 }
 
-void USG_KratosAnim::AnimNotify_TimeDilation()
+FORCEINLINE void USG_KratosAnim::AnimNotify_TimeDilation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
 	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 		}, 0.02f, false);
