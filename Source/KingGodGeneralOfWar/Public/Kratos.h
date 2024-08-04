@@ -296,4 +296,5 @@ private:
 	bool bParrying;
 	bool bRuneReady;
 	bool bGuardStagger;
+	bool bSuperArmor;
 };

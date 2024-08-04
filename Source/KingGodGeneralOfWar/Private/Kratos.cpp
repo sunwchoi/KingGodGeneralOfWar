@@ -33,8 +33,7 @@ const float RUN_FOV = 105;
 const float GUARD_FOV = 70;
 const float AIM_FOV = 60;
 
-const int GUARD_MAX_COUNT = 3;
-
+const int GUARD_MAX_COUNT = 2;
 
 
 AKratos::AKratos()
@@ -343,12 +342,14 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	else if (Montage == Anim->RuneBaseMontage)
 	{
 		State = EPlayerState::Idle;
-		bRuneReady = true;
+		if (!bInterrupted)
+			bRuneReady = true;
 	}
 	else if (Montage == Anim->RuneAttackMontage)
 	{
 		State = EPlayerState::Idle;
 		bRuneReady = false;
+		bSuperArmor = false;
 		WeakAttackEndComboState();
 	}
 	else if (Montage == Anim->HitMontage)
@@ -632,6 +633,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		// 룬 공격
 		else
 		{
+			bSuperArmor = true;
 			State = EPlayerState::RuneAttack;
 
 			WeakAttackStartComboState();
@@ -786,6 +788,7 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 		break;
 	// 기본 피격
 	default:
+		if (bSuperArmor) break;
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));
 		CurHP -= DamageValue;
 		Anim->PlayHitMontage();
