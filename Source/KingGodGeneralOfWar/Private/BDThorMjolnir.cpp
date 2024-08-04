@@ -83,39 +83,22 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	////날아가는 중이면서 돌아올 수 있는 상태
-	//if (bReturning && bIsFly) {
-	//	//타겟 위치를 토르의 왼손 소켓위치로 설정
-	//	HandLocation = Thor->GetMesh()->GetSocketLocation(TEXT("BDMjolnirHand")) - GetActorLocation();
-	//}
-	////망치가 플레이어에게 돌아
-	//if (FVector::Dist(GetActorLocation(), HandLocation) < 200) {
-	//	if (bReturning) {
-	//		bReturning = false;
-
-	//	}
-	//}
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("bReturning: %s, bIsFly: %s"), bReturning ? TEXT("true") : TEXT("false"), bIsFly ? TEXT("true") : TEXT("false")));
-
-
+	//날아가는 중
 	if (!bReturning && bCreateTrue) {
 		MovementComp->Velocity = Thor->GetActorForwardVector() * MovementComp->InitialSpeed;
 	}
+	//망치 돌아옴
 	else if (bReturning && bCreateTrue)
 	{
 		FVector HandLocation = Thor->GetMesh()->GetSocketLocation(TEXT("BDMjolnirHand"));
 		FVector CurrentLocation = GetActorLocation();
 		FVector Direction = (HandLocation - CurrentLocation).GetSafeNormal();
 
-
 		//SetActorLocation(GetActorLocation() + Direction * Speed * GetWorld()->DeltaTimeSeconds);
 
 		MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("call tick"));
 
-		//FVector NewLocation = CurrentLocation + Direction * Speed * DeltaTime;
-		//SetActorLocation(NewLocation);
 
 		float Distance = FVector::Dist(GetActorLocation(), HandLocation);
 
@@ -123,7 +106,7 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 		{
 			this->Destroy(); // 자신을 파괴
 			UE_LOG(LogTemp, Warning, TEXT("Destroy"));
-			Thor->visibleWeapon(); // 무기 다시 보이게 하기
+			Thor->EquipWeapon(); // 무기 다시 보이게 하기
 			UE_LOG(LogTemp, Warning, TEXT("Mjolnir Back"));
 
 			bReturning = false;
@@ -131,7 +114,7 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, "), bReturning ? TEXT("true") : TEXT("false"));
+	UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, bCreateTrue : %s "), bReturning ? TEXT("true") : TEXT("false"), bCreateTrue ? TEXT("true") : TEXT("false"));
 
 }
 
@@ -155,7 +138,7 @@ void ABDThorMjolnir::BackMjolnir()
 {
 	UE_LOG(LogTemp, Warning, TEXT("BackMjolnir called"));
 	bReturning = true;
-
+	UE_LOG(LogTemp, Warning, TEXT("bReturing : %s"), bReturning ? TEXT("true") : TEXT("false"));
 }
 
 //묠니르가 부딪혔을 때 나오는 함수
@@ -166,8 +149,6 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		//데미지 처리
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		if (AttackTarget) {
-			//공격 상태 나누기
-			//여기에 데미지랑 공격 상태 부르는 함수들 만들어서 타입이랑 공격 상태 나누기
 			//AttackTarget->Damage(BDThrowDamage, EAttackType::Attack1);
 			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
 		}

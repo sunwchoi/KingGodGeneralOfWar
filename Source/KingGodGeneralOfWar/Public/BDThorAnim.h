@@ -54,9 +54,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDThorDamageMontage;
 
-	//피격 몽타주
+	//공격 상태 랜덤 지정 시 몽타주
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDThorAttackRandomMontage;
+
+	// 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDHammerThreeSwingMontage;
 
 
 	//몽타주 실행
@@ -72,6 +76,8 @@ public:
 	void playBDDamage();
 	UFUNCTION()
 	void playBDAttackRandomState();
+	UFUNCTION()
+	void playBDHammerThreeSwing();
 
 
 	UFUNCTION()
