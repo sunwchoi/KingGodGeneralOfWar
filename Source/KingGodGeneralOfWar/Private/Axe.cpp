@@ -51,7 +51,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
 	auto* Thor = Cast<ABDThor>(OtherActor);
-	auto* player = Cast<AKratos>(GetOwner());
+	auto* player = Cast<AKratos>(GetAttachParentActor());
 
 	if (Thor)
 	{
@@ -79,6 +79,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		else
 			attackNum = 0;
 		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(attackDirection) );
 		AwakenThor->getFSM()->SetDamage(8, attackDirection);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
 	}
