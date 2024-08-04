@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> LightBPClass;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UCameraShakeBase> PoundCameraShake;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -44,7 +47,7 @@ public:
 	void DrawWeapon();
 
 	class UAwakenThorFSM* getFSM() const;
-	void SetHp(float Damage);
+	bool SetHp(float Damage);
 
 	void UpdateHpUI();
 private:

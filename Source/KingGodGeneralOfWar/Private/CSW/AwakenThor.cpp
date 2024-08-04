@@ -98,12 +98,15 @@ UAwakenThorFSM* AAwakenThor::getFSM() const
 	return Fsm;
 }
 
-void AAwakenThor::SetHp(float Damage)
+bool AAwakenThor::SetHp(float Damage)
 {
-	if (Hp > Damage)
-		Hp -= Damage;
-	else
+	if (Hp <= Damage)
+	{
 		Hp = 0;
+		return true;
+	}
+	Hp -= Damage;
+	return false;
 }
 
 void AAwakenThor::SetThorLocation(FVector NewLoc)
