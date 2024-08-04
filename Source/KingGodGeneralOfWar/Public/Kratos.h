@@ -43,6 +43,23 @@ enum class EHitType : uint8
 	STUN UMETA(DisplayName = "STUN"),
 };
 
+UENUM()
+enum class EAttackDirectionType : uint8
+{
+	FORWARD UMETA(DisplayName = "FORWARD"),
+	BACKWARD UMETA(DisplayName = "BACKWARD"),
+	LEFT UMETA(DisplayName = "LEFT"),
+	RIGHT UMETA(DisplayName = "RIGHT"),
+};
+
+UENUM()
+enum class EAttackType : uint8
+{
+	WEAK_ATTACK UMETA(DisplayName = "WEAK_ATTACK"),
+	STRONG_ATTACK UMETA(DisplayName = "STRONG_ATTACK"),
+	RUNE_ATTACK UMETA(DisplayName = "RUNE_ATTACK"),
+	AXE_THROW_ATTACK UMETA(DisplayName = "AXE_THROW_ATTACK"),
+};
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
 {
@@ -248,11 +265,17 @@ public:
 	void SetWeapon();
 	void SetShield();
 	void CameraShakeOnAttack();
+	FString GetHitSectionName(EHitType hitType);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ParryVFX;
 
 	bool bAxeGone;
+
+	EAttackType CurrentAttackType;
 private:
+
+	FString GetDodgeDirection(int& DodgeScale);
+
 	bool bIsAttacking;
 	bool bIsDodging;
 	FTimerHandle DodgeHandle;
@@ -267,4 +290,5 @@ private:
 	int GuardHitCnt;
 	bool bParrying;
 	bool bRuneReady;
+	bool bGuardStagger;
 };

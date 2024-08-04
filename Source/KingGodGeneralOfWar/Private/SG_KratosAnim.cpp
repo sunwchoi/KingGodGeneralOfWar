@@ -4,6 +4,7 @@
 #include "SG_KratosAnim.h"
 #include "Axe.h"
 #include "FlyingAxe.h"
+#include "Kismet/GameplayStatics.h"
 USG_KratosAnim::USG_KratosAnim()
 {
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
@@ -55,6 +56,11 @@ USG_KratosAnim::USG_KratosAnim()
 		TEXT("/ Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneAttack.AM_Kratos_RuneAttack'")
 	);
 	if (TempRuneAttackMontage.Succeeded())	RuneAttackMontage = TempRuneAttackMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempHitMontage(
+		TEXT("Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Hit.AM_Kratos_Hit'")
+	);
+	if (TempHitMontage.Succeeded())	HitMontage = TempHitMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -133,6 +139,12 @@ void USG_KratosAnim::PlayRuneBaseMontage()
 		Montage_Play(RuneBaseMontage);
 }
 
+void USG_KratosAnim::PlayHitMontage()
+{
+	if (!Montage_IsPlaying(HitMontage))
+		Montage_Play(HitMontage);
+}
+
 void USG_KratosAnim::PlayDashAttackMontage()
 {
 	Montage_Play(DashAttackMontage);
@@ -175,7 +187,12 @@ void USG_KratosAnim::JumpToRollMontageSection(int32 NewSection)
 
 void USG_KratosAnim::JumpToGuardMontageSection(FString SectionName)
 {
-	Montage_JumpToSection(FName(*FString(SectionName)));
+	Montage_JumpToSection(FName(*SectionName), GuardMontage);
+}
+
+void USG_KratosAnim::JumpToHitMontageSection(FString SectionName)
+{
+	Montage_JumpToSection(FName(*SectionName), HitMontage);
 }
 
 void USG_KratosAnim::AnimNotify_AttackHitCheck()
@@ -225,6 +242,21 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 			FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRotation);
 		}
 	}
+}
+
+void USG_KratosAnim::AnimNotify_TimeDilation()
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, 0.02f, false);
+}
+
+void USG_KratosAnim::AnimNotify_FieldSpawn()
+{
+	
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)

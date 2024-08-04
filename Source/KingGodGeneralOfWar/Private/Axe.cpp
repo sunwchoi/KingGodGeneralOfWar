@@ -59,6 +59,8 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
+		
+//		AwakenThor->getFSM()->SetDamage();
 		AwakenThor->getFSM()->SetDamage();
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
 	}

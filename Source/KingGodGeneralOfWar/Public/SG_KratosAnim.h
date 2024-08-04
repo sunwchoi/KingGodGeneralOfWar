@@ -28,14 +28,15 @@ public:
 	USG_KratosAnim();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	void PlayWeakAttackMontage();
-	void PlayStrongAttackMontage();
 	void PlayDodgeMontage();
 	void PlayRollMontage();
 	void PlayGuardMontage();
+	void PlayRuneBaseMontage();
+	void PlayHitMontage();
+	void PlayWeakAttackMontage();
+	void PlayStrongAttackMontage();
 	void PlayAxeThrowMontage();
 	void PlayAxeWithdrawMontage();
-	void PlayRuneBaseMontage();
 	void PlayDashAttackMontage();
 	void PlayRuneAttackMontage();
 
@@ -43,6 +44,7 @@ public:
 	void JumpToDodgeMontageSection(FString SectionName);
 	void JumpToRollMontageSection(int32 NewSection);
 	void JumpToGuardMontageSection(FString SectionName);
+	void JumpToHitMontageSection(FString SectionName);
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate OnAttackHitCheck;
@@ -59,35 +61,38 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float Speed;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* WeakAttackMontage ;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* StrongAttackMontage ;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* DodgeMontage ;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* RollMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* GuardMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* AxeThrowMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* AxeWithdrawMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* DashAttackMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* RuneBaseMontage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = ATTACK, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	UAnimMontage* RuneAttackMontage;
+
+	UPROPERTY()
+	UAnimMontage* HitMontage;
 private:
 
 	UFUNCTION()
@@ -110,6 +115,12 @@ private:
 	
 	UFUNCTION()
 	void AnimNotify_HideAxe();
+
+	UFUNCTION()
+	void AnimNotify_TimeDilation();
+
+	UFUNCTION()
+	void AnimNotify_FieldSpawn();
 
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
