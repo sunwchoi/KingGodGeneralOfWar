@@ -144,6 +144,11 @@ void UAwakenThorAnim::JumpToHitSection(const FString& Section)
 	Montage_JumpToSection(FName(*Section), HitMontage);
 }
 
+void UAwakenThorAnim::PlayDieMontage()
+{
+	Montage_Play(DieMontage);
+}
+
 
 bool UAwakenThorAnim::GetIsPlay() const
 {
