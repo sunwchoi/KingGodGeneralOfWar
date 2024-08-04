@@ -35,12 +35,7 @@ const float AIM_FOV = 60;
 
 const int GUARD_MAX_COUNT = 3;
 
-const EAttackDirectionType AttackTypeDirectionArr[4][4] = {
-	{EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT},
-	{EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
-	{EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
-	{EAttackDirectionType::FORWARD, EAttackDirectionType::BACKWARD}
-};
+
 
 AKratos::AKratos()
 {

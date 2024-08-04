@@ -9,7 +9,12 @@
 #include "Kratos.generated.h"
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
-
+const EAttackDirectionType AttackTypeDirectionArr[4][4] = {
+	{EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT},
+	{EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
+	{EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
+	{EAttackDirectionType::FORWARD, EAttackDirectionType::BACKWARD}
+};
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {

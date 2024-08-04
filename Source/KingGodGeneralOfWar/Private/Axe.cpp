@@ -51,21 +51,38 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
 	auto* Thor = Cast<ABDThor>(OtherActor);
+	auto* player = Cast<AKratos>(GetOwner());
+
 	if (Thor)
 	{
 		Thor->fsm->Damage(10);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
+		int attackNum = 0;
+		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
+			attackNum = player->CurrentWeakCombo;
+		else if (player->CurrentAttackType == EAttackType::STRONG_ATTACK)
+			attackNum = player->CurrentStrongCombo;
+		else
+			attackNum = 0;
+		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
 	}
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 		
 //		AwakenThor->getFSM()->SetDamage();
-		AwakenThor->getFSM()->SetDamage();
+		int attackNum = 0;
+		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
+			attackNum = player->CurrentWeakCombo;
+		else if (player->CurrentAttackType == EAttackType::STRONG_ATTACK)
+			attackNum = player->CurrentStrongCombo;
+		else
+			attackNum = 0;
+		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
+		AwakenThor->getFSM()->SetDamage(8, attackDirection);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
 	}
 
-	auto* player = Cast<AKratos>(GetOwner());
 	if (player)		player->CameraShakeOnAttack();
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.04f);
