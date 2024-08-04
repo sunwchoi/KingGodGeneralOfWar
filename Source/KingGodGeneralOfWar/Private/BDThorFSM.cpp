@@ -36,10 +36,6 @@ void UBDThorFSM::BeginPlay()
 	//체력 설정
 	BDCurrentHP = BDMaxHp;
 
-	/*if (anim) {
-		anim->OnMontageEnded.AddDynamic(this, &UBDThorFSM::BDEndState);
-	}*/
-
 }
 
 
@@ -152,7 +148,10 @@ void UBDThorFSM::BDMoveState()
 
 void UBDThorFSM::BDAvoidanceState()
 {
-	//회피 구현
+	anim->playBDRightDodge();
+
+	//이제 근처 물체 위치를 받아서 오른쪽으로 회피할 것인지 뒤쪽으로 회피할 것인지에 대한 코드 작성
+	
 	//플레이어의 방향을 중점으로 뒤로 피하거나 옆으로 피한다.
 }
 
@@ -198,8 +197,7 @@ void UBDThorFSM::BDAttackModeChangeState()
 BDThorGeneralState UBDThorFSM::RandomAttackState()
 {
 	//애니메이션 상태는 우선 몽타주를 실행한다
-
-
+	
 	// 가능한 상태들을 배열로 저장
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
@@ -217,13 +215,16 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	BDThorGeneralState NewState = AttackStates[RandomIndex];
 
 	//만약 망치 공격일 경우
-	if (NewState == BDThorGeneralState::BDHammerThreeSwing || NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
-		//손에 망치를 들어라
-		//me->EquipWeapon();
-	}
-	else {
-		me->DrawWeapon(); //허리에 망치를 두어라
-	}
+	//if (NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
+	//	//손에 망치를 들어라
+	//	me->EquipWeapon();
+	//}
+	//else if(NewState == BDThorGeneralState::BDHammerThreeSwing) {
+	//	me->EquipRight(); //오른손에 망치를 들어라
+	//}
+	//else {
+	//	me->DrawWeapon(); //허리에 망치를 두어라
+	//}
 
 	// 마지막 상태 업데이트
 	LastAttackState = NewState;
@@ -236,13 +237,10 @@ void UBDThorFSM::BDDamageState()
 	//피격 애니메이션 재생
 	anim->playBDDamage();
 
-	//공격에 따른 데미지 공격 값 달라짐
-	//Damage(10); //데미지 
-	
 	//체력이 남아있다면
 	if (BDCurrentHP > 0) {
 		//상태를 회피로 전환
-		//mState = BDThorGeneralState::BDMove;
+		mState = BDThorGeneralState::BDAvoidance;
 	}
 	else if (BDCurrentHP <= 0) {
 		//2 페이즈로 전환
@@ -290,6 +288,7 @@ void UBDThorFSM::BDHammerWindState()
 //망치 n번 휘두르기
 void UBDThorFSM::BDHammerThreeSwingState()
 {
+	anim->playBDHammerThreeSwing(); //3번 휘두르기
 }
 
 //플레이어 잡아서 업어치기 (카메라 컷씬)
@@ -305,17 +304,38 @@ void UBDThorFSM::BDHittingDownState()
 
 
 
-//애니메이션 마지막 종료 후 상태 확인
+//애니메이션 마지막 종료 후 상태 확인 
+// 데미지, 대기, 이동은 EndState에서 관리하지 안흥ㅁ
 void UBDThorFSM::BDEndState()
 {
-	//만약 공격 상태라면
-	if (mState == BDThorGeneralState::BDHammerThrow || mState == BDThorGeneralState::BDHammerThreeSwing || mState == BDThorGeneralState::BDHammerWind || mState == BDThorGeneralState::BDGiveUPFly || mState == BDThorGeneralState::BDHitDown) {
-		//move로 돌아가기?
+	//만약 근접 공격 상태라면
+	if (mState == BDThorGeneralState::BDGiveUPFly || mState == BDThorGeneralState::BDHitDown) {
+		//if (me->IsWeaponHold == true) {
+		//	me->DrawWeapon(); //무기를 내린다.
+		//}
+		//플레이어 근처에 있기 때문에 일단 회피 상태
 		BDSetState(BDThorGeneralState::BDMove);
 		
 		//UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
 	}
-	//else if(mState == BDThorGeneralState::)
+	//망치를 든 근접 공격 상태였었다면
+	else if (mState == BDThorGeneralState::BDHammerThreeSwing) {
+		//if (me->IsWeaponHold == false) {
+		//	me->EquipWeapon(); //우선 무기를 든다.
+		//}
+
+		BDSetState(BDThorGeneralState::BDAttackModeChange);
+	}
+	else if (mState == BDThorGeneralState::BDHammerThrow || mState == BDThorGeneralState::BDHammerWind) {
+		//if (me->IsWeaponHold == false) {
+		//	me->EquipWeapon(); //우선 무기를 든다.
+		//}
+		BDSetState(BDThorGeneralState::BDAttackModeChange);
+	}
+	//회피를 끝냈다면
+	else if (mState == BDThorGeneralState::BDAvoidance) {
+		BDSetState(BDThorGeneralState::BDAttackModeChange);
+	}
 }
 
 
