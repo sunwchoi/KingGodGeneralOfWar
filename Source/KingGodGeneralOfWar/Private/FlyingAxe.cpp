@@ -115,32 +115,27 @@ void AFlyingAxe::Tick(float DeltaTime)
 void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	isHit = true;
-	ABDThor* Thor = Cast<ABDThor>(OtherActor);
-	AAwakenThor* AwakenThor = Cast<AAwakenThor>(OtherActor);
-	CapsuleComp->SetupAttachment(OverlappedComponent);
-	if (nullptr == Thor)
-	{
-		if (nullptr == AwakenThor)
-		{
-			SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());
-			return;
-		}
-	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Thor Hit"));
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
-	this->AttachToComponent(Cast<ACharacter>(OtherActor)->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
-	this->SetActorEnableCollision(false); // 충돌 비활성화
+	auto* Thor = Cast<ABDThor>(OtherActor);
+	SetActorEnableCollision(false); // 충돌 비활성화
 
 	if (Thor)
 	{
 		Thor->fsm->Damage(10);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
+		AttachToComponent(Thor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
-		AwakenThor->getFSM()->SetDamage(5, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
+		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
+		if (AwakenThor)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
+			AwakenThor->getFSM()->SetDamage(5, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
+			AttachToComponent(AwakenThor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
-
 	if (!isWithdraw)
 	{
 		SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());

@@ -93,6 +93,9 @@ public:
 
 	UPROPERTY()
 	UAnimMontage* HitMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ARuneAttackField> RuneAttackFieldFactory;
 private:
 
 	UFUNCTION()

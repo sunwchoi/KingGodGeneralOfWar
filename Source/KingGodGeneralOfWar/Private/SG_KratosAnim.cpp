@@ -5,6 +5,7 @@
 #include "Axe.h"
 #include "FlyingAxe.h"
 #include "Kismet/GameplayStatics.h"
+#include "RuneAttackField.h"
 USG_KratosAnim::USG_KratosAnim()
 {
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
@@ -256,7 +257,8 @@ void USG_KratosAnim::AnimNotify_TimeDilation()
 
 void USG_KratosAnim::AnimNotify_FieldSpawn()
 {
-	
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	GetWorld()->SpawnActor<ARuneAttackField>(RuneAttackFieldFactory, Player->GetActorTransform());
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
