@@ -128,6 +128,16 @@ void UAwakenThorAnim::AnimNotify_JumpAttackEnd()
 	Fsm->SetState(EAwakenThorState::Idle);
 }
 
+void UAwakenThorAnim::PlayHitMontage()
+{
+	Montage_Play(HitMontage);
+}
+
+void UAwakenThorAnim::JumpToHitSection(const FString& Section)
+{
+	Montage_JumpToSection(FName(*Section), HitMontage);
+}
+
 
 bool UAwakenThorAnim::GetIsPlay() const
 {

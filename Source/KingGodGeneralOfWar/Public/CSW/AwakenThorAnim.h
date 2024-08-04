@@ -89,6 +89,12 @@ public:
 	
 	UFUNCTION()
 	void AnimNotify_JumpAttackEnd();
+
+	void PlayHitMontage();
+	void JumpToHitSection(const FString& Section);
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* HitMontage;
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);

@@ -39,11 +39,10 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FString state = UEnum::GetValueAsString(State);
-	FString anim = UEnum::GetValueAsString(Anim->GetState());
-
+	// FString state = UEnum::GetValueAsString(State);
+	// FString anim = UEnum::GetValueAsString(Anim->GetState());
 	// UE_LOG(LogTemp, Warning, TEXT("state: %s, \n anim: %s"), *state, *anim);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Me->GetCharacterMovement()->MaxWalkSpeed);
+	
 	switch (State)
 	{
 	case EAwakenThorState::Idle:
@@ -359,12 +358,22 @@ void UAwakenThorFSM::StartFallAttack()
 	SphereOverlap(EHitType::NB_MEDIUM, false);
 }
 
+void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
+{
+	Str = UEnum::GetValueAsString(AtkDir).Mid(22);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *Str);
+}
+
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 {
 	if (State != EAwakenThorState::Idle)
 		return ;
+	FString Str;
+	GetHitDirectionString(AtkDir, Str);
 	State = EAwakenThorState::Damage;
 	Anim->SetState(State);
+	Anim->PlayHitMontage();
+	Anim->JumpToHitSection(Str);
 }
 
 void UAwakenThorFSM::SetJump(bool Value)
