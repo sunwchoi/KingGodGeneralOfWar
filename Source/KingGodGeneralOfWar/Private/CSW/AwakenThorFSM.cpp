@@ -359,7 +359,7 @@ void UAwakenThorFSM::StartFallAttack()
 	SphereOverlap(EHitType::NB_MEDIUM, false);
 }
 
-void UAwakenThorFSM::SetDamage()
+void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 {
 	if (State != EAwakenThorState::Idle)
 		return ;
