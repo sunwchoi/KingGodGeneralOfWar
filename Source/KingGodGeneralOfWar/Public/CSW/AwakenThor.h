@@ -44,7 +44,7 @@ public:
 	void DrawWeapon();
 
 	class UAwakenThorFSM* getFSM() const;
-	void SetHp(float Damage);
+	bool SetHp(float Damage);
 
 	void UpdateHpUI();
 private:

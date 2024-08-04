@@ -96,6 +96,11 @@ public:
 	void PlayHitMontage();
 	void JumpToHitSection(const FString& Section);
 
+	void PlayDieMontage();
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* DieMontage;
+
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* HitMontage;
 	

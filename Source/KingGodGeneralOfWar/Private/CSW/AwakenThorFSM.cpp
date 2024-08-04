@@ -351,9 +351,15 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 {
-	Me->SetHp(Damage);
+	bool isDie = Me->SetHp(Damage);
 	Me->UpdateHpUI();
-	
+
+	if (isDie)
+	{
+		State = EAwakenThorState::Die;
+		Anim->SetState(State);
+		Anim->PlayDieMontage();
+	}
 	if (State != EAwakenThorState::Idle)
 		return ;
 	FString Str;
@@ -398,7 +404,7 @@ void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 			{
 				FString tmp = UEnum::GetValueAsString(State);
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
-				Target->Damage(Damage, HitType, IsMelee);
+				Target->Damage(Me, Damage, HitType, IsMelee);
 			} // SetDamage
 		}
 
