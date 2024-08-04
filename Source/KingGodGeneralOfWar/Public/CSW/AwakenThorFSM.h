@@ -75,12 +75,15 @@ public:
 
 	void GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
 
+	
+
 	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::FORWARD);
 	void SetJump(bool Value);
 	EAwakenThorState GetState() const;
 
 
 private:
+	void DrawDecal();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;
@@ -120,6 +123,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
 	float KickZoneRadius = 100.f;
+
 	
-	void SphereOverlap(EHitType HitType, bool IsMelee);
+	
+	void SphereOverlap(float Damage, EHitType HitType, bool IsMelee);
+	void DrawAttackZoneDecal(bool isAttack = false);
 };

@@ -127,7 +127,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
-		State = EAwakenThorState::RangedAttackChange;
+		// State = EAwakenThorState::RangedAttackChange;
 		if (State != EAwakenThorState::Dash)
 		{
 			if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport)
@@ -284,19 +284,12 @@ void UAwakenThorFSM::ReadyPoundAttack()
 	dy = FMath::RandRange(minDy, maxDy);
 	AttackZone.Add(std::make_pair(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0), PoundZoneRadius));
 	
-	for (auto zone : AttackZone)
-	{
-		FVector size = FVector(100, 100, 5);
-	
-		UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-		UE_LOG(LogTemp, Warning, TEXT("ThorPoundAttack"));
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 5.f);
-	}
+	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartPoundAttack()
 {
-	SphereOverlap(EHitType::STUN, false);
+	SphereOverlap(10, EHitType::STUN, false);
 }
 
 void UAwakenThorFSM::StartClapAttack()
@@ -305,7 +298,7 @@ void UAwakenThorFSM::StartClapAttack()
 
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(attackLoc, ClapZoneRadius));
-	SphereOverlap(EHitType::NB_HIGH, true);
+	SphereOverlap(10, EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::StartKickAttack()
@@ -314,7 +307,7 @@ void UAwakenThorFSM::StartKickAttack()
 	
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(attackLoc, KickZoneRadius));
-	SphereOverlap(EHitType::NB_HIGH, true);
+	SphereOverlap(10, EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::ReadyJumpAttack()
@@ -327,41 +320,27 @@ void UAwakenThorFSM::ReadyJumpAttack()
 	for (int i = 0; i < 5; i++)
 		AttackZone.Add(std::make_pair(org + (fwd + FRotator(0, 75 * i, 0).Vector()) * 1000, JumpAtkZoneRaidus));
 
-	for (auto zone : AttackZone)
-	{
-		FVector size = FVector(100, 100, 5);
-	
-		UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-		UE_LOG(LogTemp, Warning, TEXT("ThorPoundAttack"));
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 5.f);
-	}
+	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartJumpAttack()
 {
-	SphereOverlap(EHitType::STUN, false);
+	SphereOverlap(10, EHitType::STUN, false);
 	FVector loc = Me->GetActorLocation();
 	FVector target = Target->GetActorLocation();
 	
 	Me->SetActorLocation(FVector(target.X, target.Y, loc.Z) + Target->GetActorForwardVector() * 100);
-	FVector newLoc = Me->GetActorLocation();\
+	FVector newLoc = Me->GetActorLocation();
 	newLoc.Z = 0;
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(newLoc, JumpAtkZoneRaidus));
 
-	for (auto zone : AttackZone)
-	{
-		FVector size = FVector(100, 100, 5);
-	
-		UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-		UE_LOG(LogTemp, Warning, TEXT("ThorPoundAttack"));
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 5.f);
-	}
+	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartFallAttack()
 {
-	SphereOverlap(EHitType::NB_HIGH, false);
+	SphereOverlap(20, EHitType::NB_HIGH, false);
 }
 
 void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
@@ -395,7 +374,7 @@ EAwakenThorState UAwakenThorFSM::GetState() const
 	return State;
 }
 
-void UAwakenThorFSM::SphereOverlap(EHitType HitType, bool IsMelee)
+void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 {
 
 	TArray<AActor *> OverlappedActors;
@@ -419,11 +398,38 @@ void UAwakenThorFSM::SphereOverlap(EHitType HitType, bool IsMelee)
 			{
 				FString tmp = UEnum::GetValueAsString(State);
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
-				Target->Damage(1, HitType, IsMelee);
+				Target->Damage(Damage, HitType, IsMelee);
 			} // SetDamage
 		}
 
-		DrawDebugSphere(GetWorld(), zone.first, zone.second, 32, FColor::Green, false, 1.f);
+		FVector newLoc(zone.first.X, zone.first.Y, 20);
+		if (!IsMelee)
+			GetWorld()->SpawnActor<AActor>(Me->LightBPClass, newLoc, FRotator::ZeroRotator);
+		// DrawDebugSphere(GetWorld(), zone.first, zone.second, 32, FColor::Green, false, 1.f);
+	}
+	if(!IsMelee)
+	DrawAttackZoneDecal(true);
+}
+
+void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
+{
+	for (auto zone : AttackZone)
+	{
+		FVector size = FVector(zone.second, zone.second,0);
+
+		UMaterialInterface* AttackZoneDecal;
+		if (!isAttack)
+		{
+			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
+			size.Z = 10;
+		}
+		else
+		{
+			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
+			size.Z = 3;
+		}
+			
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.f);
 	}
 }
 

@@ -19,7 +19,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> LightBPClass;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -60,6 +63,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UHpBar> HpBarBPClass;
 
+	
 	UPROPERTY()
 	UHpBar* HpBar;
 
