@@ -137,7 +137,8 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 	}
 	else
 	{
-		AwakenThor->getFSM()->SetDamage();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
+		AwakenThor->getFSM()->SetDamage(5, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
 	}
 
 	if (!isWithdraw)

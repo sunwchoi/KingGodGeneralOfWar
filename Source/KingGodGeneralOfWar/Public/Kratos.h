@@ -9,7 +9,6 @@
 #include "Kratos.generated.h"
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
-
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -46,16 +45,22 @@ enum class EHitType : uint8
 UENUM()
 enum class EAttackDirectionType : uint8
 {
-	FORWARD UMETA(DisplayName = "FORWARD"),
+	FORWARD = 0 UMETA(DisplayName = "FORWARD"),
 	BACKWARD UMETA(DisplayName = "BACKWARD"),
 	LEFT UMETA(DisplayName = "LEFT"),
 	RIGHT UMETA(DisplayName = "RIGHT"),
 };
 
+const EAttackDirectionType AttackTypeDirectionArr[5][5] = {
+	{EAttackDirectionType::FORWARD, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT, },
+	{EAttackDirectionType::FORWARD, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
+	{EAttackDirectionType::FORWARD, EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
+	{EAttackDirectionType::FORWARD, EAttackDirectionType::BACKWARD, }
+};
 UENUM()
 enum class EAttackType : uint8
 {
-	WEAK_ATTACK UMETA(DisplayName = "WEAK_ATTACK"),
+	WEAK_ATTACK = 0 UMETA(DisplayName = "WEAK_ATTACK"),
 	STRONG_ATTACK UMETA(DisplayName = "STRONG_ATTACK"),
 	RUNE_ATTACK UMETA(DisplayName = "RUNE_ATTACK"),
 	AXE_THROW_ATTACK UMETA(DisplayName = "AXE_THROW_ATTACK"),
