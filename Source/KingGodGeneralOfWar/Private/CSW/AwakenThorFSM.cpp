@@ -377,6 +377,9 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 {
+	Me->SetHp(Damage);
+	Me->UpdateHpUI();
+	
 	if (State != EAwakenThorState::Idle)
 		return ;
 	FString Str;

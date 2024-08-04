@@ -5,6 +5,7 @@
 
 #include "Kratos.h"
 #include "CSW/AwakenThorFSM.h"
+#include "CSW/HpBar.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
@@ -28,6 +29,9 @@ void AAwakenThor::BeginPlay()
 	Super::BeginPlay();
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 
+	HpBar = CreateWidget<UHpBar>(GetWorld(), HpBarBPClass);
+	HpBar->AddToViewport();
+	
 }
 
 // Called every frame
@@ -84,6 +88,14 @@ UAwakenThorFSM* AAwakenThor::getFSM() const
 	return Fsm;
 }
 
+void AAwakenThor::SetHp(float Damage)
+{
+	if (Hp > Damage)
+		Hp -= Damage;
+	else
+		Hp = 0;
+}
+
 void AAwakenThor::SetThorLocation(FVector NewLoc)
 {
 	SetActorLocation(NewLoc);
@@ -91,3 +103,7 @@ void AAwakenThor::SetThorLocation(FVector NewLoc)
 	Mjolnir->SetRelativeLocation(FVector(0, 60, 20));
 }
 
+void AAwakenThor::UpdateHpUI()
+{
+	HpBar->SetHp(Hp, MaxHp);
+}

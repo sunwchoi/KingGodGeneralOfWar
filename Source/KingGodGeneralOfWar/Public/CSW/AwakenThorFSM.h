@@ -108,6 +108,7 @@ private:
 
 	bool bJump;
 
+
 	
 
 	void SphereOverlap(EHitType HitType, bool IsMelee);
