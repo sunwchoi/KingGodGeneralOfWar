@@ -97,24 +97,24 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 		//SetActorLocation(GetActorLocation() + Direction * Speed * GetWorld()->DeltaTimeSeconds);
 
 		MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("call tick"));
+		//UE_LOG(LogTemp, Warning, TEXT("call tick"));
 
 
 		float Distance = FVector::Dist(GetActorLocation(), HandLocation);
 
 		if (Distance < 200.0f) // 거리 체크
 		{
+			bReturning = false;
+			bCreateTrue = false;
 			this->Destroy(); // 자신을 파괴
 			UE_LOG(LogTemp, Warning, TEXT("Destroy"));
 			Thor->EquipWeapon(); // 무기 다시 보이게 하기
 			UE_LOG(LogTemp, Warning, TEXT("Mjolnir Back"));
 
-			bReturning = false;
-			bCreateTrue = false;
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, bCreateTrue : %s "), bReturning ? TEXT("true") : TEXT("false"), bCreateTrue ? TEXT("true") : TEXT("false"));
+	//UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, bCreateTrue : %s "), bReturning ? TEXT("true") : TEXT("false"), bCreateTrue ? TEXT("true") : TEXT("false"));
 
 }
 
@@ -123,7 +123,7 @@ void ABDThorMjolnir::FireInDirection(const FVector& ShootDirection)
 	//묠니르가 전혀 스폰되지 않은 상태일때만
 	if (!bCreateTrue) { 
 		// MjoCol과 MjolnirMesh를 -90도로 회전시킴
-		FRotator NewRotation = FRotator(0, -90, 90);
+		FRotator NewRotation = FRotator(90, -90, 90);
 		MjoCol->SetRelativeRotation(NewRotation);
 		MjolnirMesh->SetRelativeRotation(NewRotation);
 
@@ -149,7 +149,7 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		//데미지 처리
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		if (AttackTarget) {
-			//AttackTarget->Damage(BDThrowDamage, EAttackType::Attack1);
+			AttackTarget->Damage(10, EHitType::STAGGER, false);
 			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
 		}
 	}

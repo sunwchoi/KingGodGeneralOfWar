@@ -141,8 +141,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;
-
-	UPROPERTY(EditDefaultsOnly)
-	FTimerHandle StateTimerHandle; //상태 변경 전의 딜레이 주기 위한 변수
 		
 };

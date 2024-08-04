@@ -40,10 +40,10 @@ ABDThor::ABDThor()
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
 	//애니메이션 블루프린트 할당하기
-	ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor'"));
+	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor'"));
 	if (BDThorAnimation.Succeeded()) {
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
-	}
+	}*/
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +51,7 @@ void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetCharacterMovement()->bOrientRotationToMovement = true; //플레이어 방향으로 바라보기
+	//GetCharacterMovement()->bOrientRotationToMovement = true; //플레이어 방향으로 바라보기
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
@@ -63,6 +63,7 @@ void ABDThor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called to bind functionality to input
@@ -125,13 +126,14 @@ void ABDThor::visibleWeapon()
 void ABDThor::BDHammerThrowHit()
 {
 	FTransform t = GetMesh()->GetSocketTransform(TEXT("BDMjolnirHand"));
-	ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t);
+	//ABDThorMjolnir* Mjolnir = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t);
+	FlyWeapon  = GetWorld()->SpawnActor<ABDThorMjolnir>(MjolnirFactory, t);
 
-	if (Mjolnir)
+	if (FlyWeapon)
 	{
 		//FVector LaunchDirection = (fsm->Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
 		FVector LaunchDirection = GetActorForwardVector();
-		Mjolnir->FireInDirection(LaunchDirection);
+		FlyWeapon->FireInDirection(LaunchDirection);
 		UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
 	}
 	else {

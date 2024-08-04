@@ -11,16 +11,6 @@ void UBDThorAnim::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	/*if (bdThor == nullptr || bdThor->IsValidLowLevel()) {
-		auto ownerPawn = TryGetPawnOwner();
-		bdThor = Cast<ABDThor>(ownerPawn);
-
-	}
-
-	if (bdThorFSM == nullptr || bdThorFSM->IsValidLowLevel()) {
-		bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
-	}*/
-
 	if (!bdThor) {
 		auto ownerPawn = TryGetPawnOwner();
 		//auto* actor = UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass());
@@ -31,10 +21,6 @@ void UBDThorAnim::NativeUpdateAnimation(float DeltaSeconds)
 		bdThorFSM = Cast<UBDThorFSM>(bdThor->fsm);
 	}
 
-	if (!Mjolnir) {
-		auto* actor = UGameplayStatics::GetActorOfClass(GetWorld(), ABDThorMjolnir::StaticClass());
-		Mjolnir = Cast<ABDThorMjolnir>(actor);
-	}
 }
 
 
@@ -91,10 +77,10 @@ void UBDThorAnim::playBDHammerThreeSwing()
 
 void UBDThorAnim::AnimNotify_AnimEnd()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
+	UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
 	if (bdThorFSM) {
 		bdThorFSM->BDEndState(); // 애니메이션이 끝날 시 제어
-		//UE_LOG(LogTemp, Warning, TEXT("Succed"));
+		UE_LOG(LogTemp, Warning, TEXT("Succed"));
 	}
 	else {
 		//UE_LOG(LogTemp, Warning, TEXT("Faild"));
@@ -115,6 +101,6 @@ void UBDThorAnim::AnimNotify_SlashWind()
 
 void UBDThorAnim::AnimNotify_BackMjolnir()
 {
-	Mjolnir->BackMjolnir(); //묠니르가 돌아오도록 호출
+	bdThor->FlyWeapon->BackMjolnir(); //묠니르가 돌아오도록 호출
 	UE_LOG(LogTemp, Warning, TEXT("Notify Back1"));
 }

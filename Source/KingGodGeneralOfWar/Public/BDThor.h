@@ -60,6 +60,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = weapon)
 	TSubclassOf<class ABDThorMjolnir> MjolnirFactory;
 
+	UPROPERTY()
+	class ABDThorMjolnir* FlyWeapon;
+
 
 	UFUNCTION(BlueprintCallable, Category = weapon)
 	void BDHammerThrowHit(); //망치를 Fire 하는 능력
