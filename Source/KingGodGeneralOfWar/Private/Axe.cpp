@@ -86,12 +86,12 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 
 	if (player)		player->CameraShakeOnAttack();
 
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.04f);
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.08f);
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.002f, false);
+		}, 0.008f, false);
 }
 
 void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
