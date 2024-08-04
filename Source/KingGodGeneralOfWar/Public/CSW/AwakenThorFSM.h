@@ -83,8 +83,6 @@ public:
 
 
 private:
-	void DrawDecal();
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;
 
@@ -128,4 +126,7 @@ private:
 	
 	void SphereOverlap(float Damage, EHitType HitType, bool IsMelee);
 	void DrawAttackZoneDecal(bool isAttack = false);
+
+	void SphereOverlapForPound(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
+	void DrawAttackZoneDecalForPound(const std::pair<FVector, float>& Zone, bool isAttack = false);
 };
