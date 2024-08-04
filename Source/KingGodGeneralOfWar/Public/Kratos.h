@@ -260,7 +260,7 @@ public:
 	class ASG_Shield* Shield;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UCameraShakeBase> AttackShake;
+	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> AimWidgetClass;

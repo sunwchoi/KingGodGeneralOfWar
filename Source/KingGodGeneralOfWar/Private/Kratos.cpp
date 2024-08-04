@@ -397,8 +397,7 @@ void AKratos::SetShield()
 
 void AKratos::CameraShakeOnAttack()
 {
-	//FAddCameraShakeParams params();
-	//GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShake,);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactory, 1.0f);
 }
 
 FString AKratos::GetHitSectionName(EHitType hitType)
@@ -726,6 +725,7 @@ void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 
 void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
 {
+	if (bAxeGone) return;
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		State = EPlayerState::NoneMovable;
@@ -792,13 +792,8 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 		break;
 	// 패링 가능 상태
 	case EPlayerState::GuardStart:
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Parrying"));
-		//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(1, 1, 1));
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->GetActorTransform());
-		//GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket"))
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
 		bParrying = true;
 		State = EPlayerState::Parry;
 
