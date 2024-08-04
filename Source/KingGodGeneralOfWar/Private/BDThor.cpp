@@ -9,6 +9,8 @@
 #include "Kratos.h"
 #include "WindSlash.h"
 #include "BDThorMjolnir.h"
+#include "BDThorHP.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -55,7 +57,18 @@ void ABDThor::BeginPlay()
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
-	
+
+	//UI 보여주기
+	if (BDThorHPClass) {
+		UUserWidget* BDHPBar = CreateWidget<UUserWidget>(GetWorld(), BDThorHPClass);
+		BDThorHPBar = Cast<UBDThorHP>(BDHPBar);
+		if (BDThorHPBar) {
+			BDThorHPBar->AddToViewport();
+			BDThorHPBar->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+
+	UpdateHpUI();
 }
 
 // Called every frame
@@ -148,5 +161,12 @@ void ABDThor::BDHammerWindSlash()
 	FActorSpawnParameters parm;
 	parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AWindSlash>(SlashFat, GetActorLocation(), GetActorRotation(), parm);
+}
+
+void ABDThor::UpdateHpUI()
+{
+	if (BDThorHPBar) {
+		BDThorHPBar->SetHP(fsm->BDCurrentHP, fsm->BDMaxHp);
+	}
 }
 
