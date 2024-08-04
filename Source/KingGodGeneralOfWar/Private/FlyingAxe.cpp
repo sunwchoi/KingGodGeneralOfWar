@@ -131,12 +131,6 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 	this->AttachToComponent(Cast<ACharacter>(OtherActor)->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
 	this->SetActorEnableCollision(false); // 충돌 비활성화
 
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.05f);
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
-		{
-			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.0005f, false);
 	if (Thor)
 	{
 		Thor->fsm->Damage(10);

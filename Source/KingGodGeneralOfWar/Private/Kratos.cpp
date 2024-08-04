@@ -32,6 +32,8 @@ const float WALK_FOV = 90;
 const float RUN_FOV = 105;
 const float GUARD_FOV = 70;
 const float AIM_FOV = 60;
+
+const int GUARD_MAX_COUNT = 3;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -85,6 +87,8 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Aim, ETriggerEvent::Triggered, this, &AKratos::OnMyActionAimOn);
 		input->BindAction(IA_Aim, ETriggerEvent::Completed, this, &AKratos::OnMyActionAimOff);
 		input->BindAction(IA_WithdrawAxe, ETriggerEvent::Started, this, &AKratos::OnMyActionWithdrawAxe);
+		input->BindAction(IA_RuneBase, ETriggerEvent::Started, this, &AKratos::OnMyActionRuneBase);
+		
 	}
 }
 void AKratos::PostInitializeComponents()
@@ -95,24 +99,47 @@ void AKratos::PostInitializeComponents()
 	{
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnMontageEndedDelegated);
 
-		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
-		// 각각 콜리전 설정을 On -> Off로 전환
-		
+		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck
+		// 콜리전 설정을 On -> Off로 전환
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
 			{
-				// 방패 공격 : 강공격 콤보 3번쨰
-				if (CurrentStrongCombo == 3)
+				if (State == EPlayerState::StrongCombo)
+				{
+					// 방패 공격 : 강공격 콤보 3번쨰
+					if (CurrentStrongCombo == 3)
+						Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+					// 도끼 공격
+					else 
+						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				}
+				else if (State == EPlayerState::DashAttack)
+				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
-				// 도끼 공격
-				else 
+				}
+				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
+				{
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				}
 			});
+		// 공격이 끝난 시점을 체크하는 노티파이 AttackEndCheck
+		// 콜리전 설정을 Off -> On로 전환
 		Anim->OnAttackEndCheck.AddLambda([this]() -> void
 			{
-				if (CurrentStrongCombo == 3)
+				if (State == EPlayerState::StrongCombo)
+				{
+					if (CurrentStrongCombo == 3)
+						Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+					else
+						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+				}
+				else if (State == EPlayerState::DashAttack)
+				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-				else
+				}
+				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
+				{
 					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+				}
 
 			});
 		Anim->OnNextAttackCheck.AddLambda([this]() -> void
@@ -122,17 +149,17 @@ void AKratos::PostInitializeComponents()
 				if (bIsStrongComboInputOn)
 				{
 					StrongAttackStartComboState();
-					Anim->JumpToStrongAttackMontageSection(CurrentStrongCombo);
+					Anim->JumpToAttackMontageSection(CurrentStrongCombo);
 				}
 			});
 		Anim->OnNextWeakAttackCheck.AddLambda([this]() -> void
 			{
 				CanNextWeakCombo = false;
-
+				
 				if (bIsWeakComboInputOn)
 				{
 					WeakAttackStartComboState();
-					Anim->JumpToWeakAttackMontageSection(CurrentWeakCombo);
+					Anim->JumpToAttackMontageSection(CurrentWeakCombo);
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -168,7 +195,7 @@ void AKratos::BeginPlay()
 	{
 		SetShield();
 	}
-
+	GuardHitCnt = GUARD_MAX_COUNT;
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
@@ -205,6 +232,8 @@ void AKratos::Tick(float DeltaTime)
 	{
 		TargetFOV -= 10;
 	}
+	if (bRuneReady)
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("RuneReady")));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
@@ -268,14 +297,11 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	else if (Montage == Anim->WeakAttackMontage)
 	{
 		State = EPlayerState::Idle;
-		CanNextWeakCombo = false;
-		CurrentWeakCombo = 0;
-		bIsAttacking = false;
+		WeakAttackEndComboState();
 	}
 	else if (Montage == Anim->DodgeMontage)
 	{
-		//if (State == EPlayerState::Roll) return;
-		if (bInterrupted) return;
+		if (State == EPlayerState::Roll || State == EPlayerState::DashAttack) return;
 
 		State = EPlayerState::Idle;
 		bIsDodging = false;
@@ -295,8 +321,29 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else
 		{
+			GuardHitCnt = GUARD_MAX_COUNT;
 			State = EPlayerState::Idle;
 		}
+	}
+	else if (Montage == Anim->DashAttackMontage)
+	{
+		State = EPlayerState::Idle;
+		bIsDodging = false;
+
+	}
+	else if (Montage == Anim->RuneBaseMontage)
+	{
+		State = EPlayerState::Idle;
+		bRuneReady = true;
+	}
+	else if (Montage == Anim->RuneAttackMontage)
+	{
+		State = EPlayerState::Idle;
+		bRuneReady = false;
+		WeakAttackEndComboState();
+	}
+	else
+	{
 	}
 }
 
@@ -321,7 +368,6 @@ void AKratos::SetShield()
 	{
 		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
-
 	}
 }
 
@@ -547,12 +593,25 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
 		|| State == EPlayerState::Run)
 	{
-		State = EPlayerState::MeleeAttack;
+		if (!bRuneReady)
+		{
+			State = EPlayerState::WeakCombo;
 
-		WeakAttackStartComboState();
-		Anim->PlayWeakAttackMontage();
-		Anim->JumpToWeakAttackMontageSection(1);
-		bIsAttacking = true;
+			WeakAttackStartComboState();
+			Anim->PlayWeakAttackMontage();
+			Anim->JumpToAttackMontageSection(1);
+			bIsAttacking = true;
+		}
+		// 룬 공격
+		else
+		{
+			State = EPlayerState::RuneAttack;
+
+			WeakAttackStartComboState();
+			Anim->PlayRuneAttackMontage();
+			Anim->JumpToAttackMontageSection(1);
+			bIsAttacking = true;
+		}
 	}
 	// 도끼 던지기
 	else if (State == EPlayerState::Aim)
@@ -560,9 +619,12 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		bAxeGone = true;
 		Anim->PlayAxeThrowMontage();
 	}
+	// 대시 공격
 	else if (State == EPlayerState::Dodge)
 	{
-		
+		State = EPlayerState::DashAttack;
+		LaunchCharacter(GetActorForwardVector() * 1500, false, false);
+		Anim->PlayDashAttackMontage();
 	}
 }
 
@@ -581,11 +643,11 @@ void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
 		|| State == EPlayerState::Run)
 	{
-		State = EPlayerState::MeleeAttack;
+		State = EPlayerState::StrongCombo;
 
 		StrongAttackStartComboState();
 		Anim->PlayStrongAttackMontage();
-		Anim->JumpToStrongAttackMontageSection(1);
+		Anim->JumpToAttackMontageSection(1);
 		bIsAttacking = true;
 	}
 	
@@ -613,11 +675,21 @@ void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 		Anim->PlayAxeWithdrawMontage();
 }
 
+void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
+{
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
+	{
+		State = EPlayerState::NoneMovable;
+		Anim->PlayRuneBaseMontage();
+
+	}
+}
+
 void AKratos::WeakAttackStartComboState()
 {
 	CanNextWeakCombo = true;
 	bIsWeakComboInputOn = false;
-	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 3);
+	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
 }
 
 void AKratos::WeakAttackEndComboState()
@@ -625,6 +697,7 @@ void AKratos::WeakAttackEndComboState()
 	bIsWeakComboInputOn = false;
 	CanNextWeakCombo = false;
 	CurrentWeakCombo = 0;
+	bIsAttacking = false;
 }
 
 void AKratos::StrongAttackStartComboState()
@@ -650,6 +723,16 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 	else if (State == EPlayerState::Guard)
 	{
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
+		if (GuardHitCnt >= 1)
+		{
+			FVector PlayerToEnemyDirection = GetActorForwardVector();
+			LaunchCharacter(PlayerToEnemyDirection * -1 * 1000, true, false);
+			GuardHitCnt -= 1;
+		}
+		else
+		{
+			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
+		}
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("가드"));
 	}
 	else if (State == EPlayerState::GuardStart)
@@ -664,7 +747,7 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 			}, 0.02f, false);
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("패링!!!!"));
 		bParrying = true;
-		State = EPlayerState::Dodge;
+		State = EPlayerState::Parry;
 	}
 	else
 	{

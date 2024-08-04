@@ -49,6 +49,12 @@ USG_KratosAnim::USG_KratosAnim()
 		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneBase.AM_Kratos_RuneBase'")
 	);
 	if (TempRuneBaseMontage.Succeeded())	RuneBaseMontage = TempRuneBaseMontage.Object;
+
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRuneAttackMontage(
+		TEXT("/ Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneAttack.AM_Kratos_RuneAttack'")
+	);
+	if (TempRuneAttackMontage.Succeeded())	RuneAttackMontage = TempRuneAttackMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -74,12 +80,14 @@ void USG_KratosAnim::UpdatePlayerState()
 }
 void USG_KratosAnim::PlayWeakAttackMontage()
 {
-	Montage_Play(WeakAttackMontage, 1.0f);
+	if (!Montage_IsPlaying(WeakAttackMontage))
+		Montage_Play(WeakAttackMontage, 1.0f);
 
 }
 void USG_KratosAnim::PlayStrongAttackMontage()
 {
-	Montage_Play(StrongAttackMontage, 1.0f);
+	if (!Montage_IsPlaying(StrongAttackMontage))
+		Montage_Play(StrongAttackMontage, 1.0f);
 }
 
 void USG_KratosAnim::PlayDodgeMontage()
@@ -114,19 +122,45 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 			check(AxeWithdrawMontage);
 			if (AxeWithdrawMontage)
 				Montage_Play(AxeWithdrawMontage);
-			
+
 		}, 1.15f, false);
 
 }
 
-void USG_KratosAnim::JumpToStrongAttackMontageSection(int32 NewSection)
+void USG_KratosAnim::PlayRuneBaseMontage()
 {
-	Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
+	if (!Montage_IsPlaying(RuneBaseMontage))
+		Montage_Play(RuneBaseMontage);
 }
 
-void USG_KratosAnim::JumpToWeakAttackMontageSection(int32 NewSection)
+void USG_KratosAnim::PlayDashAttackMontage()
 {
-	Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
+	Montage_Play(DashAttackMontage);
+}
+
+void USG_KratosAnim::PlayRuneAttackMontage()
+{
+	if (!Montage_IsPlaying(RuneAttackMontage))
+		Montage_Play(RuneAttackMontage);
+}
+
+void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
+{
+	if (Montage_IsPlaying(StrongAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
+	else if (Montage_IsPlaying(WeakAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
+	else if (Montage_IsPlaying(RuneAttackMontage))
+	{
+		Montage_JumpToSection(GetAttackMontageSection(NewSection), RuneAttackMontage);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+	}
 }
 
 void USG_KratosAnim::JumpToDodgeMontageSection(FString SectionName)
