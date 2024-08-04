@@ -56,7 +56,6 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	if (Thor)
 	{
 		Thor->fsm->Damage(10);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
 		int attackNum = 0;
 		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
 			attackNum = player->CurrentWeakCombo;
@@ -70,7 +69,6 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 		
-//		AwakenThor->getFSM()->SetDamage();
 		int attackNum = 0;
 		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
 			attackNum = player->CurrentWeakCombo;
@@ -79,9 +77,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		else
 			attackNum = 0;
 		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(attackDirection) );
 		AwakenThor->getFSM()->SetDamage(8, attackDirection);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
 	}
 
 	if (player)		player->CameraShakeOnAttack();

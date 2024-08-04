@@ -276,7 +276,7 @@ public:
 
 	void SetWeapon();
 	void SetShield();
-	void CameraShakeOnAttack();
+	void CameraShakeOnAttack(float scale = 1.0f);
 	FString GetHitSectionName(EHitType hitType);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ParryVFX;

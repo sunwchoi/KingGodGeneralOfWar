@@ -404,9 +404,9 @@ void AKratos::SetShield()
 	}
 }
 
-void AKratos::CameraShakeOnAttack()
+void AKratos::CameraShakeOnAttack(float scale)
 {
-	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactory, 1.0f);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactory, scale);
 }
 
 FString AKratos::GetHitSectionName(EHitType hitType)
@@ -863,6 +863,8 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			{
 				Thor->fsm->Damage(10);
 				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
+				CameraShakeOnAttack(5.0f);
+
 			}
 			else
 			{
@@ -870,6 +872,7 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 				AwakenThor->getFSM()->SetDamage(10, EAttackDirectionType::FORWARD);
 				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
+				CameraShakeOnAttack(5.0f);
 			}
 		}
 	}
