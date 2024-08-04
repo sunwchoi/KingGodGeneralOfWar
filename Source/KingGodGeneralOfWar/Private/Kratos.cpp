@@ -245,6 +245,8 @@ void AKratos::Tick(float DeltaTime)
 	if (bRuneReady)
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("RuneReady")));
 
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo ));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
@@ -365,7 +367,6 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	else if (Montage == Anim->AxeWithdrawMontage)
 	{
 		bIsAxeWithdrawing = false;
-		bAxeGone = false;
 	}
 }
 
@@ -656,7 +657,6 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 	// 도끼 던지기
 	else if (State == EPlayerState::Aim)
 	{
-		bAxeGone = true;
 		Anim->PlayAxeThrowMontage();
 		CurrentAttackType = EAttackType::AXE_THROW_ATTACK;
 	}

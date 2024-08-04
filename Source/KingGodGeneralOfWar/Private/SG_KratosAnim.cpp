@@ -54,7 +54,7 @@ USG_KratosAnim::USG_KratosAnim()
 
 
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempRuneAttackMontage(
-		TEXT("/Script/Engine.AnimMontage'/Game/YJI/Assets/Animation/Player/Attack/RuneAttack/AM_RuneAttack01.AM_RuneAttack01'")
+		TEXT("/Script/Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_RuneAttack.AM_Kratos_RuneAttack'")
 	);
 	if (TempRuneAttackMontage.Succeeded())	RuneAttackMontage = TempRuneAttackMontage.Object;
 
