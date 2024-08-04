@@ -111,7 +111,6 @@ void UAwakenThorFSM::IdleState()
 			NextStates.Add(EAwakenThorState::RangedAttackChange);
 			NextStates.Add(EAwakenThorState::BackTeleport);
 			NextStates.Add(EAwakenThorState::BackTeleport);
-			NextStates.Add(EAwakenThorState::BackTeleport);
 			NextStates.Add(EAwakenThorState::LeftTeleport);
 			NextStates.Add(EAwakenThorState::RightTeleport);
 		}
@@ -289,7 +288,8 @@ void UAwakenThorFSM::ReadyPoundAttack()
 
 void UAwakenThorFSM::StartPoundAttack()
 {
-	SphereOverlap(10, EHitType::STUN, false);
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
+	SphereOverlapForPound(AttackZone.Pop(), 10, EHitType::STUN, false);
 }
 
 void UAwakenThorFSM::StartClapAttack()
@@ -340,6 +340,7 @@ void UAwakenThorFSM::StartJumpAttack()
 
 void UAwakenThorFSM::StartFallAttack()
 {
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
 	SphereOverlap(20, EHitType::NB_HIGH, false);
 }
 
@@ -417,6 +418,57 @@ void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 	DrawAttackZoneDecal(true);
 }
 
+void UAwakenThorFSM::SphereOverlapForPound(const std::pair<FVector, float>& zone, float Damage, EHitType HitType, bool IsMelee)
+{
+	TArray<AActor *> OverlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
+
+	
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		zone.first,
+		zone.second,
+		ObjectTypes,
+		AKratos::StaticClass(),
+		TArray<AActor*>(),
+		OverlappedActors
+		);
+	if (OverlappedActors.Num() > 0)
+	{
+		if(Cast<AKratos>(OverlappedActors.Top()))
+		{
+			FString tmp = UEnum::GetValueAsString(State);
+			Target->Damage(Me, Damage, HitType, IsMelee);
+		} 
+	}
+
+	FVector newLoc(zone.first.X, zone.first.Y, 20);
+	if (!IsMelee)
+		GetWorld()->SpawnActor<AActor>(Me->LightBPClass, newLoc, FRotator::ZeroRotator);
+	if(!IsMelee)
+		DrawAttackZoneDecalForPound(zone, true);
+}
+
+void UAwakenThorFSM::DrawAttackZoneDecalForPound(const std::pair<FVector, float>& zone, bool isAttack)
+{
+	FVector size = FVector(zone.second, zone.second,0);
+
+	UMaterialInterface* AttackZoneDecal;
+	if (!isAttack)
+	{
+		AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
+		size.Z = 10;
+	}
+	else
+	{
+		AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
+		size.Z = 3;
+	}
+			
+	UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.f);
+}
+
 void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
 {
 	for (auto zone : AttackZone)
@@ -435,7 +487,7 @@ void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
 			size.Z = 3;
 		}
 			
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.f);
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.5f);
 	}
 }
 

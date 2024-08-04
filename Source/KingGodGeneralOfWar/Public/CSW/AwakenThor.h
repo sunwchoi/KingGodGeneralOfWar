@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> LightBPClass;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UCameraShakeBase> PoundCameraShake;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
