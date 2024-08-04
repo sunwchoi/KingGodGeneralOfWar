@@ -254,6 +254,11 @@ void USG_KratosAnim::AnimNotify_TimeDilation()
 		}, 0.02f, false);
 }
 
+void USG_KratosAnim::AnimNotify_FieldSpawn()
+{
+	
+}
+
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
 {
 	return FName(*FString::Printf(TEXT("Attack%d"), Section));

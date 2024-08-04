@@ -119,6 +119,9 @@ private:
 	UFUNCTION()
 	void AnimNotify_TimeDilation();
 
+	UFUNCTION()
+	void AnimNotify_FieldSpawn();
+
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);
