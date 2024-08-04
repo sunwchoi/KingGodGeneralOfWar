@@ -216,6 +216,8 @@ void UBDThorFSM::Damage(float DamageNum)
 {
 	BDCurrentHP -= DamageNum;
 
+	me->UpdateHpUI(); //체력 설정
+
 	//피격 상태로 변경한다.
 	mState = BDThorGeneralState::BDDamage;
 
