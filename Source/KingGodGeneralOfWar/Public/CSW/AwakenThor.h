@@ -36,14 +36,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Teleport(FVector Target);
-	
+
+	void EquipWeapon();
+	void DrawWeapon();
 
 	class UAwakenThorFSM* getFSM() const;
 	void SetHp(float Damage);
 
 	void UpdateHpUI();
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))

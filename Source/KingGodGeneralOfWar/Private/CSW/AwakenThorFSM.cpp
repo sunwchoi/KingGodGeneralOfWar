@@ -127,7 +127,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
-		// State = EAwakenThorState::LeftTeleport;
+		State = EAwakenThorState::RangedAttackChange;
 		if (State != EAwakenThorState::Dash)
 		{
 			if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport)
@@ -267,23 +267,22 @@ void UAwakenThorFSM::Teleport()
 void UAwakenThorFSM::ReadyPoundAttack()
 {
 	FVector targetLoc = Target->GetActorLocation();
-	float zoneRad = 100.f;
 	float minDx = 300.f;
 	float maxDx = 1000.f;
 	float minDy = -1000.f;
 	float maxDy = 1000.f;
 	
 	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X, targetLoc.Y, 0), zoneRad));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X, targetLoc.Y, 0), PoundZoneRadius));
 
 	float dx = FMath::RandRange(minDx, maxDx);
 	float dy = FMath::RandRange(minDy, maxDy);
 
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0), zoneRad));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0), PoundZoneRadius));
 
 	dx = FMath::RandRange(minDx, maxDx);
 	dy = FMath::RandRange(minDy, maxDy);
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0), zoneRad));
+	AttackZone.Add(std::make_pair(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0), PoundZoneRadius));
 	
 	for (auto zone : AttackZone)
 	{
@@ -303,20 +302,18 @@ void UAwakenThorFSM::StartPoundAttack()
 void UAwakenThorFSM::StartClapAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand"));
-	float zoneRadius = 50.f;
 
 	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
+	AttackZone.Add(std::make_pair(attackLoc, ClapZoneRadius));
 	SphereOverlap(EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::StartKickAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
-	float zoneRadius = 50.f;
-
+	
 	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(attackLoc, zoneRadius));
+	AttackZone.Add(std::make_pair(attackLoc, KickZoneRadius));
 	SphereOverlap(EHitType::NB_HIGH, true);
 }
 
@@ -324,12 +321,11 @@ void UAwakenThorFSM::ReadyJumpAttack()
 {
 	FVector org = Me->GetActorLocation();
 	FVector fwd = Me->GetActorForwardVector();
-	float zoneRadius = 100.f;
 	org.Z = 0;
 
 	AttackZone.Empty();
 	for (int i = 0; i < 5; i++)
-		AttackZone.Add(std::make_pair(org + (fwd + FRotator(0, 75 * i, 0).Vector()) * 1000, zoneRadius));
+		AttackZone.Add(std::make_pair(org + (fwd + FRotator(0, 75 * i, 0).Vector()) * 1000, JumpAtkZoneRaidus));
 
 	for (auto zone : AttackZone)
 	{
@@ -346,13 +342,12 @@ void UAwakenThorFSM::StartJumpAttack()
 	SphereOverlap(EHitType::STUN, false);
 	FVector loc = Me->GetActorLocation();
 	FVector target = Target->GetActorLocation();
-	float zoneRadius = 100.f;
 	
 	Me->SetActorLocation(FVector(target.X, target.Y, loc.Z) + Target->GetActorForwardVector() * 100);
 	FVector newLoc = Me->GetActorLocation();\
 	newLoc.Z = 0;
 	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(newLoc, zoneRadius));
+	AttackZone.Add(std::make_pair(newLoc, JumpAtkZoneRaidus));
 
 	for (auto zone : AttackZone)
 	{

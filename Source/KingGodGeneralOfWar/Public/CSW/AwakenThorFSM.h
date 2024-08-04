@@ -109,7 +109,17 @@ private:
 	bool bJump;
 
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
+	float ClapZoneRadius = 100.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
+	float PoundZoneRadius = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
+	float JumpAtkZoneRaidus = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
+	float KickZoneRadius = 100.f;
+	
 	void SphereOverlap(EHitType HitType, bool IsMelee);
 };

@@ -57,6 +57,11 @@ void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Catch()
 	Fsm->Teleport();
 }
 
+void UAwakenThorAnim::AnimNotify_ClapAttackReady()
+{
+	Owner->DrawWeapon();
+}
+
 void UAwakenThorAnim::AnimNotify_ClapAttackStart()
 {
 	Fsm->StartClapAttack();
@@ -64,6 +69,7 @@ void UAwakenThorAnim::AnimNotify_ClapAttackStart()
 
 void UAwakenThorAnim::AnimNotify_ClapAttackEnd()
 {
+	Owner->EquipWeapon();
 	AnimState = EAwakenThorState::Idle;
 	Fsm->SetState(EAwakenThorState::Idle);
 }
