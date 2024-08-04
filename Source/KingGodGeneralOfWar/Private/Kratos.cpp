@@ -215,7 +215,7 @@ void AKratos::Tick(float DeltaTime)
 	FRotator playerRotation = GetActorRotation();
 
 	// 플레이어 로테이션 선형 보간
-	SetActorRotation(UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 5, true));
+	SetActorRotation(UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 6, true));
 
 	// 카메라 시야각 선형 보간
 	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 10);
@@ -288,7 +288,7 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 
 		FRotator playerCameraRotation = GetController()->AController::GetControlRotation();
 		TargetCameraRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTarget->GetActorLocation());
-		FRotator ToCameraRotation = UKismetMathLibrary::RLerp(playerCameraRotation, TargetCameraRotation, DeltaTime * 15, true);
+		FRotator ToCameraRotation = UKismetMathLibrary::RLerp(playerCameraRotation, TargetCameraRotation, DeltaTime * 3, true);
 		GetController()->AController::SetControlRotation(FRotator(playerCameraRotation.Pitch, ToCameraRotation.Yaw, playerCameraRotation.Roll));
 	}
 }

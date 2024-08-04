@@ -41,15 +41,38 @@ void ARuneAttackField::Tick(float DeltaTime)
 void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	auto* Thor = Cast<ABDThor>(OtherActor);
+	const float fieldDamage = 8;
+	const float fieldDalay = 0.3;
 	if (Thor)
 	{
-		Thor->fsm->Damage(20);
+		Thor->fsm->Damage(fieldDamage);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [Thor, fieldDamage, fieldDalay]()
+			{
+				Thor->fsm->Damage(fieldDamage);
+				FTimerHandle handle1;
+				Thor->GetWorld()->GetTimerManager().SetTimer(handle1, [Thor, fieldDamage, fieldDalay]()
+					{
+						Thor->fsm->Damage(fieldDamage);
+
+					}, fieldDalay, false);
+			}, fieldDalay, false);
 	}
 	else
 	{
 		auto AwakenThor= Cast<AAwakenThor>(OtherActor);
-		AwakenThor->getFSM()->SetDamage(20);
+		AwakenThor->getFSM()->SetDamage(fieldDamage);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [AwakenThor, fieldDamage, fieldDalay]()
+			{
+				AwakenThor->getFSM()->SetDamage(fieldDamage);
+				FTimerHandle handle1;
+				AwakenThor->GetWorld()->GetTimerManager().SetTimer(handle1, [AwakenThor, fieldDamage, fieldDalay]()
+					{
+						AwakenThor->getFSM()->SetDamage(fieldDamage);
+
+					}, fieldDalay, false);
+			}, fieldDalay, false);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Thor get damage 20")));
 }
 
