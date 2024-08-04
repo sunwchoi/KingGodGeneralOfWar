@@ -84,6 +84,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 			{
 				Player->CurrentWeapon->MeshComp->SetVisibility(true, true);
 				Player->bAxeGone = false;
+				Player->bIsAxeWithdrawing = false;
 				this->Destroy();
 			}
 		}

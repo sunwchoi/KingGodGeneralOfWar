@@ -275,6 +275,8 @@ public:
 	class UParticleSystem* ParryVFX;
 
 	bool bAxeGone;
+	bool bIsAxeWithdrawing;
+	bool bZoomOut;
 
 	EAttackType CurrentAttackType;
 private:

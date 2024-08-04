@@ -28,7 +28,7 @@ void ARuneAttackField::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(destroyHandle, [&]()
 		{
 			this->Destroy();
-		}, 2.5f, false);
+		}, 1.0f, false);
 }
 
 // Called every frame
@@ -61,15 +61,15 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	else
 	{
 		auto AwakenThor= Cast<AAwakenThor>(OtherActor);
-		AwakenThor->getFSM()->SetDamage(fieldDamage);
+		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::FORWARD);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [AwakenThor, fieldDamage, fieldDalay]()
 			{
-				AwakenThor->getFSM()->SetDamage(fieldDamage);
+				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::FORWARD);
 				FTimerHandle handle1;
 				AwakenThor->GetWorld()->GetTimerManager().SetTimer(handle1, [AwakenThor, fieldDamage, fieldDalay]()
 					{
-						AwakenThor->getFSM()->SetDamage(fieldDamage);
+						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::BACKWARD);
 
 					}, fieldDalay, false);
 			}, fieldDalay, false);

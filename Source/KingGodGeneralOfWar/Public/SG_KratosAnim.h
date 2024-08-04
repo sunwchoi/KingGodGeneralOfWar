@@ -125,6 +125,9 @@ private:
 	UFUNCTION()
 	void AnimNotify_FieldSpawn();
 
+	UFUNCTION()
+	void AnimNotify_ZoomOutCheck();
+
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);

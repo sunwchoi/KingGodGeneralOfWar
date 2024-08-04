@@ -238,6 +238,10 @@ void AKratos::Tick(float DeltaTime)
 	{
 		TargetFOV -= 10;
 	}
+	if (bZoomOut)
+	{
+		TargetFOV = 110;
+	}
 	if (bRuneReady)
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("RuneReady")));
 
@@ -351,11 +355,17 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		bRuneReady = false;
 		bSuperArmor = false;
 		WeakAttackEndComboState();
+		bZoomOut = false;
 	}
 	else if (Montage == Anim->HitMontage)
 	{
 		State = EPlayerState::Idle;
 
+	}
+	else if (Montage == Anim->AxeWithdrawMontage)
+	{
+		bIsAxeWithdrawing = false;
+		bAxeGone = false;
 	}
 }
 
@@ -467,7 +477,7 @@ void AKratos::OnMyActionLook(const FInputActionValue& value)
 
 void AKratos::OnMyActionDodge(const FInputActionValue& value)
 {
-	if (GetVelocity().Size() < 1 || State == EPlayerState::Hit)	return;
+	if (GetVelocity().Size() < 1 || State == EPlayerState::Hit || State == EPlayerState::NoneMovable)	return;
 
 	if (!bIsDodging && State != EPlayerState::Roll)
 	{
@@ -706,8 +716,11 @@ void AKratos::OnMyActionAimOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 {
-	if (bAxeGone)
+	if (bAxeGone && !bIsAxeWithdrawing)
+	{
+		bIsAxeWithdrawing = true;
 		Anim->PlayAxeWithdrawMontage();
+	}
 }
 
 void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
@@ -751,7 +764,6 @@ void AKratos::StrongWeakAttackEndComboState()
 
 void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 {
-
 	switch (State)
 	{
 	// 회피 상태
@@ -787,6 +799,8 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 
 		break;
 	// 기본 피격
+	case EPlayerState::Hit:
+		break;	
 	default:
 		if (bSuperArmor) break;
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));

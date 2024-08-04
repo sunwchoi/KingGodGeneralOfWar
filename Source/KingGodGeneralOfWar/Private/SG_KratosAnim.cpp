@@ -126,9 +126,10 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
-			check(AxeWithdrawMontage);
 			if (AxeWithdrawMontage)
+			{
 				Montage_Play(AxeWithdrawMontage);
+			}
 
 		}, 1.15f, false);
 
@@ -259,6 +260,12 @@ void USG_KratosAnim::AnimNotify_FieldSpawn()
 {
 	AKratos* Player = Cast<AKratos>(GetOwningActor());
 	GetWorld()->SpawnActor<ARuneAttackField>(RuneAttackFieldFactory, Player->GetActorTransform());
+}
+
+void USG_KratosAnim::AnimNotify_ZoomOutCheck()
+{
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	Player->bZoomOut = true;
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
