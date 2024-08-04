@@ -77,6 +77,7 @@ public:
 
 	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::FORWARD);
 	void SetJump(bool Value);
+	EAwakenThorState GetState() const;
 
 
 private:
@@ -93,8 +94,8 @@ private:
 	UPROPERTY()
 	class UAwakenThorAnim* Anim;
 	
-	float IdleDelayTime = 3.f;
-	float CurrentTime = 3.f;
+	float IdleDelayTime = 2.f;
+	float CurrentTime = 0.f;
 	
 	float TeleportDist = 1000;
 
