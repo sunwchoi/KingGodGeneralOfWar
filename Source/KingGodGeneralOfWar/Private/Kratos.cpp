@@ -32,6 +32,8 @@ const float WALK_FOV = 90;
 const float RUN_FOV = 105;
 const float GUARD_FOV = 70;
 const float AIM_FOV = 60;
+
+const int GUARD_MAX_COUNT = 3;
 AKratos::AKratos()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -97,12 +99,11 @@ void AKratos::PostInitializeComponents()
 	{
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnMontageEndedDelegated);
 
-		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck와 AttackEndCheck
-		// 각각 콜리전 설정을 On -> Off로 전환
-		
+		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck
+		// 콜리전 설정을 On -> Off로 전환
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
 			{
-				if (State == EPlayerState::MeleeAttack)
+				if (State == EPlayerState::StrongCombo)
 				{
 					// 방패 공격 : 강공격 콤보 3번쨰
 					if (CurrentStrongCombo == 3)
@@ -111,23 +112,33 @@ void AKratos::PostInitializeComponents()
 					else 
 						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
-				else
+				else if (State == EPlayerState::DashAttack)
 				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
+				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
+				{
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+				}
 			});
+		// 공격이 끝난 시점을 체크하는 노티파이 AttackEndCheck
+		// 콜리전 설정을 Off -> On로 전환
 		Anim->OnAttackEndCheck.AddLambda([this]() -> void
 			{
-				if (State == EPlayerState::MeleeAttack)
+				if (State == EPlayerState::StrongCombo)
 				{
 					if (CurrentStrongCombo == 3)
 						Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 					else
 						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
-				else
+				else if (State == EPlayerState::DashAttack)
 				{
 					Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+				}
+				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
+				{
+					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
 
 			});
@@ -144,7 +155,7 @@ void AKratos::PostInitializeComponents()
 		Anim->OnNextWeakAttackCheck.AddLambda([this]() -> void
 			{
 				CanNextWeakCombo = false;
-
+				
 				if (bIsWeakComboInputOn)
 				{
 					WeakAttackStartComboState();
@@ -184,7 +195,7 @@ void AKratos::BeginPlay()
 	{
 		SetShield();
 	}
-
+	GuardHitCnt = GUARD_MAX_COUNT;
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
@@ -221,9 +232,8 @@ void AKratos::Tick(float DeltaTime)
 	{
 		TargetFOV -= 10;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("ComboInput: %d"), bIsWeakComboInputOn));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("CurrentWeakCombo: %d"), CurrentWeakCombo));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("bIsAttacking: %d"), bIsAttacking));
+	if (bRuneReady)
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("RuneReady")));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
@@ -287,9 +297,7 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	else if (Montage == Anim->WeakAttackMontage)
 	{
 		State = EPlayerState::Idle;
-		CanNextWeakCombo = false;
-		CurrentWeakCombo = 0;
-		bIsAttacking = false;
+		WeakAttackEndComboState();
 	}
 	else if (Montage == Anim->DodgeMontage)
 	{
@@ -313,6 +321,7 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else
 		{
+			GuardHitCnt = GUARD_MAX_COUNT;
 			State = EPlayerState::Idle;
 		}
 	}
@@ -331,6 +340,7 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	{
 		State = EPlayerState::Idle;
 		bRuneReady = false;
+		WeakAttackEndComboState();
 	}
 	else
 	{
@@ -585,7 +595,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 	{
 		if (!bRuneReady)
 		{
-			State = EPlayerState::MeleeAttack;
+			State = EPlayerState::WeakCombo;
 
 			WeakAttackStartComboState();
 			Anim->PlayWeakAttackMontage();
@@ -633,7 +643,7 @@ void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Guard
 		|| State == EPlayerState::Run)
 	{
-		State = EPlayerState::MeleeAttack;
+		State = EPlayerState::StrongCombo;
 
 		StrongAttackStartComboState();
 		Anim->PlayStrongAttackMontage();
@@ -667,15 +677,19 @@ void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 
 void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
 {
-	State = EPlayerState::NoneMovable;
-	Anim->PlayRuneBaseMontage();
+	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
+	{
+		State = EPlayerState::NoneMovable;
+		Anim->PlayRuneBaseMontage();
+
+	}
 }
 
 void AKratos::WeakAttackStartComboState()
 {
 	CanNextWeakCombo = true;
 	bIsWeakComboInputOn = false;
-	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 3);
+	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
 }
 
 void AKratos::WeakAttackEndComboState()
@@ -683,6 +697,7 @@ void AKratos::WeakAttackEndComboState()
 	bIsWeakComboInputOn = false;
 	CanNextWeakCombo = false;
 	CurrentWeakCombo = 0;
+	bIsAttacking = false;
 }
 
 void AKratos::StrongAttackStartComboState()
@@ -708,6 +723,16 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 	else if (State == EPlayerState::Guard)
 	{
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
+		if (GuardHitCnt >= 1)
+		{
+			FVector PlayerToEnemyDirection = GetActorForwardVector();
+			LaunchCharacter(PlayerToEnemyDirection * -1 * 1000, true, false);
+			GuardHitCnt -= 1;
+		}
+		else
+		{
+			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
+		}
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("가드"));
 	}
 	else if (State == EPlayerState::GuardStart)

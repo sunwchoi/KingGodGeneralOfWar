@@ -80,12 +80,14 @@ void USG_KratosAnim::UpdatePlayerState()
 }
 void USG_KratosAnim::PlayWeakAttackMontage()
 {
-	Montage_Play(WeakAttackMontage, 1.0f);
+	if (!Montage_IsPlaying(WeakAttackMontage))
+		Montage_Play(WeakAttackMontage, 1.0f);
 
 }
 void USG_KratosAnim::PlayStrongAttackMontage()
 {
-	Montage_Play(StrongAttackMontage, 1.0f);
+	if (!Montage_IsPlaying(StrongAttackMontage))
+		Montage_Play(StrongAttackMontage, 1.0f);
 }
 
 void USG_KratosAnim::PlayDodgeMontage()
@@ -127,7 +129,8 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 
 void USG_KratosAnim::PlayRuneBaseMontage()
 {
-	Montage_Play(RuneBaseMontage);
+	if (!Montage_IsPlaying(RuneBaseMontage))
+		Montage_Play(RuneBaseMontage);
 }
 
 void USG_KratosAnim::PlayDashAttackMontage()
@@ -137,7 +140,8 @@ void USG_KratosAnim::PlayDashAttackMontage()
 
 void USG_KratosAnim::PlayRuneAttackMontage()
 {
-	Montage_Play(RuneAttackMontage);
+	if (!Montage_IsPlaying(RuneAttackMontage))
+		Montage_Play(RuneAttackMontage);
 }
 
 void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
@@ -145,17 +149,17 @@ void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
 	if (Montage_IsPlaying(StrongAttackMontage))
 	{
 		Montage_JumpToSection(GetAttackMontageSection(NewSection), StrongAttackMontage);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
 	}
 	else if (Montage_IsPlaying(WeakAttackMontage))
 	{
 		Montage_JumpToSection(GetAttackMontageSection(NewSection), WeakAttackMontage);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
 	}
 	else if (Montage_IsPlaying(RuneAttackMontage))
 	{
 		Montage_JumpToSection(GetAttackMontageSection(NewSection), RuneAttackMontage);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("StrongAttackMontage"));
 	}
 }
 

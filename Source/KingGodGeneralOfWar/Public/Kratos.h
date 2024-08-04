@@ -18,7 +18,8 @@ enum class EPlayerState : uint8
 	Run UMETA(DisplayName = "Run"),
 	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	MeleeAttack UMETA(DisplayName = "MeleeAttack"),
+	WeakCombo UMETA(DisplayName = "WeakCombo"),
+	StrongCombo UMETA(DisplayName = "StrongCombo"),
 	Aim UMETA(DisplayName = "Aim"),
 	DashAttack UMETA(DisplayName = "DashAttack"),
 	RuneAttack UMETA(DisplayName = "RuneAttack"),
@@ -263,7 +264,7 @@ private:
 	FRotator TargetActorRotation;
 	float TargetFOV = 90;
 
-	int guardHitCnt = 3;
+	int GuardHitCnt;
 	bool bParrying;
 	bool bRuneReady;
 };
