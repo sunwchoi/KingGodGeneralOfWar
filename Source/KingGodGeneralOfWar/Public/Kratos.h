@@ -248,6 +248,7 @@ public:
 	void SetWeapon();
 	void SetShield();
 	void CameraShakeOnAttack();
+	FString GetHitSectionName(EHitType hitType);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ParryVFX;
 
@@ -267,4 +268,5 @@ private:
 	int GuardHitCnt;
 	bool bParrying;
 	bool bRuneReady;
+	bool bGuardStagger;
 };
