@@ -4,6 +4,7 @@
 #include "SG_Shield.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/ArrowComponent.h"
 // Sets default values
 ASG_Shield::ASG_Shield()
 {
@@ -12,7 +13,8 @@ ASG_Shield::ASG_Shield()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	SetRootComponent(MeshComp);
-
+	LightPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("LightPosition"));
+	LightPosition->SetupAttachment(MeshComp);
 }
 
 // Called when the game starts or when spawned

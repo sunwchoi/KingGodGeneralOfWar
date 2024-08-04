@@ -279,6 +279,11 @@ public:
 	bool bZoomOut;
 
 	EAttackType CurrentAttackType;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AActor> ParryingLightFactory;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AActor> GuardBlockLightFactory;
 private:
 
 	FString GetDodgeDirection(int& DodgeScale);

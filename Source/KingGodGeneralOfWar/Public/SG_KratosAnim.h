@@ -120,7 +120,7 @@ private:
 	void AnimNotify_HideAxe();
 
 	UFUNCTION()
-	void AnimNotify_TimeDilation();
+	FORCEINLINE void AnimNotify_TimeDilation();
 
 	UFUNCTION()
 	void AnimNotify_FieldSpawn();

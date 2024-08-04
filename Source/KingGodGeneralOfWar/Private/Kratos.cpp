@@ -17,6 +17,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ArrowComponent.h"
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -777,6 +778,7 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 		if (GuardHitCnt >= 1)
 		{
 			LaunchCharacter(GetActorForwardVector() * -1 * 1500, true, false);
+			GetWorld()->SpawnActor<AActor>(GuardBlockLightFactory, Shield->GetActorTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 			GuardHitCnt -= 1;
 		}
 		else
@@ -791,7 +793,10 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 	// 패링 가능 상태
 	case EPlayerState::GuardStart:
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Parrying"));
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(1, 1, 1));
+		//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(1, 1, 1));
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->GetActorTransform());
+		//GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket"))
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
 		bParrying = true;
