@@ -184,8 +184,9 @@ public:
 	void StrongAttackStartComboState();
 	void StrongWeakAttackEndComboState();
 
-	UFUNCTION()
 	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
+
+	void Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
 
 	FString GetPlayerStateString();
 	void PlayerMove();
@@ -261,6 +262,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> HpBarUIFactory;
+
+	UPROPERTY()
+	class UPlayerHPUI* HpBarUI;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> AimWidgetClass;

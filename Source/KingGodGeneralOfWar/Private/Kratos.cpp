@@ -18,6 +18,12 @@
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
+#include "PlayerHPUI.h"
+#include "CSW/AwakenThor.h"
+#include "CSW/AwakenThorFSM.h"
+#include "BDThor.h"
+#include "BDThorFSM.h"
+
 // Sets default values
 
 const float ATTACK1_DELAY = .7f;
@@ -53,8 +59,8 @@ AKratos::AKratos()
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
 
-	
-	
+
+
 	/*ConstructorHelpers::FObjectFinder<UWidgetComponent>TempAimWidgetComp(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/JSG/UI/WBP_Aim.WBP_Aim'"));
 	if (TempAimWidgetComp.Succeeded())
 	{
@@ -203,6 +209,9 @@ void AKratos::BeginPlay()
 		SetShield();
 	}
 	GuardHitCnt = GUARD_MAX_COUNT;
+
+	HpBarUI = CreateWidget<UPlayerHPUI>(GetWorld(), HpBarUIFactory);
+	HpBarUI->AddToViewport();
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 // Called every frame
@@ -249,7 +258,7 @@ void AKratos::Tick(float DeltaTime)
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo ));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetPlayerStateString());
@@ -487,7 +496,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 
 		int DodgeScale;
 		FString DodgeDirString = GetDodgeDirection(DodgeScale);
-		
+
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
 		FVector DodgeDirection = UKismetMathLibrary::TransformDirection(T, PrevDirection);
 		DodgeDirection.Z = 0;
@@ -763,15 +772,15 @@ void AKratos::StrongWeakAttackEndComboState()
 	CurrentStrongCombo = 0;
 }
 
-void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
+void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 {
 	switch (State)
 	{
-	// 회피 상태
+		// 회피 상태
 	case EPlayerState::Dodge:
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
 		break;
-	// 가드 상태
+		// 가드 상태
 	case EPlayerState::Guard:
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Guard Success"));
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
@@ -790,25 +799,93 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool isMelee)
 			bGuardStagger = true;
 		}
 		break;
-	// 패링 가능 상태
+		// 패링 가능 상태
 	case EPlayerState::GuardStart:
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		bParrying = true;
 		State = EPlayerState::Parry;
-
 		break;
-	// 기본 피격
+		// 기본 피격
 	case EPlayerState::Hit:
-		break;	
+		break;
 	default:
 		if (bSuperArmor) break;
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));
 		CurHP -= DamageValue;
+		HpBarUI->SetHP(CurHP, MaxHP);
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		State = EPlayerState::Hit;
 		break;
 
+	}
+}
+
+void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee)
+{
+	// 회피 상태
+	if (State == EPlayerState::Dodge)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
+	}
+	// 가드 상태
+	else if (State == EPlayerState::Guard)
+	{
+		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
+		if (GuardHitCnt >= 1)
+		{
+			LaunchCharacter(GetActorForwardVector() * -1 * 1500, true, false);
+			GetWorld()->SpawnActor<AActor>(GuardBlockLightFactory, Shield->GetActorTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+			GuardHitCnt -= 1;
+		}
+		else
+		{
+			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
+			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
+			State = EPlayerState::Idle;
+			GuardHitCnt = GUARD_MAX_COUNT;
+			bGuardStagger = true;
+		}
+	}	
+	// 패링 가능 상태
+	else if (State == EPlayerState::GuardStart)
+	{
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
+		bParrying = true;
+		State = EPlayerState::Parry;
+		if (IsMelee)
+		{
+			auto* Thor = Cast<ABDThor>(Attacker);
+
+			if (Thor)
+			{
+				Thor->fsm->Damage(10);
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
+			}
+			else
+			{
+				auto AwakenThor = Cast<AAwakenThor>(Attacker);
+
+				AwakenThor->getFSM()->SetDamage(10, EAttackDirectionType::FORWARD);
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
+			}
+		}
+	}
+	else if (State == EPlayerState::Hit)
+	{
+		
+	}
+	// 기본 피격
+	else
+	{
+		if (bSuperArmor) return;
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));
+		CurHP -= DamageValue;
+		HpBarUI->SetHP(CurHP, MaxHP);
+		Anim->PlayHitMontage();
+		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
+		State = EPlayerState::Hit;
 	}
 }
