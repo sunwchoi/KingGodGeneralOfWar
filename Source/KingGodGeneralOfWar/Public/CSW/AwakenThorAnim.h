@@ -52,6 +52,9 @@ public:
 	void AnimNotify_AwakenThorTeleport_Catch();
 
 	UFUNCTION()
+	void AnimNotify_ClapAttackReady();
+	
+	UFUNCTION()
 	void AnimNotify_ClapAttackStart();
 	
 	UFUNCTION()
