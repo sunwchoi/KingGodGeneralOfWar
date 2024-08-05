@@ -149,7 +149,7 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		//单固瘤 贸府
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //鸥百老锭
 		if (AttackTarget) {
-			AttackTarget->Damage(10, EHitType::STAGGER, false);
+			AttackTarget->Damage(10, EHitType::NB_HIGH, false);
 			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
 		}
 	}

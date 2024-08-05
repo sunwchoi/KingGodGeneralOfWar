@@ -102,6 +102,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDHittingDownState();
 
+	//근접 공격 시 대쉬
+	UFUNCTION()
+	void BDDash();
+
+	bool bIsDash = false; //대쉬를 한번 했으면 true, 대쉬를 한번도 하지 않았으면 false로 관리를 한다.
+
 
 	UPROPERTY(EditDefaultsOnly)
 	BDThorGeneralState LastAttackState; // 마지막 공격 상태를 저장하는 변수

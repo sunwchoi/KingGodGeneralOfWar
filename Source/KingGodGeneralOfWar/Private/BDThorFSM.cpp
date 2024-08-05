@@ -9,6 +9,8 @@
 #include "BDThorMjolnir.h"
 #include "SG_GodOfWar_GameModeBase.h"
 #include "BDThorHP.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values for this component's properties
@@ -297,6 +299,9 @@ void UBDThorFSM::BDHammerThreeSwingState()
 		anim->playBDHammerThreeSwing(); //3번 휘두르기
 		UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Three Swing Animation"));
 	}
+
+
+
 }
 
 //플레이어 잡아서 업어치기 (카메라 컷씬)
@@ -309,11 +314,44 @@ void UBDThorFSM::BDHittingDownState()
 {
 }
 
+void UBDThorFSM::BDDash()
+{
+	//FVector targetLoc = Target->GetActorLocation();
+	//FVector myLoc = me->GetActorLocation();
+	//FVector dir = targetLoc - myLoc;
+	//FRotator rot = dir.Rotation();
 
+	//me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+	//float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
+
+	//me->AddMovementInput(dir);
+
+	//bIsDash = true;
+
+	//UE_LOG(LogTemp, Warning, TEXT("BDDash"));
+	////타겟과 토르의 거리가 가가울 경우
+	//if (dist < 200.f)
+	//{
+	//	me->GetCharacterMovement()->MaxWalkSpeed = 50.0f;
+	//}
+	////타겟과 토르의 거리가 멀 경우
+	//else if (dist < 600.f)
+	//{
+	//	me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
+	//}
+	//else
+	//{
+	//	if (me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
+	//		me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
+	//	else
+	//		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
+	//}
+
+}
 
 
 //애니메이션 마지막 종료 후 상태 확인 
-// 데미지, 대기, 이동은 EndState에서 관리하지 안흥ㅁ
+// 대기, 이동은 EndState에서 관리하지 않는다.
 void UBDThorFSM::BDEndState()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End1"));

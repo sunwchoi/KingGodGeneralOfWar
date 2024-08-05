@@ -69,6 +69,8 @@ void ABDThor::BeginPlay()
 		}
 	}
 
+	fsm->BDCurrentHP = fsm->BDMaxHp; //체력 설정
+
 	UpdateHpUI();
 }
 
@@ -170,7 +172,7 @@ void ABDThor::UpdateHpUI()
 		BDThorHPBar->SetHP(fsm->BDCurrentHP, fsm->BDMaxHp);
 	}
 
-	if (fsm->BDCurrentHP <= 0) {
+	if (fsm->BDCurrentHP < 0) {
 		//2 페이즈로 전환
 		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //게임모드 캐스트
 
