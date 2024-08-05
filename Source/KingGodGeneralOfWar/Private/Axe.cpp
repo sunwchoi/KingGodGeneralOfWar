@@ -12,6 +12,8 @@
 #include "BDThorFSM.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "FlyingAxe.h"
+
+const float AXE_DAMAGE = 3;
 // Sets default values
 AAxe::AAxe()
 {
@@ -36,7 +38,6 @@ void AAxe::BeginPlay()
 {
 	Super::BeginPlay();
 	MeshComp->OnComponentBeginOverlap.AddDynamic(this, &AAxe::OnAxeBeginOverlap);
-	MeshComp->OnComponentHit.AddDynamic(this, &AAxe::OnAxeHit);
 }
 
 // Called every frame
@@ -55,7 +56,6 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 
 	if (Thor)
 	{
-		Thor->fsm->Damage(10);
 		int attackNum = 0;
 		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
 			attackNum = player->CurrentWeakCombo;
@@ -64,6 +64,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		else
 			attackNum = 0;
 		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
+		Thor->fsm->Damage(AXE_DAMAGE);
 	}
 	else
 	{
@@ -77,10 +78,10 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		else
 			attackNum = 0;
 		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
-		AwakenThor->getFSM()->SetDamage(8, attackDirection);
+		AwakenThor->getFSM()->SetDamage(AXE_DAMAGE, attackDirection);
 	}
 
-	if (player)		player->CameraShakeOnAttack();
+	if (player)		player->CameraShakeOnAttack(0.5);
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.08f);
 	FTimerHandle handle;
@@ -88,11 +89,6 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		{
 			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 		}, 0.008f, false);
-}
-
-void AAxe::OnAxeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, Hit.BoneName.ToString());
 }
 
 

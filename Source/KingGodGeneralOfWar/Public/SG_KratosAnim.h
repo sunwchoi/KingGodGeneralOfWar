@@ -126,6 +126,9 @@ private:
 	void AnimNotify_FieldSpawn();
 
 	UFUNCTION()
+	void AnimNotify_RuneAttackGroundShake();
+
+	UFUNCTION()
 	void AnimNotify_ZoomOutCheck();
 
 	FName GetAttackMontageSection(int32 Section);

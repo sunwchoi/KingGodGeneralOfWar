@@ -39,9 +39,11 @@ const float WALK_FOV = 90;
 const float RUN_FOV = 105;
 const float GUARD_FOV = 70;
 const float AIM_FOV = 60;
+const float PARRY_FOV = 100;
 
 const int GUARD_MAX_COUNT = 2;
 
+const float PARRYING_DAMAGE = 3;
 
 AKratos::AKratos()
 {
@@ -241,6 +243,9 @@ void AKratos::Tick(float DeltaTime)
 	case EPlayerState::Aim:
 		TargetFOV = AIM_FOV;
 		break;
+		case EPlayerState::Parry:
+		TargetFOV = PARRY_FOV;
+		break;
 	default:
 		TargetFOV = WALK_FOV;
 	}
@@ -257,14 +262,14 @@ void AKratos::Tick(float DeltaTime)
 
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
+	/*GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetPlayerStateString());
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
-		TEXT("HP: %f"), CurHP));
+		TEXT("HP: %f"), CurHP));*/
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -412,7 +417,6 @@ void AKratos::CameraShakeOnAttack(float scale)
 FString AKratos::GetHitSectionName(EHitType hitType)
 {
 	FString HitTypeValueAsString = UEnum::GetValueAsString(hitType);
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, HitTypeValueAsString.Mid(10)); ;
 	return HitTypeValueAsString.Mid(10);
 }
 
@@ -811,7 +815,6 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 		break;
 	default:
 		if (bSuperArmor) break;
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));
 		CurHP -= DamageValue;
 		HpBarUI->SetHP(CurHP, MaxHP);
 		Anim->PlayHitMontage();
@@ -827,7 +830,7 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	// 회피 상태
 	if (State == EPlayerState::Dodge)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
 	}
 	// 가드 상태
 	else if (State == EPlayerState::Guard)
@@ -852,6 +855,7 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	else if (State == EPlayerState::GuardStart)
 	{
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		CameraShakeOnAttack(3.0f);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		bParrying = true;
 		State = EPlayerState::Parry;
@@ -861,18 +865,13 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 			if (Thor)
 			{
-				Thor->fsm->Damage(10);
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("Thor Hit"));
-				CameraShakeOnAttack(5.0f);
-
+				Thor->fsm->Damage(PARRYING_DAMAGE);
 			}
 			else
 			{
 				auto AwakenThor = Cast<AAwakenThor>(Attacker);
 
-				AwakenThor->getFSM()->SetDamage(10, EAttackDirectionType::FORWARD);
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, TEXT("AwakenThor Hit"));
-				CameraShakeOnAttack(5.0f);
+				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::FORWARD);
 			}
 		}
 	}
@@ -884,11 +883,11 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	else
 	{
 		if (bSuperArmor) return;
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%d Get Damage"), DamageValue));
 		CurHP -= DamageValue;
 		HpBarUI->SetHP(CurHP, MaxHP);
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
+		CameraShakeOnAttack(8);
 		State = EPlayerState::Hit;
 	}
 }

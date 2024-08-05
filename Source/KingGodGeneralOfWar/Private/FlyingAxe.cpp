@@ -13,6 +13,7 @@
 #include "BDThorFSM.h"
 #include "Kismet/GameplayStatics.h"
 const float LerpInit = 0.02;
+const float AXE_THROW_DAMAGE = 2;
 // Sets default values
 AFlyingAxe::AFlyingAxe()
 {
@@ -86,6 +87,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 				Player->CurrentWeapon->MeshComp->SetVisibility(true, true);
 				Player->bAxeGone = false;
 				Player->bIsAxeWithdrawing = false;
+				Player->CameraShakeOnAttack(1.0f);
 				this->Destroy();
 			}
 		}
@@ -122,7 +124,7 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 
 	if (Thor)
 	{
-		Thor->fsm->Damage(10);
+		Thor->fsm->Damage(AXE_THROW_DAMAGE);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
 		AttachToComponent(Thor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
 
@@ -132,8 +134,8 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 		if (AwakenThor)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
-			AwakenThor->getFSM()->SetDamage(5, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
+			AwakenThor->getFSM()->SetDamage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
 			AttachToComponent(AwakenThor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
 		}

@@ -262,6 +262,12 @@ void USG_KratosAnim::AnimNotify_FieldSpawn()
 	GetWorld()->SpawnActor<ARuneAttackField>(RuneAttackFieldFactory, Player->GetActorTransform());
 }
 
+void USG_KratosAnim::AnimNotify_RuneAttackGroundShake()
+{
+	AKratos* Player = Cast<AKratos>(GetOwningActor());
+	Player->CameraShakeOnAttack(3);
+}
+
 void USG_KratosAnim::AnimNotify_ZoomOutCheck()
 {
 	AKratos* Player = Cast<AKratos>(GetOwningActor());

@@ -41,7 +41,7 @@ void ARuneAttackField::Tick(float DeltaTime)
 void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	auto* Thor = Cast<ABDThor>(OtherActor);
-	const float fieldDamage = 8;
+	const float fieldDamage = 5;
 	const float fieldDalay = 0.3;
 	if (Thor)
 	{

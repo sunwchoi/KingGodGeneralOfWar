@@ -5,6 +5,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/ArrowComponent.h"
+#include "BDThor.h"
+#include "CSW/AwakenThor.h"
+#include "BDThorFSM.h"
+#include "CSW/AwakenThorFSM.h"
+
+const float SHIELD_DAMAGE = 2;
+
 // Sets default values
 ASG_Shield::ASG_Shield()
 {
@@ -35,6 +42,19 @@ void ASG_Shield::Tick(float DeltaTime)
 void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+
+	auto* Thor = Cast<ABDThor>(OtherActor);
+
+	if (Thor)
+	{
+		Thor->fsm->Damage(SHIELD_DAMAGE);
+	}
+	else
+	{
+		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
+
+		AwakenThor->getFSM()->SetDamage(SHIELD_DAMAGE, EAttackDirectionType::FORWARD);
+	}
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);
 	FTimerHandle handle;
