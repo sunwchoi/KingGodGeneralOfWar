@@ -7,6 +7,8 @@
 #include "BDThorAnim.h"
 #include "Kismet/GameplayStatics.h"
 #include "BDThorMjolnir.h"
+#include "SG_GodOfWar_GameModeBase.h"
+#include "BDThorHP.h"
 
 
 // Sets default values for this component's properties
@@ -346,10 +348,8 @@ void UBDThorFSM::BDEndState()
 		//체력이 남아있다면
 		if (BDCurrentHP > 0) {
 			//상태를 회피로 전환
-			BDSetState(BDThorGeneralState::BDAvoidance);
-		}
-		else if (BDCurrentHP <= 0) {
-			//2 페이즈로 전환
+			//BDSetState(BDThorGeneralState::BDAvoidance);
+			BDSetState(BDThorGeneralState::BDMove);
 		}
 	}
 }
