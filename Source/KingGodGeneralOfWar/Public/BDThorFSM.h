@@ -130,7 +130,7 @@ public:
 
 	//토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float BDDelayTime = 1.0f;
+	float BDDelayTime = 0.5f;
 
 	//피격 시 데미지 함수, DamageNum 데미지 수치
 	UFUNCTION()
