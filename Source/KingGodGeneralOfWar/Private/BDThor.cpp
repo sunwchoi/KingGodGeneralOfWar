@@ -11,6 +11,7 @@
 #include "BDThorMjolnir.h"
 #include "BDThorHP.h"
 #include "Blueprint/UserWidget.h"
+#include "SG_GodOfWar_GameModeBase.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -168,5 +169,21 @@ void ABDThor::UpdateHpUI()
 	if (BDThorHPBar) {
 		BDThorHPBar->SetHP(fsm->BDCurrentHP, fsm->BDMaxHp);
 	}
+
+	if (fsm->BDCurrentHP <= 0) {
+		//2 페이즈로 전환
+		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //게임모드 캐스트
+
+		if (BDThorHPBar) {
+			BDThorHPBar->RemoveFromParent(); //HP가 0이 되면 삭제해라
+		}
+
+		if (BDGameMode) {
+			BDGameMode->ThorFadeOut(); //페이드 아웃 실행
+		}
+
+
+	}
+
 }
 
