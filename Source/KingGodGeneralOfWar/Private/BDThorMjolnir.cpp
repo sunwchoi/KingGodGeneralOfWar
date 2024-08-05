@@ -38,8 +38,8 @@ ABDThorMjolnir::ABDThorMjolnir()
 	MovementComp->SetUpdatedComponent(MjoCol);
 
 	//스피드 설정
-	MovementComp->InitialSpeed = 1500.0f; //원래는 1500
-	MovementComp->MaxSpeed = 1500.0f;
+	MovementComp->InitialSpeed = 2000.0f; //원래는 1500
+	MovementComp->MaxSpeed = 2000.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bShouldBounce = false;
 	MovementComp->ProjectileGravityScale = 0.0f;
