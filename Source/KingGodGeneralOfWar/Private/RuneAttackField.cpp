@@ -49,7 +49,7 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [Thor, fieldDamage, fieldDalay]()
 			{
-				Thor->fsm->Damage(fieldDamage);
+				Thor->fsm->Damage(fieldDamage+1);
 				FTimerHandle handle1;
 				Thor->GetWorld()->GetTimerManager().SetTimer(handle1, [Thor, fieldDamage, fieldDalay]()
 					{
