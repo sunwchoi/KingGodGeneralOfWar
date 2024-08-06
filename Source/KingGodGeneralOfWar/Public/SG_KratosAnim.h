@@ -96,7 +96,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ARuneAttackField> RuneAttackFieldFactory;
+
+	UPROPERTY()
+	class AKratos* Me;
 private:
+
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
@@ -135,10 +139,6 @@ private:
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
-
-	class AFlyingAxe* FlyingAxe;
 
 	FRotator TargetRotation;
 };

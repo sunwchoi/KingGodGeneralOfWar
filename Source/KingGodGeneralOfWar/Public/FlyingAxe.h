@@ -50,13 +50,17 @@ public:
 	FVector TargetLocation;
 	FVector CurLocation;
 
-	bool isHit;
-	bool isWithdraw;
-	bool isRising;
-	void WithdrawAxe();
+	bool bHit;
+	bool bWithdrawing;
+	bool bRising;
 	float LerpAlpha;
 	float WithdrawRotationScale = -20;
-	class AKratos* Player;
+
+
+	void BackToPlayer();
+
+	UPROPERTY()
+	class AKratos* Me;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* BloodVFXFactory;

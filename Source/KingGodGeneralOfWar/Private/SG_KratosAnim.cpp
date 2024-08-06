@@ -74,15 +74,14 @@ void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
 
 void USG_KratosAnim::UpdatePlayerState()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	if (Player)
+	if (Me)
 	{
-		FVector velocity = Player->GetVelocity();
-		FVector forwardVector = Player->GetActorForwardVector();
+		FVector velocity = Me->GetVelocity();
+		FVector forwardVector = Me->GetActorForwardVector();
 
-		PlayerState = Player->State;
+		PlayerState = Me->State;
 		Speed = FVector::DotProduct(forwardVector, velocity);
-		Direction = FVector::DotProduct(Player->GetActorRightVector(), velocity);
+		Direction = FVector::DotProduct(Me->GetActorRightVector(), velocity);
 	}
 }
 void USG_KratosAnim::PlayWeakAttackMontage()
@@ -96,6 +95,7 @@ void USG_KratosAnim::PlayStrongAttackMontage()
 	if (!Montage_IsPlaying(StrongAttackMontage))
 		Montage_Play(StrongAttackMontage, 1.0f);
 }
+
 
 void USG_KratosAnim::PlayDodgeMontage()
 {
@@ -115,14 +115,14 @@ void USG_KratosAnim::PlayGuardMontage()
 void USG_KratosAnim::PlayAxeThrowMontage()
 {
 	Montage_Play(AxeThrowMontage, 1.0f);
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	TargetRotation = Player->GetControlRotation();
+	TargetRotation = Me->GetControlRotation();
 }
 
 void USG_KratosAnim::PlayAxeWithdrawMontage()
 {
-	FlyingAxe->WithdrawAxe();
-
+	if (!Me) return;
+	
+	Me->WithdrawAxe();
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
@@ -132,7 +132,6 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 			}
 
 		}, 1.15f, false);
-
 }
 
 void USG_KratosAnim::PlayRuneBaseMontage()
@@ -224,25 +223,19 @@ void USG_KratosAnim::AnimNotify_MovableCheck()
 
 void USG_KratosAnim::AnimNotify_GuardLoopStartCheck()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	if (Player)
+	if (Me)
 	{
-		if (Player->State == EPlayerState::GuardStart)
-			Player->State = EPlayerState::Guard;
+		if (Me->State == EPlayerState::GuardStart)
+			Me->State = EPlayerState::Guard;
 	}
 }
 
 void USG_KratosAnim::AnimNotify_HideAxe()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	if (Player)
+	if (Me)
 	{
-		auto* Axe = Player->CurrentWeapon;
-		if (Axe)
-		{
-			Axe->MeshComp->SetVisibility(false, true);
-			FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRotation);
-		}
+		Me->OnHideAxe();
+		Me->ThrowAxe(TargetRotation);
 	}
 }
 
@@ -258,20 +251,17 @@ FORCEINLINE void USG_KratosAnim::AnimNotify_TimeDilation()
 
 void USG_KratosAnim::AnimNotify_FieldSpawn()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	GetWorld()->SpawnActor<ARuneAttackField>(RuneAttackFieldFactory, Player->GetActorTransform());
+	GetWorld()->SpawnActor<ARuneAttackField>(RuneAttackFieldFactory, Me->GetActorTransform());
 }
 
 void USG_KratosAnim::AnimNotify_RuneAttackGroundShake()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	Player->CameraShakeOnAttack(3);
+	Me->CameraShakeOnAttack(5);
 }
 
 void USG_KratosAnim::AnimNotify_ZoomOutCheck()
 {
-	AKratos* Player = Cast<AKratos>(GetOwningActor());
-	Player->bZoomOut = true;
+	Me->bZoomOut = true;
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)

@@ -23,6 +23,7 @@
 #include "CSW/AwakenThorFSM.h"
 #include "BDThor.h"
 #include "BDThorFSM.h"
+#include "FlyingAxe.h"
 
 // Sets default values
 
@@ -61,13 +62,6 @@ AKratos::AKratos()
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
 
-
-
-	/*ConstructorHelpers::FObjectFinder<UWidgetComponent>TempAimWidgetComp(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/JSG/UI/WBP_Aim.WBP_Aim'"));
-	if (TempAimWidgetComp.Succeeded())
-	{
-		AimWidgetComp = TempAimWidgetComp.Object;
-	}*/
 }
 // Called to bind functionality to input
 void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -103,7 +97,7 @@ void AKratos::PostInitializeComponents()
 	if (Anim)
 	{
 		Anim->OnMontageEnded.AddDynamic(this, &AKratos::OnMontageEndedDelegated);
-
+		Anim->Me = this;
 		// 공격이 유효할 시점을 체크하는 노티파이 AttackHitCheck
 		// 콜리전 설정을 On -> Off로 전환
 		Anim->OnAttackHitCheck.AddLambda([this]() -> void
@@ -115,7 +109,7 @@ void AKratos::PostInitializeComponents()
 						Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 					// 도끼 공격
 					else
-						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+						Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
 				else if (State == EPlayerState::DashAttack)
 				{
@@ -123,7 +117,7 @@ void AKratos::PostInitializeComponents()
 				}
 				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
 				{
-					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
+					Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("Axe"), true);
 				}
 			});
 		// 공격이 끝난 시점을 체크하는 노티파이 AttackEndCheck
@@ -135,7 +129,7 @@ void AKratos::PostInitializeComponents()
 					if (CurrentStrongCombo == 3)
 						Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 					else
-						CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+						Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
 				else if (State == EPlayerState::DashAttack)
 				{
@@ -143,7 +137,7 @@ void AKratos::PostInitializeComponents()
 				}
 				else if (State == EPlayerState::RuneAttack || State == EPlayerState::WeakCombo)
 				{
-					CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+					Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 				}
 
 			});
@@ -201,7 +195,7 @@ void AKratos::BeginPlay()
 		}
 	}
 
-	if (nullptr == CurrentWeapon)
+	if (nullptr == Axe)
 	{
 		SetWeapon();
 	}
@@ -262,14 +256,14 @@ void AKratos::Tick(float DeltaTime)
 
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
-	/*GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, GetPlayerStateString());
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, GetPlayerStateString());
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
-		TEXT("HP: %f"), CurHP));*/
+		TEXT("HP: %f"), CurHP));
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -389,11 +383,11 @@ void AKratos::SetWeapon()
 {
 	FActorSpawnParameters param;
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	CurrentWeapon = GetWorld()->SpawnActor<AAxe>(AxeFactory, GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket")), param);
-	if (CurrentWeapon)
+	Axe = GetWorld()->SpawnActor<AAxe>(AxeFactory, GetMesh()->GetSocketTransform(TEXT("hand_rAxeSocket")), param);
+	if (Axe)
 	{
-		CurrentWeapon->K2_AttachToComponent(GetMesh(), TEXT("hand_rAxeSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
-		CurrentWeapon->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+		Axe->K2_AttachToComponent(GetMesh(), TEXT("hand_rAxeSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
+		Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	}
 }
 
@@ -745,6 +739,30 @@ void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
 		Anim->PlayRuneBaseMontage();
 
 	}
+}
+
+void AKratos::OnHideAxe()
+{
+	Axe->MeshComp->SetVisibility(false, true);
+}
+
+void AKratos::ThrowAxe(FRotator TargetRot)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ThrowAxe"));
+	FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRot);
+}
+
+void AKratos::WithdrawAxe()
+{
+	FlyingAxe->BackToPlayer();
+}
+
+void AKratos::CatchFlyingAxe()
+{
+	Axe->MeshComp->SetVisibility(true, true);
+	bAxeGone = false;
+	bIsAxeWithdrawing = false;
+	CameraShakeOnAttack(1.0f);
 }
 
 void AKratos::WeakAttackStartComboState()

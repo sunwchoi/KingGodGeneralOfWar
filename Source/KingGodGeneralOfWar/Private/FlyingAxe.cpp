@@ -46,19 +46,19 @@ void AFlyingAxe::BeginPlay()
 {
 	Super::BeginPlay();
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AFlyingAxe::FlyingAxeOnComponentBeginOverlap);
-	Player = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Me = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	LerpAlpha = LerpInit;
-	Player->bAxeGone = true;
+	Me->bAxeGone = true;
 }
 
 // Called every frame
 void AFlyingAxe::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!Player) return;
+	if (!Me) return;
 
 	// 날아가는 중
-	if (!(isHit || isWithdraw))
+	if (!(bHit || bWithdrawing))
 	{
 		SetActorLocation(GetActorLocation() + DirectionArrowComp->GetForwardVector() * MoveSpeed * DeltaTime);
 
@@ -66,34 +66,31 @@ void AFlyingAxe::Tick(float DeltaTime)
 		SubMeshComp->AddRelativeRotation(quat);
 	}
 	// 회수 중
-	else if (isWithdraw)
+	else if (bWithdrawing)
 	{
 		// 회수: 플레이어에게 돌아오는 모션
-		if (!isRising)
+		if (!bRising)
 		{
-			TargetLocation = Player->GetMesh()->GetSocketLocation(TEXT("hand_rAxeSocket"));
+			TargetLocation = Me->GetMesh()->GetSocketLocation(TEXT("hand_rAxeSocket"));
 		}
-
-		if (FVector::Dist(GetActorLocation(), TargetLocation) < 30)
+		const float MIN_DIST = 30;
+		if (FVector::Dist(GetActorLocation(), TargetLocation) < MIN_DIST)
 		{
-			if (isRising)
+			if (bRising)
 			{
-				isRising = false;
+				bRising = false;
 				LerpAlpha = LerpInit;
 				CurLocation = GetActorLocation();
 			}
 			else
 			{
-				Player->CurrentWeapon->MeshComp->SetVisibility(true, true);
-				Player->bAxeGone = false;
-				Player->bIsAxeWithdrawing = false;
-				Player->CameraShakeOnAttack(1.0f);
+				Me->CatchFlyingAxe();
 				this->Destroy();
 			}
 		}
 		else
 		{
-			if (isRising)
+			if (bRising)
 			{
 				FQuat quat = FRotator(-10, 0, 0).Quaternion();
 				SubMeshComp->AddRelativeRotation(quat);
@@ -118,7 +115,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 
 void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isHit = true;
+	bHit = true;
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	SetActorEnableCollision(false); // 충돌 비활성화
 
@@ -135,23 +132,24 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 		if (AwakenThor)
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
-			AwakenThor->getFSM()->SetDamage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]);
+			AwakenThor->getFSM()->SetDamage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
 			AttachToComponent(AwakenThor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
 		}
 	}
-	if (!isWithdraw)
+	if (!bWithdrawing)
 	{
 		SubMeshComp->SetRelativeRotation(HitArrowComp->GetRelativeRotation());
 	}
 }
 
-void AFlyingAxe::WithdrawAxe()
+void AFlyingAxe::BackToPlayer()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("BackToPlayer")));
 	TargetLocation = WithdrawTargetPosition->GetComponentLocation();
 	SubMeshComp->SetRelativeRotation(WithdrawRotation->GetRelativeRotation());
-	isWithdraw = true;
-	isRising = true;
+	bWithdrawing = true;
+	bRising = true;
 	CurLocation = GetActorLocation();
 	this->SetActorEnableCollision(true); // 충돌 비활성화
 	this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);

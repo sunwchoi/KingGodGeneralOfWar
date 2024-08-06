@@ -176,6 +176,11 @@ public:
 	UFUNCTION()
 	void OnMyActionRuneBase(const FInputActionValue& value);
 
+	void OnHideAxe();
+	void ThrowAxe(FRotator TargetRot);
+	void WithdrawAxe();
+	void CatchFlyingAxe();
+
 	// 약공격 콤보
 	void WeakAttackStartComboState();
 	void WeakAttackEndComboState();
@@ -216,12 +221,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MaxPitch;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
-	TSubclassOf<class ABDThor> Boss1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Thor");
-	TSubclassOf<class ABDThor> Boss2;
-
 	void LockTargetFunc(float DeltaTime);
 
 	UFUNCTION()
@@ -248,17 +247,23 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 
 	int CurrentStrongCombo;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
 	TSubclassOf<class AAxe> AxeFactory;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
 	TSubclassOf<class ASG_Shield> ShieldFactory;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	class AAxe* CurrentWeapon;
+	UPROPERTY()
+	class AAxe* Axe;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	UPROPERTY()
 	class ASG_Shield* Shield;
+
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
+	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
+
+	UPROPERTY()
+	class AFlyingAxe* FlyingAxe;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
