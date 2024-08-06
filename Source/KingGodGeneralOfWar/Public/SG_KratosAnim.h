@@ -101,7 +101,6 @@ public:
 	class AKratos* Me;
 private:
 
-
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
 
@@ -124,7 +123,7 @@ private:
 	void AnimNotify_HideAxe();
 
 	UFUNCTION()
-	FORCEINLINE void AnimNotify_TimeDilation();
+	void AnimNotify_TimeDilation();
 
 	UFUNCTION()
 	void AnimNotify_FieldSpawn();
@@ -138,7 +137,6 @@ private:
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);
-
 
 	FRotator TargetRotation;
 };

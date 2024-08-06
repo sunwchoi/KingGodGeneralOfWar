@@ -86,50 +86,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void PostInitializeComponents() override;
-	UPROPERTY()
-	class USG_KratosAnim* Anim ;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USpringArmComponent* SpringArmComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCameraComponent* CameraComp;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputMappingContext* IMC_Player;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Move;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Look;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Dodge;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Run;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Guard;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_LockOn;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_WeakAttack;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_StrongAttack;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_Aim;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_WithdrawAxe;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UInputAction* IA_RuneBase;
 
 	UFUNCTION()
 	void OnMyActionMove(const FInputActionValue& Value);
@@ -176,41 +132,141 @@ public:
 	UFUNCTION()
 	void OnMyActionRuneBase(const FInputActionValue& value);
 
+	UFUNCTION()
+	void OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted);
+
+	// Axe Throwing
 	void OnHideAxe();
 	void ThrowAxe(FRotator TargetRot);
 	void WithdrawAxe();
 	void CatchFlyingAxe();
 
-	// 약공격 콤보
+	// Damage Function
+	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
+	void Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
+
+	void CameraShakeOnAttack(float scale = 1.0f);
+	FString GetPlayerStateString();
+	EAttackDirectionType GetAttackDirection();
+
+private:
+	// Weak Attack Combo
 	void WeakAttackStartComboState();
 	void WeakAttackEndComboState();
 
-	// 강공격 콤보
+	// Strong Attack Combo
 	void StrongAttackStartComboState();
 	void StrongWeakAttackEndComboState();
 
-	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
-
-	void Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
-
-	FString GetPlayerStateString();
 	void PlayerMove();
+	void SetWeapon();
+	void SetShield();
+	void LockTargetFunc(float DeltaTime);
 
-	UPROPERTY(BlueprintReadOnly)
-	FVector Direction;
-	UPROPERTY(BlueprintReadOnly)
-	FVector PrevDirection;
+	FString GetHitSectionName(EHitType hitType);
+	FString GetDodgeDirection(int& DodgeScale);
+
+public:
+	// Player Input
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputMappingContext* IMC_Player;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Move;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Look;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Dodge;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Run;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Guard;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_LockOn;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_WeakAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_StrongAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_Aim;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_WithdrawAxe;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_RuneBase;
+
+
+	// UClass Pointer
+	class AActor* LockTarget;
+
+	// Components
+	UPROPERTY()
+	class USG_KratosAnim* Anim ;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCameraComponent* CameraComp;
+
+	// Kratos Weapon
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class AAxe> AxeFactory;
+
+	UPROPERTY()
+	class AAxe* Axe;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class ASG_Shield> ShieldFactory;
+
+	UPROPERTY()
+	class ASG_Shield* Shield;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
+
+	UPROPERTY()
+	class AFlyingAxe* FlyingAxe;
+
+	// VFX & Camera Shake
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	class UParticleSystem* ParryVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX Actor")
+	TSubclassOf<class AActor> ParryingLightFactory;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX Actor")
+	TSubclassOf<class AActor> GuardBlockLightFactory;
+
+	// UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> HpBarUIFactory;
+
+	UPROPERTY()
+	class UPlayerHPUI* HpBarUI;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> AimWidgetClass;
+	UPROPERTY()
+	class UUserWidget* AimWidget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHP = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurHP;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bLockOn;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class AActor* LockTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerState State = EPlayerState::Idle;
@@ -221,99 +277,40 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera");
 	float MaxPitch;
 
-	void LockTargetFunc(float DeltaTime);
-
-	UFUNCTION()
-	void OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted);
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool CanNextWeakCombo;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool bIsWeakComboInputOn;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	int CurrentWeakCombo;
-
-	/// <summary>
-	/// 강공격 콤보를 위한 bool 변수 및 콤보 카운트
-	/// </summary>
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool CanNextStrongCombo;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-	bool bIsStrongComboInputOn;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
-
-	int CurrentStrongCombo;
-	UPROPERTY(EditDefaultsOnly, Category = Weapon)
-	TSubclassOf<class AAxe> AxeFactory;
-
-	UPROPERTY(EditDefaultsOnly, Category = Weapon)
-	TSubclassOf<class ASG_Shield> ShieldFactory;
-
-	UPROPERTY()
-	class AAxe* Axe;
-
-	UPROPERTY()
-	class ASG_Shield* Shield;
-
-	UPROPERTY(EditDefaultsOnly, Category = Weapon)
-	TSubclassOf<class AFlyingAxe> FlyingAxeFactory;
-
-	UPROPERTY()
-	class AFlyingAxe* FlyingAxe;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UUserWidget> HpBarUIFactory;
-
-	UPROPERTY()
-	class UPlayerHPUI* HpBarUI;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UUserWidget> AimWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	class UUserWidget* AimWidget;
-
-	void SetWeapon();
-	void SetShield();
-	void CameraShakeOnAttack(float scale = 1.0f);
-	FString GetHitSectionName(EHitType hitType);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UParticleSystem* ParryVFX;
-
-	bool bAxeGone;
-	bool bIsAxeWithdrawing;
+	// 룬공격 막타 줌아웃
 	bool bZoomOut;
 
 	EAttackType CurrentAttackType;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class AActor> ParryingLightFactory;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class AActor> GuardBlockLightFactory;
+	
 private:
-
-	FString GetDodgeDirection(int& DodgeScale);
-
-	bool bIsAttacking;
-	bool bIsDodging;
-	FTimerHandle DodgeHandle;
-
-	float CurrentTime;
-	float DelayTime;
-
+	
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
+
+	FVector Direction;
+	FVector PrevDirection;
+
 	float TargetFOV = 90;
 
-	int GuardHitCnt;
+	bool bLockOn;
+	bool bIsAttacking;
+	bool bIsDodging;
 	bool bParrying;
 	bool bRuneReady;
 	bool bGuardStagger;
 	bool bSuperArmor;
+
+	/// Attack Combo 를 위한 bool 변수 및 콤보 카운트
+	bool CanNextStrongCombo;
+	bool bIsStrongComboInputOn;
+	int CurrentStrongCombo;
+
+	bool CanNextWeakCombo;
+	bool bIsWeakComboInputOn;
+	int CurrentWeakCombo;
+
+	bool bAxeGone;
+	bool bIsAxeWithdrawing;
+
+	int GuardHitCnt;
 };

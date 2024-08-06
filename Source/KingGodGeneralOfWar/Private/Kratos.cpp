@@ -388,6 +388,7 @@ void AKratos::SetWeapon()
 	{
 		Axe->K2_AttachToComponent(GetMesh(), TEXT("hand_rAxeSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
 		Axe->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+		Axe->Me = this;
 	}
 }
 
@@ -406,6 +407,20 @@ void AKratos::SetShield()
 void AKratos::CameraShakeOnAttack(float scale)
 {
 	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactory, scale);
+}
+
+EAttackDirectionType AKratos::GetAttackDirection()
+{
+	int ComboCount = 0;
+	if (CurrentAttackType == EAttackType::WEAK_ATTACK || CurrentAttackType == EAttackType::RUNE_ATTACK)
+		ComboCount = CurrentWeakCombo;
+	else if (CurrentAttackType == EAttackType::STRONG_ATTACK)
+		ComboCount = CurrentStrongCombo;
+	else
+		ComboCount = 0;
+	EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(CurrentAttackType)][ComboCount];
+
+	return attackDirection;
 }
 
 FString AKratos::GetHitSectionName(EHitType hitType)
@@ -750,6 +765,7 @@ void AKratos::ThrowAxe(FRotator TargetRot)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ThrowAxe"));
 	FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRot);
+	bAxeGone = true;
 }
 
 void AKratos::WithdrawAxe()
@@ -805,17 +821,17 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 		// 가드 상태
 	case EPlayerState::Guard:
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Guard Success"));
-		Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
 		if (GuardHitCnt >= 1)
 		{
+			Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
 			LaunchCharacter(GetActorForwardVector() * -1 * 1500, true, false);
 			GetWorld()->SpawnActor<AActor>(GuardBlockLightFactory, Shield->GetActorTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 			GuardHitCnt -= 1;
 		}
 		else
 		{
-			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
 			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
+			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
 			State = EPlayerState::Idle;
 			GuardHitCnt = GUARD_MAX_COUNT;
 			bGuardStagger = true;
@@ -900,9 +916,10 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	// 기본 피격
 	else
 	{
-		if (bSuperArmor) return;
 		CurHP -= DamageValue;
 		HpBarUI->SetHP(CurHP, MaxHP);
+		if (bSuperArmor) return;
+
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		CameraShakeOnAttack(8);

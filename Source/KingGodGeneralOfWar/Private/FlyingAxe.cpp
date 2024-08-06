@@ -48,7 +48,6 @@ void AFlyingAxe::BeginPlay()
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AFlyingAxe::FlyingAxeOnComponentBeginOverlap);
 	Me = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	LerpAlpha = LerpInit;
-	Me->bAxeGone = true;
 }
 
 // Called every frame

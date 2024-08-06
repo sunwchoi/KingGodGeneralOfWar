@@ -47,41 +47,26 @@ void AAxe::Tick(float DeltaTime)
 
 }
 
+// 도끼 공격이 닿았을 때 데미지와 공격 방향을 전달
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, EdgeComp->GetComponentTransform());
 	auto* Thor = Cast<ABDThor>(OtherActor);
-	auto* player = Cast<AKratos>(GetAttachParentActor());
 
 	if (Thor)
 	{
-		int attackNum = 0;
-		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
-			attackNum = player->CurrentWeakCombo;
-		else if (player->CurrentAttackType == EAttackType::STRONG_ATTACK)
-			attackNum = player->CurrentStrongCombo;
-		else
-			attackNum = 0;
-		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
+		EAttackDirectionType attackDirection = Me->GetAttackDirection();
 		Thor->fsm->Damage(AXE_DAMAGE);
 	}
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
-		
-		int attackNum = 0;
-		if (player->CurrentAttackType == EAttackType::WEAK_ATTACK || player->CurrentAttackType == EAttackType::RUNE_ATTACK)
-			attackNum = player->CurrentWeakCombo;
-		else if (player->CurrentAttackType == EAttackType::STRONG_ATTACK)
-			attackNum = player->CurrentStrongCombo;
-		else
-			attackNum = 0;
-		EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(player->CurrentAttackType)][attackNum];
+		EAttackDirectionType attackDirection = Me->GetAttackDirection();
 		AwakenThor->getFSM()->SetDamage(AXE_DAMAGE, attackDirection);
 	}
 
-	if (player)		player->CameraShakeOnAttack(0.5);
+	Me->CameraShakeOnAttack(0.5);
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.08f);
 	FTimerHandle handle;

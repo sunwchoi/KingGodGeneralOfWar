@@ -39,5 +39,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UProjectileMovementComponent* MovementComp;
 
-
+	UPROPERTY()
+	class AKratos* Me;
 };

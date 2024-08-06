@@ -23,46 +23,43 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UCapsuleComponent* CapsuleComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UStaticMeshComponent* SubMeshComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* DirectionArrowComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* HitArrowComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* WithdrawTargetPosition;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* WithdrawRotation;
-
-	float MoveSpeed = 4000.0f;
-	float RotationSpeed = 90.0f;
-
-	UFUNCTION()
-	void FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	FVector TargetLocation;
-	FVector CurLocation;
-
-	bool bHit;
-	bool bWithdrawing;
-	bool bRising;
-	float LerpAlpha;
-	float WithdrawRotationScale = -20;
-
-
-	void BackToPlayer();
 
 	UPROPERTY()
 	class AKratos* Me;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* BloodVFXFactory;
+
+	UFUNCTION()
+	void FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void BackToPlayer();
+
+	FVector TargetLocation;
+	FVector CurLocation;
+
+	float MoveSpeed = 4000.0f;
+	float RotationSpeed = 90.0f;
+	bool bHit;
+	bool bWithdrawing;
+	bool bRising;
+	float LerpAlpha;
+	float WithdrawRotationScale = -20;
 
 };
