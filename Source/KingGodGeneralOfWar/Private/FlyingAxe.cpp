@@ -61,7 +61,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 	{
 		SetActorLocation(GetActorLocation() + DirectionArrowComp->GetForwardVector() * MoveSpeed * DeltaTime);
 
-		FQuat quat = FRotator(-45, 1, 1).Quaternion();
+		FQuat quat = FRotator(-45, 2, 2).Quaternion();
 		SubMeshComp->AddRelativeRotation(quat);
 	}
 	// 회수 중

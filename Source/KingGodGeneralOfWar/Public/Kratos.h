@@ -17,19 +17,17 @@ enum class EPlayerState : uint8
 	Run UMETA(DisplayName = "Run"),
 	Dodge UMETA(DisplayName = "Dodge"),
 	Roll UMETA(DisplayName = "Roll"),
-	WeakCombo UMETA(DisplayName = "WeakCombo"),
-	StrongCombo UMETA(DisplayName = "StrongCombo"),
+	Attack UMETA(DisplayName = "Attack"),
 	Aim UMETA(DisplayName = "Aim"),
-	DashAttack UMETA(DisplayName = "DashAttack"),
-	RuneAttack UMETA(DisplayName = "RuneAttack"),
 	GuardStart UMETA(DisplayName = "GuardStart"),
+	Parry UMETA(DisplayName = "Parry"),
 	Guard UMETA(DisplayName = "Guard"),
 	GuardHit UMETA(DisplayName = "GuardHit"),
-	GuardStaggerd UMETA(DisplayName = "GuardStaggerd"),
 	GuardEnd UMETA(DisplayName = "GuardEnd"),
 	NoneMovable UMETA(DisplayName = "NoneMovable"),
 	Hit UMETA(DisplayName = "Hit"),
-	Parry UMETA(DisplayName = "Parry"),
+	Die UMETA(DisplayName = "Die"),
+
 };
 
 UENUM(BlueprintType)
@@ -64,6 +62,7 @@ enum class EAttackType : uint8
 	STRONG_ATTACK UMETA(DisplayName = "STRONG_ATTACK"),
 	RUNE_ATTACK UMETA(DisplayName = "RUNE_ATTACK"),
 	AXE_THROW_ATTACK UMETA(DisplayName = "AXE_THROW_ATTACK"),
+	DASH_ATTACK UMETA(DisplayName = "DASH_ATTACK"),
 };
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
