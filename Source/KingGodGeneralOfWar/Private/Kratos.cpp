@@ -59,6 +59,9 @@ AKratos::AKratos()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	WithdrawPositionComp = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPositionComp"));
+	WithdrawPositionComp->SetupAttachment(RootComponent);
+
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
 
@@ -163,7 +166,7 @@ void AKratos::PostInitializeComponents()
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
 			{
-				State = EPlayerState::Idle;
+				SetState(EPlayerState::Idle);
 			});
 	}
 }
@@ -281,7 +284,6 @@ void AKratos::PlayerMove()
 	PrevDirection = Direction;
 	Direction = FVector(0, 0, 0);
 
-
 	float MoveScale = 0;
 	switch (State)
 	{
@@ -312,26 +314,26 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == Anim->StrongAttackMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		CanNextStrongCombo = false;
 		CurrentStrongCombo = 0;
 		bIsAttacking = false;
 	}
 	else if (Montage == Anim->WeakAttackMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		WeakAttackEndComboState();
 	}
 	else if (Montage == Anim->DodgeMontage)
 	{
 		if (State == EPlayerState::Roll || State == EPlayerState::DashAttack) return;
 
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		bIsDodging = false;
 	}
 	else if (Montage == Anim->RollMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		bIsDodging = false;
 	}
 	else if (Montage == Anim->GuardMontage)
@@ -340,29 +342,29 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnGuardMontageEnded On Interrupted"));
 			if (Anim->Montage_IsPlaying(Anim->GuardMontage)) return;
-			State = EPlayerState::Idle;
+			SetState(EPlayerState::Idle);
 		}
 		else
 		{
 			GuardHitCnt = GUARD_MAX_COUNT;
-			State = EPlayerState::Idle;
+			SetState(EPlayerState::Idle);
 		}
 	}
 	else if (Montage == Anim->DashAttackMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		bIsDodging = false;
 
 	}
 	else if (Montage == Anim->RuneBaseMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		if (!bInterrupted)
 			bRuneReady = true;
 	}
 	else if (Montage == Anim->RuneAttackMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 		bRuneReady = false;
 		bSuperArmor = false;
 		WeakAttackEndComboState();
@@ -370,7 +372,7 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	}
 	else if (Montage == Anim->HitMontage)
 	{
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 
 	}
 	else if (Montage == Anim->AxeWithdrawMontage)
@@ -474,7 +476,7 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 	// 움직임은 유휴, 이동, 달리기가능
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		State = EPlayerState::Move;
+		SetState(EPlayerState::Move);
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
@@ -504,7 +506,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 
 	if (!bIsDodging && State != EPlayerState::Roll)
 	{
-		State = EPlayerState::Dodge;
+		SetState(EPlayerState::Dodge);
 		bIsDodging = true;
 
 		int DodgeScale;
@@ -519,7 +521,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 	}
 	else if (State == EPlayerState::Dodge)
 	{
-		State = EPlayerState::Roll;
+		SetState(EPlayerState::Roll);
 		bIsDodging = true;
 		Anim->Montage_Stop(0.1f, Anim->DodgeMontage);
 		int8 sectionIdx = 3;
@@ -545,7 +547,7 @@ void AKratos::OnMyActionRunOn(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Idle || State == EPlayerState::Move)
 	{
-		State = EPlayerState::Run;
+		SetState(EPlayerState::Run);
 
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Move -> Run"));
 	}
@@ -555,7 +557,7 @@ void AKratos::OnMyActionRunOff(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Run)
 	{
-		State = EPlayerState::Move;
+		SetState(EPlayerState::Move);
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Run -> Move"));
 	}
 }
@@ -566,7 +568,7 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
-		State = EPlayerState::GuardStart;
+		SetState(EPlayerState::GuardStart);
 		Anim->PlayGuardMontage();
 	}
 }
@@ -579,7 +581,7 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
 		Anim->Montage_Stop(0, Anim->GuardMontage);
-		//State = EPlayerState::GuardEnd;
+		//SetState(EPlayerState::GuardEnd);
 	}
 }
 
@@ -633,7 +635,7 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 void AKratos::OnMyActionIdle(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Move || State == EPlayerState::Run)
-		State = EPlayerState::Idle;
+		SetState(EPlayerState::Idle);
 }
 
 
@@ -763,9 +765,9 @@ void AKratos::OnHideAxe()
 
 void AKratos::ThrowAxe(FRotator TargetRot)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("ThrowAxe"));
 	FlyingAxe = GetWorld()->SpawnActor<AFlyingAxe>(FlyingAxeFactory, Axe->GetActorLocation(), TargetRot);
 	bAxeGone = true;
+	CameraShakeOnAttack(1.3f);
 }
 
 void AKratos::WithdrawAxe()
@@ -778,7 +780,12 @@ void AKratos::CatchFlyingAxe()
 	Axe->MeshComp->SetVisibility(true, true);
 	bAxeGone = false;
 	bIsAxeWithdrawing = false;
-	CameraShakeOnAttack(1.0f);
+	CameraShakeOnAttack(2.0f);
+}
+
+void AKratos::SetState(EPlayerState NextState)
+{
+	State = NextState;
 }
 
 void AKratos::WeakAttackStartComboState()
@@ -839,10 +846,10 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 		break;
 		// 패링 가능 상태
 	case EPlayerState::GuardStart:
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		bParrying = true;
-		State = EPlayerState::Parry;
+		SetState(EPlayerState::Parry);
 		break;
 		// 기본 피격
 	case EPlayerState::Hit:
@@ -853,7 +860,7 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 		HpBarUI->SetHP(CurHP, MaxHP);
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
-		State = EPlayerState::Hit;
+		SetState(EPlayerState::Hit);
 		break;
 
 	}
@@ -880,7 +887,7 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		{
 			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
 			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
-			State = EPlayerState::Idle;
+			SetState(EPlayerState::Idle);
 			GuardHitCnt = GUARD_MAX_COUNT;
 			bGuardStagger = true;
 		}
@@ -888,11 +895,11 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	// 패링 가능 상태
 	else if (State == EPlayerState::GuardStart)
 	{
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		CameraShakeOnAttack(3.0f);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		bParrying = true;
-		State = EPlayerState::Parry;
+		SetState(EPlayerState::Parry);
 		if (IsMelee)
 		{
 			auto* Thor = Cast<ABDThor>(Attacker);
@@ -923,6 +930,6 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		CameraShakeOnAttack(8);
-		State = EPlayerState::Hit;
+		SetState(EPlayerState::Hit);
 	}
 }

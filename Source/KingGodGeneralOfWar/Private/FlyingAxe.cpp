@@ -70,7 +70,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 		// 회수: 플레이어에게 돌아오는 모션
 		if (!bRising)
 		{
-			TargetLocation = Me->GetMesh()->GetSocketLocation(TEXT("hand_rAxeSocket"));
+			TargetLocation = Me->WithdrawPositionComp->GetComponentLocation();
 		}
 		const float MIN_DIST = 30;
 		if (FVector::Dist(GetActorLocation(), TargetLocation) < MIN_DIST)
@@ -91,16 +91,17 @@ void AFlyingAxe::Tick(float DeltaTime)
 		{
 			if (bRising)
 			{
-				FQuat quat = FRotator(-10, 0, 0).Quaternion();
+				FQuat quat = FRotator(-15, 0, 0).Quaternion();
 				SubMeshComp->AddRelativeRotation(quat);
 				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 4));
 			}
 			else
 			{
-				FQuat quat = FRotator(WithdrawRotationScale, 0.1f, 0.1f).Quaternion();
+				FQuat quat = FRotator(WithdrawRotationScale, -3.0f, -3.0f).Quaternion();
 				WithdrawRotationScale -= 0.33;
 				SubMeshComp->AddRelativeRotation(quat);
-				SetActorLocation(FMath::Lerp(CurLocation, TargetLocation, LerpAlpha));
+				FVector nextLocation = FMath::Lerp(CurLocation, TargetLocation, LerpAlpha);
+				SetActorLocation(nextLocation);
 			}
 		}
 		LerpAlpha += LerpInit;

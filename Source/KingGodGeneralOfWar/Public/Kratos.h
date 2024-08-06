@@ -150,6 +150,8 @@ public:
 	EAttackDirectionType GetAttackDirection();
 
 private:
+	void SetState(EPlayerState NextState);
+
 	// Weak Attack Combo
 	void WeakAttackStartComboState();
 	void WeakAttackEndComboState();
@@ -204,19 +206,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
 	class UInputAction* IA_RuneBase;
 
-
 	// UClass Pointer
 	class AActor* LockTarget;
 
-	// Components
 	UPROPERTY()
 	class USG_KratosAnim* Anim ;
 
+	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UArrowComponent* WithdrawPositionComp;
 
 	// Kratos Weapon
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
