@@ -259,8 +259,8 @@ void AKratos::Tick(float DeltaTime)
 
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Velocity: %f"), GetVelocity().Size()));
@@ -370,6 +370,7 @@ void AKratos::OnMyRuneAttackEnd()
 	bRuneReady = false;
 	bSuperArmor = false;
 	bZoomOut = false;
+	CurrentAttackType = EAttackType::NONE;
 }
 
 void AKratos::OnMyAttackComboEnd()
@@ -651,7 +652,6 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		else
 		{
 			bSuperArmor = true;
-
 			SetState(EPlayerState::Attack);
 
 			WeakAttackStartComboState();
@@ -763,6 +763,7 @@ void AKratos::CatchFlyingAxe()
 	Axe->MeshComp->SetVisibility(true, true);
 	bAxeGone = false;
 	bIsAxeWithdrawing = false;
+	CurrentAttackType = EAttackType::NONE;
 	CameraShakeOnAttack(2.0f);
 }
 
