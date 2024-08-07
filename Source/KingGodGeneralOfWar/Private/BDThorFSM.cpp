@@ -18,7 +18,7 @@ UBDThorFSM::UBDThorFSM()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	LastAttackState = BDThorGeneralState::BDIdle; // ÃÊ±âÈ­
+	LastAttackState = BDThorGeneralState::BDIdle; // ï¿½Ê±ï¿½È­
 }
 
 
@@ -27,17 +27,17 @@ void UBDThorFSM::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//¿ùµå¿¡¼­ ÇÃ·¹ÀÌ¾î Ã£¾Æ¿À±â
+	//ï¿½ï¿½ï¿½å¿¡ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ã£ï¿½Æ¿ï¿½ï¿½ï¿½
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), AKratos::StaticClass());
-	//AKratos Å¸ÀÔÀ¸·Î Ä³½ºÆÃ
+	//AKratos Å¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½
 	Target = Cast<AKratos>(actor);
-	//¼ÒÀ¯ °´Ã¼ °¡Á®¿À±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	me = Cast<ABDThor>(GetOwner());
 
-	//¾Ö´Ï¸ÞÀÌ¼Ç ÇÒ´ç
+	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Ò´ï¿½
 	anim = Cast<UBDThorAnim>(me->GetMesh()->GetAnimInstance());
 
-	//Ã¼·Â ¼³Á¤
+	//Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	BDCurrentHP = BDMaxHp;
 
 }
@@ -50,47 +50,47 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 	switch (mState) {
 	case BDThorGeneralState::BDIdle:
-		BDIdleState(); //´ë±â
+		BDIdleState(); //ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDMove:
-		BDMoveState(); //¿òÁ÷ÀÓ
+		BDMoveState(); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDAttackModeChange:
-		BDAttackModeChangeState(); //°ø°Ý »óÅÂ º¯°æ ÇÔ¼ö
+		BDAttackModeChangeState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 		break;
 	case BDThorGeneralState::BDAvoidance:
-		BDAvoidanceState(); //È¸ÇÇ
+		BDAvoidanceState(); //È¸ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDDamage:
-		BDDamageState(); //ÇÇ°Ý
+		BDDamageState(); //ï¿½Ç°ï¿½
 		break;
 	case BDThorGeneralState::BDHammerThrow:
-		BDHammerThrowState(); //°ø°Ý ÆÐÅÏ
+		BDHammerThrowState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDHammerWind:
-		BDHammerWindState(); //°ø°Ý ÆÐÅÏ
+		BDHammerWindState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDHammerThreeSwing:
-		BDHammerThreeSwingState(); //°ø°Ý ÆÐÅÏ
+		BDHammerThreeSwingState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDGiveUPFly:
-		BDGiveUPFlyState(); //°ø°Ý ÆÐÅÏ
+		BDGiveUPFlyState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		break;
 	case BDThorGeneralState::BDHitDown:
-		BDHittingDownState(); //°ø°Ý ÆÐÅÏ
+		BDHittingDownState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		break;
 	}
 
-	//½ÇÇàÃ¢¿¡ »óÅÂ ¸Þ¼¼Áö Ãâ·Â
+	//ï¿½ï¿½ï¿½ï¿½Ã¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	FString logMessege = UEnum::GetValueAsString(mState);
 	GEngine->AddOnScreenDebugMessage(0, 1, FColor::Cyan, logMessege);
 }
 
 
-//»óÅÂ °ü¸® ÇÔ¼ö
+//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 void UBDThorFSM::BDIdleState()
 {
-	//¹æÇâ µ¹¸®±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -98,26 +98,26 @@ void UBDThorFSM::BDIdleState()
 
 	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 
-	//½Ã°£ÀÌ Èå¸£¸é¼­
+	//ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½å¸£ï¿½é¼­
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
-	//¸¸¾à °æ°ú ½Ã°£ÀÌ ´ë±â ½Ã°£À» ÃÊ°úÇß´Ù¸é
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½ï¿½ß´Ù¸ï¿½
 	if (BDCurrentTime > BDidleDelayTime) {
-		//3. ÀÌµ¿ »óÅÂ·Î ÀüÈ¯ÇÏ°í ½Í´Ù.
+		//3. ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
 		mState = BDThorGeneralState::BDMove;
-		//°æ°ú ½Ã°£ ÃÊ±âÈ­
+		//ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½Ê±ï¿½È­
 		BDCurrentTime = 0;
 
-		//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ µ¿±âÈ­
+		//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 		anim->animState = mState;
 	}
 }
 
 void UBDThorFSM::BDMoveState()
 {
-	//±âº»ÀûÀ¸·Î´Â ÇÃ·¹ÀÌ¾î¸¦ ÇâÇØ ÀÌµ¿ÇÏÁö¸¸
-	//ÇÇ°Ý »óÅÂ°¡ µÇ¾ú°Å³ª °ø°ÝÀ» ÇÏ±â Àü¿¡ ÇÃ·¹ÀÌ¾î¸¦ ¹Ù¶óº¸¸ç µÚ·Î ÀÌµ¿ÇÏ°Å³ª ¿·À¸·Î È¸ÇÇ¸¦ ÇÑ´Ù.
+	//ï¿½âº»ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Ç¾ï¿½ï¿½Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½Ù¶óº¸¸ï¿½ ï¿½Ú·ï¿½ ï¿½Ìµï¿½ï¿½Ï°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½Ç¸ï¿½ ï¿½Ñ´ï¿½.
 
-	//¹æÇâ µ¹¸®±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -125,12 +125,12 @@ void UBDThorFSM::BDMoveState()
 
 	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 
-	//±âº» ÀÌµ¿ ±¸Çö
-	//1. Å¸±ê ¸ñÀûÁö°¡ ÇÊ¿äÇÏ´Ù.
+	//ï¿½âº» ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
+	//1. Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï´ï¿½.
 	FVector destination = Target->GetActorLocation();
-	//2. ¹æÇâÀÌ ÇÊ¿äÇÏ´Ù.
+	//2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï´ï¿½.
 	FVector dir = destination - me->GetActorLocation();
-	//3. ¹æÇâÀ¸·Î ÀÌµ¿ÇÏ°í ½Í´Ù.
+	//3. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
 	me->AddMovementInput(dir.GetSafeNormal());
 
 
@@ -138,21 +138,21 @@ void UBDThorFSM::BDMoveState()
 	if (BDCurrentTime > BDDelayTime) {
 		//mState = BDThorGeneralState::BDAttackModeChange;
 
-		////¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ µ¿±âÈ­
+		////ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 		//anim->animState = mState;
 
 		BDSetState(BDThorGeneralState::BDAttackModeChange);
 		BDCurrentTime = 0;
 	}
 
-	//Å¸±ê°ú °¡±î¿öÁö¸é °ø°Ý »óÅÂ·Î ÀüÈ¯ÇÏ°í ½Í´Ù.
-	//1. ¸¸¾à °Å¸®°¡ °ø°Ý ¹üÀ§ ¾È¿¡ µé¾î¿À¸é
+	//Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
+	//1. ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//if (dir.Size() < BDAttackRange) {
-	//	//2. °ø°Ý »óÅÂ·Î ÀüÈ¯ÇÏ°í ½Í´Ù.
-	//	//¿©±â ´õ ±¸Ã¼È­
+	//	//2. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
+	//	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ã¼È­
 	//	mState = BDThorGeneralState::BDAttackModeChange;
 
-	//	//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ µ¿±âÈ­
+	//	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 	//	anim->animState = mState;
 	//}
 }
@@ -160,19 +160,19 @@ void UBDThorFSM::BDMoveState()
 
 void UBDThorFSM::BDAttackModeChangeState()
 {
-	//ÀÏÁ¤½Ã°£¿¡ ´Ù¾çÇÑ ÆÐÅÏÀ¸·Î ³Ñ¾î°¡¾ßÇÑ´Ù.
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½Ù¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ï¿½Ñ´ï¿½.
 
-	//¿ì¼±Àº ¾Ö´Ï¸ÞÀÌ¼ÇÀº ´ë±â or ¿òÁ÷ÀÓ or È¸ÇÇ ¾Ö´Ï¸ÞÀÌ¼ÇÀ» Àç»ýÇÑ´Ù.
-	//¿ì¼±Àº ´ë±â »óÅÂ ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ýÀ¸·Î ÁöÁ¤
+	//ï¿½ì¼±ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ or ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ or È¸ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+	//ï¿½ì¼±ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	anim->playBDAttackRandomState();
 
-	//1. ½Ã°£ÀÌ Èå¸£°í
+	//1. ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½å¸£ï¿½ï¿½
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
-	//2. °ø°Ý ½Ã°£ÀÌ µÇ¸é
+	//2. ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½Ç¸ï¿½
 	if (BDCurrentTime > BDAttackDelayTime) {
-		// ·£´ýÀ¸·Î °ø°Ý ÆÐÅÏ ¼±ÅÃ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		mState = RandomAttackState();
-		//mState = BDThorGeneralState::BDHammerWind;  // ÀÓ½Ã »óÅÂ
+		//mState = BDThorGeneralState::BDHammerWind;  // ï¿½Ó½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		anim->animState = mState;
 		
 		//UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
@@ -180,28 +180,28 @@ void UBDThorFSM::BDAttackModeChangeState()
 		BDCurrentTime = 0;
 	}
 
-	//Å¸±êÀÌ °ø°ÝÀ» ¹ÞÀ¸¸é ´Ù½Ã ÀÌµ¿À¸·Î º¯ÇÏ°í ½Í´Ù.
+	//Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
 
-	////ÀÓ½Ã ÄÚµå, ÇÃ·¹ÀÌ¾îÀÇ Damage°¡ ¹ß»ýÇßÀ» °æ¿ì ¿¡³Ê¹ÌÀÇ »óÅÂ¸¦ ´ë±â ¶Ç´Â ÀÌµ¿À¸·Î º¯°æ
+	////ï¿½Ó½ï¿½ ï¿½Úµï¿½, ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ Damageï¿½ï¿½ ï¿½ß»ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	//float distance = FVector::Distance(Target->GetActorLocation(), me->GetActorLocation());
-	////Å¸±êÀÇ °Å¸®°¡ °ø°Ý ¹üÀ§¸¦ ¹þ¾î³µÀ¸´Ï±î
+	////Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³µï¿½ï¿½ï¿½Ï±ï¿½
 	//if (distance > BDAttackRange) {
-	//	//»óÅÂ¸¦ Àá½Ã ´ë±â·Î ÀüÈ¯ÇÑ´Ù.
+	//	//ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ñ´ï¿½.
 	//	mState = BDThorGeneralState::BDIdle;
-	//	//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ µ¿±âÈ­
+	//	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 	//	anim->animState = mState;
 	//}
 
 }
 
-//°ø°Ý ÆÐÅÏÀ» ·£´ýÀ¸·Î ÁöÁ¤ÇÏ´Â ÇÔ¼ö
+//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½
 BDThorGeneralState UBDThorFSM::RandomAttackState()
 {
-	//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ´Â ¿ì¼± ¸ùÅ¸ÁÖ¸¦ ½ÇÇàÇÑ´Ù
+	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½Â´ï¿½ ï¿½ì¼± ï¿½ï¿½Å¸ï¿½Ö¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
 	
 	bBDAttackCheck = false;
 
-	// °¡´ÉÇÑ »óÅÂµéÀ» ¹è¿­·Î ÀúÀå
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Âµï¿½ï¿½ï¿½ ï¿½è¿­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
 		BDThorGeneralState::BDHammerWind,
@@ -210,48 +210,48 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 		//BDThorGeneralState::BDHitDown
 	};
 
-	// ¸¶Áö¸· »óÅÂ Á¦°Å
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	AttackStates.Remove(LastAttackState);
 
-	// ·£´ýÀ¸·Î ¼±ÅÃ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	int32 RandomIndex = FMath::RandRange(0, AttackStates.Num() - 1);
 	BDThorGeneralState NewState = AttackStates[RandomIndex];
 
-	//¸¸¾à ¸ÁÄ¡ °ø°ÝÀÏ °æ¿ì
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	if (NewState == BDThorGeneralState::BDHammerThrow || NewState == BDThorGeneralState::BDHammerWind) {
-		//¼Õ¿¡ ¸ÁÄ¡¸¦ µé¾î¶ó
+		//ï¿½Õ¿ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		me->EquipWeapon();
 	}
 	else if(NewState == BDThorGeneralState::BDHammerThreeSwing) {
-		me->EquipRight(); //¿À¸¥¼Õ¿¡ ¸ÁÄ¡¸¦ µé¾î¶ó
+		me->EquipRight(); //ï¿½ï¿½ï¿½ï¿½ï¿½Õ¿ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	}
 	else {
-		me->DrawWeapon(); //Çã¸®¿¡ ¸ÁÄ¡¸¦ µÎ¾î¶ó
+		me->DrawWeapon(); //ï¿½ã¸®ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Î¾ï¿½ï¿½
 	}
 
-	// ¸¶Áö¸· »óÅÂ ¾÷µ¥ÀÌÆ®
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	LastAttackState = NewState;
 	//UE_LOG(LogTemp, Warning, TEXT("Random!!"));
-	return NewState; //»óÅÂ ¸®ÅÏ
+	return NewState; //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 }
 
-//µ¥¹ÌÁö¸¦ ¹ÞÀ» ½Ã ¹ß»ýÇÏ´Â ÇÔ¼ö, µÎ¹øÂ°´Â ¾Ö´Ï¸ÞÀÌ¼ÇÀ» Àç»ýÇÒ È÷Æ® ¹æÇâÀ» ¸»ÇÑ´Ù.
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ß»ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½, ï¿½Î¹ï¿½Â°ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ñ´ï¿½.
 void UBDThorFSM::Damage(float DamageNum, EAttackDirectionType AtkDir)
 {
 	BDCurrentHP -= DamageNum;
 
-	me->UpdateHpUI(); //Ã¼·Â ¼³Á¤
+	me->UpdateHpUI(); //Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	BDGetHitDirectionString(AtkDir, Str);
+	BDGetHitDirectionString(AtkDir);
 
-	//ÇÇ°Ý »óÅÂ·Î º¯°æÇÑ´Ù.
+	//ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	mState = BDThorGeneralState::BDDamage;
 
 	//UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
 
 }
 
-void UBDThorFSM::BDGetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
+void UBDThorFSM::BDGetHitDirectionString(EAttackDirectionType AtkDir)
 {
 	Str = UEnum::GetValueAsString(AtkDir).Mid(22);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *Str);
@@ -261,9 +261,9 @@ void UBDThorFSM::BDDamageState()
 {
 	if (!anim->Montage_IsPlaying(anim->BDThorDamageMontage)) {
 		//UE_LOG(LogTemp, Warning, TEXT("Damage"));
-		//ÇÇ°Ý ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ý
+		//ï¿½Ç°ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½
 		anim->playBDDamage();
-		//Á¡ÇÁ
+		//ï¿½ï¿½ï¿½ï¿½
 		anim->BDJumpToHitSection(Str);
 	}
 
@@ -274,22 +274,22 @@ void UBDThorFSM::BDDamageState()
 void UBDThorFSM::BDAvoidanceState()
 {
 	if (!anim->Montage_IsPlaying(anim->BDThorRightDodgeMontage)) {
-		//µ¥¹ÌÁö¸¦ ¹Þ¾ÒÀ» ¶§ È¸ÇÇ
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½ï¿½ ï¿½ï¿½ È¸ï¿½ï¿½
 		UE_LOG(LogTemp, Warning, TEXT("Avoidance"));
 		anim->playBDRightDodge();
 	}
 
-	//ÀÌÁ¦ ±ÙÃ³ ¹°Ã¼ À§Ä¡¸¦ ¹Þ¾Æ¼­ ¿À¸¥ÂÊÀ¸·Î È¸ÇÇÇÒ °ÍÀÎÁö µÚÂÊÀ¸·Î È¸ÇÇÇÒ °ÍÀÎÁö¿¡ ´ëÇÑ ÄÚµå ÀÛ¼º
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã³ ï¿½ï¿½Ã¼ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Þ¾Æ¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½Û¼ï¿½
 
-	//ÇÃ·¹ÀÌ¾îÀÇ ¹æÇâÀ» ÁßÁ¡À¸·Î µÚ·Î ÇÇÇÏ°Å³ª ¿·À¸·Î ÇÇÇÑ´Ù.
+	//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú·ï¿½ ï¿½ï¿½ï¿½Ï°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ñ´ï¿½.
 }
 
 
-//¸ÁÄ¡ ³¯¸®¸é¼­ ¹ø°³ °ø°Ý
+//ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void UBDThorFSM::BDHammerThrowState()
 {
 
-	//¹æÇâ µ¹¸®±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -297,12 +297,12 @@ void UBDThorFSM::BDHammerThrowState()
 
 	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 
-	// ÇöÀç »óÅÂ°¡ ÀÌ¹Ì Hammer Wind¶ó¸é ÇÔ¼ö È£ÃâÀ» °Ç³Ê¶Ú´Ù.
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Ì¹ï¿½ Hammer Windï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½ï¿½ï¿½ ï¿½Ç³Ê¶Ú´ï¿½.
 	if (mState != BDThorGeneralState::BDHammerThrow) {
 		return;
 	}
 
-	//¾Ö´Ï¸ÞÀÌ¼Ç ¸ùÅ¸ÁÖ¸¦ Àç»ýÇÏ°í ÀÖÁö ¾ÊÀ»¶§, ÇÃ·¹ÀÌ¾î¿ÍÀÇ ÇöÀç °Å¸®°¡ 250 ÀÌÇÏÀÏ¶§
+	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½Å¸ï¿½Ö¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ 250 ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½
 	if (!anim->Montage_IsPlaying(anim->BDHammerThrowMontage)) {
 		anim->playBDHammerThrow();
 	}
@@ -310,10 +310,10 @@ void UBDThorFSM::BDHammerThrowState()
 	
 }
 
-//¸ÁÄ¡ ÈÖµÎ¸£¸é¼­ ¹Ù¶÷°ø°Ý
+//ï¿½ï¿½Ä¡ ï¿½ÖµÎ¸ï¿½ï¿½é¼­ ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½
 void UBDThorFSM::BDHammerWindState()
 {
-	//¹æÇâ µ¹¸®±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -322,15 +322,15 @@ void UBDThorFSM::BDHammerWindState()
 	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 
 	if (me->IsWeaponHold == false) {
-		me->EquipWeapon(); //¿ì¼± ¹«±â¸¦ µç´Ù.
+		me->EquipWeapon(); //ï¿½ì¼± ï¿½ï¿½ï¿½â¸¦ ï¿½ï¿½ï¿½.
 	}
 
-	// ÇöÀç »óÅÂ°¡ ÀÌ¹Ì Hammer Wind¶ó¸é ÇÔ¼ö È£ÃâÀ» °Ç³Ê¶Ú´Ù.
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Ì¹ï¿½ Hammer Windï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½ï¿½ï¿½ ï¿½Ç³Ê¶Ú´ï¿½.
 	if (mState != BDThorGeneralState::BDHammerWind) {
 		return;
 	}
 
-	// ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ Àç»ýµÇ°í ÀÖ´ÂÁö È®ÀÎÇÏ°í, Àç»ýµÇÁö ¾Ê¾Ò´Ù¸é Àç»ýÇÑ´Ù.
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï°ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò´Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	if (!anim->Montage_IsPlaying(anim->BDHammerWindMontage))
 	{
 		anim->playBDHammerWind();
@@ -339,10 +339,10 @@ void UBDThorFSM::BDHammerWindState()
 
 }
 
-//¸ÁÄ¡ 3¹ø ÈÖµÎ¸£±â
+//ï¿½ï¿½Ä¡ 3ï¿½ï¿½ ï¿½ÖµÎ¸ï¿½ï¿½ï¿½
 void UBDThorFSM::BDHammerThreeSwingState()
 {
-	//´ë½¬
+	//ï¿½ë½¬
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -355,12 +355,12 @@ void UBDThorFSM::BDHammerThreeSwingState()
 	me->AddMovementInput(dirR);
 
 	//UE_LOG(LogTemp, Warning, TEXT("bIsDash: %s"), anim->bIsDash ? TEXT("true") : TEXT("false"));
-	//¸ùÅ¸ÁÖ ½ÇÇà
+	//ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	anim->playBDHammerThreeSwing(); //3¹ø ÈÖµÎ¸£±â
+	anim->playBDHammerThreeSwing(); //3ï¿½ï¿½ ï¿½ÖµÎ¸ï¿½ï¿½ï¿½
 
-	//Å¸°Ù°ú Åä¸£ÀÇ °Å¸®°¡ °¡±î¿ï °æ¿ì
-	// Å¸°Ù°ú Åä¸£ÀÇ °Å¸®°¡ °¡±î¿ï °æ¿ì
+	//Å¸ï¿½Ù°ï¿½ ï¿½ä¸£ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+	// Å¸ï¿½Ù°ï¿½ ï¿½ä¸£ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	if (anim->Montage_IsPlaying(anim->BDHammerThreeSwingMontage))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is playing"));
@@ -368,23 +368,23 @@ void UBDThorFSM::BDHammerThreeSwingState()
 		if (dirR.Size() <= 200.0f)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("State1: %s"), *UEnum::GetValueAsString(mState));
-			// ¸ùÅ¸ÁÖ ¼½¼ÇÀ» "Attack1"À¸·Î º¯°æ
+			// ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ "Attack1"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-			me->GetCharacterMovement()->MaxWalkSpeed = 200.f; // ´Þ¸®´Â °É ¸ØÃß°í
+			me->GetCharacterMovement()->MaxWalkSpeed = 200.f; // ï¿½Þ¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ß°ï¿½
 
 			if (!bBDAttackCheck) {
 				anim->Montage_JumpToSection(FName("Attack1"), anim->BDHammerThreeSwingMontage);
 				bBDAttackCheck = true;
 			}
 			//else {
-			//	//¸¸¾à ÇÃ·¹ÀÌ¾î°¡ ¸Â¾Ò´Ù¸é
-			//	//BDSetState(BDThorGeneralState::BDIdle); //³ªÁß¿¡ µÚ·Î È¸ÇÇ ¶Ç´Â ¿·À¸·Î È¸ÇÇ·Î º¯°æ
-			//	//bBDAttackCheck = false; //º¯°æ
+			//	//ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½Â¾Ò´Ù¸ï¿½
+			//	//BDSetState(BDThorGeneralState::BDIdle); //ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ú·ï¿½ È¸ï¿½ï¿½ ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½
+			//	//bBDAttackCheck = false; //ï¿½ï¿½ï¿½ï¿½
 			//}
 
 			//UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Three Swing Animation"));
 		}
-		// Å¸°Ù°ú Åä¸£ÀÇ °Å¸®°¡ ¸Ö °æ¿ì
+		// Å¸ï¿½Ù°ï¿½ ï¿½ä¸£ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
 		else if (dirR.Size() > 200.0f)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("State2: %s"), *UEnum::GetValueAsString(mState));
@@ -397,19 +397,19 @@ void UBDThorFSM::BDHammerThreeSwingState()
 	}
 }
 
-//ÇÃ·¹ÀÌ¾î Àâ¾Æ¼­ ¾÷¾îÄ¡±â (Ä«¸Þ¶ó ÄÆ¾À)
+//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ¼ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ (Ä«ï¿½Þ¶ï¿½ ï¿½Æ¾ï¿½)
 void UBDThorFSM::BDGiveUPFlyState()
 {
 }
 
-//¹Ù´ÚÀ» ÁÖ¸ÔÀ¸·Î ³»·ÁÄ¡±â
+//ï¿½Ù´ï¿½ï¿½ï¿½ ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½
 void UBDThorFSM::BDHittingDownState()
 {
 }
 
 void UBDThorFSM::BDDash()
 {
-	//¹æÇâ µ¹¸®±â
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -422,64 +422,64 @@ void UBDThorFSM::BDDash()
 	me->AddMovementInput(dirR);
 
 	UE_LOG(LogTemp, Warning, TEXT("BDDash"));
-	//Å¸°Ù°ú Åä¸£ÀÇ °Å¸®°¡ °¡°¡¿ï °æ¿ì
+	//Å¸ï¿½Ù°ï¿½ ï¿½ä¸£ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	if (dist < 200.f)
 	{
 		me->GetCharacterMovement()->MaxWalkSpeed = 50.0f;
 	}
-	//Å¸°Ù°ú Åä¸£ÀÇ °Å¸®°¡ ¸Ö °æ¿ì
+	//Å¸ï¿½Ù°ï¿½ ï¿½ä¸£ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
 	else if (dist < 600.f)
 	{
 		me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
 	}
 	else
 	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //³Ê¹« ¸Õ °æ¿ì »¡¸® ¿Àµµ·Ï
+		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //ï¿½Ê¹ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		//if (me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
 		//	me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
 		//else
-		//	me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //³Ê¹« ¸Õ °æ¿ì »¡¸® ¿Àµµ·Ï
+		//	me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //ï¿½Ê¹ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 
 }
 
 
-//¾Ö´Ï¸ÞÀÌ¼Ç ¸¶Áö¸· Á¾·á ÈÄ »óÅÂ È®ÀÎ 
-// ´ë±â, ÀÌµ¿Àº EndState¿¡¼­ °ü¸®ÇÏÁö ¾Ê´Â´Ù.
+//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ 
+// ï¿½ï¿½ï¿½, ï¿½Ìµï¿½ï¿½ï¿½ EndStateï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´Â´ï¿½.
 void UBDThorFSM::BDEndState()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End1"));
 
-	//¸¸¾à ±ÙÁ¢ °ø°Ý »óÅÂ¶ó¸é
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¶ï¿½ï¿½
 	if (mState == BDThorGeneralState::BDGiveUPFly || mState == BDThorGeneralState::BDHitDown) {
-		//ÇÃ·¹ÀÌ¾î ±ÙÃ³¿¡ ÀÖ±â ¶§¹®¿¡ ÀÏ´Ü È¸ÇÇ »óÅÂ
+		//ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ã³ï¿½ï¿½ ï¿½Ö±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		BDSetState(BDThorGeneralState::BDMove);
 		
 		//UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
 	}
-	//¸ÁÄ¡¸¦ µç ±ÙÁ¢ °ø°Ý »óÅÂ¿´¾ú´Ù¸é
+	//ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½Ù¸ï¿½
 	else if (mState == BDThorGeneralState::BDHammerThreeSwing) {
 		if (me->IsWeaponHold == false) {
-			me->DrawWeapon(); //¹«±â¸¦ ³»¸°´Ù.
+			me->DrawWeapon(); //ï¿½ï¿½ï¿½â¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 		}
 		//BDSetState(BDThorGeneralState::BDIdle);
 	}
-	//¸ÁÄ¡¸¦ µç ¿ø°Å¸® °ø°Ý »óÅÂ¶ó¸é
+	//ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¶ï¿½ï¿½
 	else if (mState == BDThorGeneralState::BDHammerThrow || mState == BDThorGeneralState::BDHammerWind) {
 		BDSetState(BDThorGeneralState::BDMove);
 	}
-	//È¸ÇÇ¸¦ ³¡³Â´Ù¸é
+	//È¸ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½Â´Ù¸ï¿½
 	else if (mState == BDThorGeneralState::BDAvoidance) {
 		UE_LOG(LogTemp, Warning, TEXT("EndAvoidance"));
-		BDSetState(BDThorGeneralState::BDMove); //¿ø·¡´Â °ø°Ý ÆÐÅÏ ·£´ýÀ¸·Î °¡¾ßÇÔ
+		BDSetState(BDThorGeneralState::BDMove); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
-	//µ¥¹ÌÁö¸¦ ¹Þ¾Ò´Ù¸é
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Ò´Ù¸ï¿½
 	else if (mState == BDThorGeneralState::BDDamage) {
 		UE_LOG(LogTemp, Warning, TEXT("EndDamage"));
 
-		//Ã¼·ÂÀÌ ³²¾ÆÀÖ´Ù¸é
+		//Ã¼ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´Ù¸ï¿½
 		if (BDCurrentHP > 0) {
-			//»óÅÂ¸¦ È¸ÇÇ·Î ÀüÈ¯
+			//ï¿½ï¿½ï¿½Â¸ï¿½ È¸ï¿½Ç·ï¿½ ï¿½ï¿½È¯
 			//BDSetState(BDThorGeneralState::BDAvoidance);
 			BDSetState(BDThorGeneralState::BDMove);
 		}
@@ -487,10 +487,10 @@ void UBDThorFSM::BDEndState()
 }
 
 
-//¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ º¯°æ
+//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void UBDThorFSM::BDSetState(BDThorGeneralState BDnewState)
 {
-	mState = BDnewState; //»óÅÂ ÁöÁ¤
+	mState = BDnewState; //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	anim->animState = mState;
 	//UE_LOG(LogTemp, Warning, TEXT("State changed to: %s"), *UEnum::GetValueAsString(mState));
 }

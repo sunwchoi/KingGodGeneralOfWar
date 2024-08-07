@@ -57,7 +57,7 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 	if (Thor)
 	{
 		EAttackDirectionType attackDirection = Me->GetAttackDirection();
-		Thor->fsm->Damage(AXE_DAMAGE);
+		Thor->fsm->Damage(AXE_DAMAGE, attackDirection);
 	}
 	else
 	{

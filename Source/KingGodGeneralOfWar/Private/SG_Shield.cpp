@@ -47,7 +47,7 @@ void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	if (Thor)
 	{
-		Thor->fsm->Damage(SHIELD_DAMAGE);
+		Thor->fsm->Damage(SHIELD_DAMAGE, EAttackDirectionType::FORWARD);
 	}
 	else
 	{

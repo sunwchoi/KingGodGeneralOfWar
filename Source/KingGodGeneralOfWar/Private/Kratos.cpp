@@ -927,7 +927,7 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 			if (Thor)
 			{
-				Thor->fsm->Damage(PARRYING_DAMAGE);
+				Thor->fsm->Damage(PARRYING_DAMAGE, EAttackDirectionType::FORWARD);
 			}
 			else
 			{

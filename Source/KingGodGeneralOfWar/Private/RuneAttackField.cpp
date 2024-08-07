@@ -45,15 +45,15 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	const float fieldDalay = 0.3;
 	if (Thor)
 	{
-		Thor->fsm->Damage(fieldDamage);
+		Thor->fsm->Damage(fieldDamage, EAttackDirectionType::FORWARD);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [Thor, fieldDamage, fieldDalay]()
 			{
-				Thor->fsm->Damage(fieldDamage+1);
+				Thor->fsm->Damage(fieldDamage+1, EAttackDirectionType::FORWARD);
 				FTimerHandle handle1;
 				Thor->GetWorld()->GetTimerManager().SetTimer(handle1, [Thor, fieldDamage, fieldDalay]()
 					{
-						Thor->fsm->Damage(fieldDamage);
+						Thor->fsm->Damage(fieldDamage, EAttackDirectionType::BACKWARD);
 
 					}, fieldDalay, false);
 			}, fieldDalay, false);

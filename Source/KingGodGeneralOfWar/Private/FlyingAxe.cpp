@@ -121,7 +121,7 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 
 	if (Thor)
 	{
-		Thor->fsm->Damage(AXE_THROW_DAMAGE);
+		Thor->fsm->Damage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
 		AttachToComponent(Thor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
 
