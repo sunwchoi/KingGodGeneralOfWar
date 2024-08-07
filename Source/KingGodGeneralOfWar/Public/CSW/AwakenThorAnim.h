@@ -52,15 +52,6 @@ public:
 	void AnimNotify_AwakenThorTeleport_Catch();
 
 	UFUNCTION()
-	void AnimNotify_ClapAttackReady();
-	
-	UFUNCTION()
-	void AnimNotify_ClapAttackStart();
-	
-	UFUNCTION()
-	void AnimNotify_ClapAttackEnd();
-
-	UFUNCTION()
 	void AnimNotify_PoundAttackReady();
 
 	UFUNCTION()
@@ -68,15 +59,6 @@ public:
 	
 	UFUNCTION()
 	void AnimNotify_PoundAttackEnd();
-
-	UFUNCTION()
-	void AnimNotify_KickStart();
-
-	UFUNCTION()
-	void AnimNotify_KickEnd();
-
-	UFUNCTION()
-	void AnimNotify_HitEnd();
 
 	UFUNCTION()
 	void AnimNotify_JumpAttackStart();
@@ -93,16 +75,36 @@ public:
 	UFUNCTION()
 	void AnimNotify_JumpAttackEnd();
 
+	UFUNCTION()
+	void AnimNotify_End();
+
 	void PlayHitMontage();
 	void JumpToHitSection(const FString& Section);
 
 	void PlayDieMontage();
+
+	void PlayClapAttackMontage();
+	void PlayKickAttackMontage();
+	void PlayPoundAttackMontage();
+	void PlayTeleportMontage();
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DieMontage;
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* HitMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ClapAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* KickAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* PoundAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* TeleportMontage;
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);

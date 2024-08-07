@@ -57,23 +57,6 @@ void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Catch()
 	Fsm->Teleport();
 }
 
-void UAwakenThorAnim::AnimNotify_ClapAttackReady()
-{
-	Owner->DrawWeapon();
-}
-
-void UAwakenThorAnim::AnimNotify_ClapAttackStart()
-{
-	Fsm->StartClapAttack();
-}
-
-void UAwakenThorAnim::AnimNotify_ClapAttackEnd()
-{
-	Owner->EquipWeapon();
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
-}
-
 void UAwakenThorAnim::AnimNotify_PoundAttackReady()
 {
 	Fsm->ReadyPoundAttack();
@@ -82,29 +65,6 @@ void UAwakenThorAnim::AnimNotify_PoundAttackReady()
 void UAwakenThorAnim::AnimNotify_PoundAttackStart()
 {
 	Fsm->StartPoundAttack();
-}
-
-void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
-{
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
-}
-
-void UAwakenThorAnim::AnimNotify_KickStart()
-{
-	Fsm->StartKickAttack();
-}
-
-void UAwakenThorAnim::AnimNotify_KickEnd()
-{
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
-}
-
-void UAwakenThorAnim::AnimNotify_HitEnd()
-{
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
 }
 
 void UAwakenThorAnim::AnimNotify_JumpAttackReady()
@@ -134,6 +94,12 @@ void UAwakenThorAnim::AnimNotify_JumpAttackEnd()
 	Fsm->SetState(EAwakenThorState::Idle);
 }
 
+void UAwakenThorAnim::AnimNotify_End()
+{
+	UE_LOG(LogTemp, Warning, TEXT("End!!"));
+	Fsm->SetState(EAwakenThorState::Idle);
+}
+
 void UAwakenThorAnim::PlayHitMontage()
 {
 	Montage_Play(HitMontage);
@@ -144,9 +110,33 @@ void UAwakenThorAnim::JumpToHitSection(const FString& Section)
 	Montage_JumpToSection(FName(*Section), HitMontage);
 }
 
-	void UAwakenThorAnim::PlayDieMontage()
+void UAwakenThorAnim::PlayDieMontage()
 {
 	Montage_Play(DieMontage);
+}
+
+void UAwakenThorAnim::PlayClapAttackMontage()
+{
+	if(!Montage_IsPlaying(ClapAttackMontage))
+		Montage_Play(ClapAttackMontage);
+}
+
+void UAwakenThorAnim::PlayKickAttackMontage()
+{
+	if (!Montage_IsPlaying(KickAttackMontage))
+		Montage_Play(KickAttackMontage);
+}
+
+void UAwakenThorAnim::PlayPoundAttackMontage()
+{
+	if (!Montage_IsPlaying(PoundAttackMontage))
+		Montage_Play(PoundAttackMontage);
+}
+
+void UAwakenThorAnim::PlayTeleportMontage()
+{
+	if (!Montage_IsPlaying(TeleportMontage))
+		Montage_Play(TeleportMontage);
 }
 
 
