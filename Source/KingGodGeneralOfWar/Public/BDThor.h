@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
 	class UStaticMeshComponent* BDWeapon; //무기 컴포넌트
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
+	class UCapsuleComponent* BDWeaponCol; //무기 콜리전
+
 	//공격할 때 손으로 위치 바꾸기
 	UFUNCTION()
 	void EquipWeapon();
@@ -82,6 +85,7 @@ public:
 	UFUNCTION()
 	void UpdateHpUI();
 
-
+	UFUNCTION()
+	void BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 };

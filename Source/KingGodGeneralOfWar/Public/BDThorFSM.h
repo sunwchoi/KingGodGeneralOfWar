@@ -106,7 +106,8 @@ public:
 	UFUNCTION()
 	void BDDash();
 
-	bool bIsDash = false; //대쉬를 한번 했으면 true, 대쉬를 한번도 하지 않았으면 false로 관리를 한다.
+	//망치 휘두르기에서 공격 체크
+	bool bBDAttackCheck;
 
 
 	UPROPERTY(EditDefaultsOnly)
@@ -126,7 +127,7 @@ public:
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float BDidleDelayTime = 0.5f;
+	float BDidleDelayTime = 0.7f;
 	//경과 시간
 	float BDCurrentTime = 0;
 
@@ -140,7 +141,13 @@ public:
 
 	//피격 시 데미지 함수, DamageNum 데미지 수치
 	UFUNCTION()
-	void Damage(float DamageNum);
+	void Damage(float DamageNum, EAttackDirectionType AtkDir);
+
+	UFUNCTION()
+	void BDGetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
+
+	UPROPERTY()
+	FString Str; //데미지 방향
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDMaxHp = 100.0f;

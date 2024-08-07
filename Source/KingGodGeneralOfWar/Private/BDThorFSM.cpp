@@ -90,6 +90,14 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 //상태 관리 함수
 void UBDThorFSM::BDIdleState()
 {
+	//방향 돌리기
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
 	//시간이 흐르면서
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
 	//만약 경과 시간이 대기 시간을 초과했다면
@@ -109,6 +117,14 @@ void UBDThorFSM::BDMoveState()
 	//기본적으로는 플레이어를 향해 이동하지만
 	//피격 상태가 되었거나 공격을 하기 전에 플레이어를 바라보며 뒤로 이동하거나 옆으로 회피를 한다.
 
+	//방향 돌리기
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
 	//기본 이동 구현
 	//1. 타깃 목적지가 필요하다.
 	FVector destination = Target->GetActorLocation();
@@ -120,10 +136,12 @@ void UBDThorFSM::BDMoveState()
 
 	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
 	if (BDCurrentTime > BDDelayTime) {
-		mState = BDThorGeneralState::BDAttackModeChange;
+		//mState = BDThorGeneralState::BDAttackModeChange;
 
-		//애니메이션 상태 동기화
-		anim->animState = mState;
+		////애니메이션 상태 동기화
+		//anim->animState = mState;
+
+		BDSetState(BDThorGeneralState::BDAttackModeChange);
 		BDCurrentTime = 0;
 	}
 
@@ -181,6 +199,8 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 {
 	//애니메이션 상태는 우선 몽타주를 실행한다
 	
+	bBDAttackCheck = false;
+
 	// 가능한 상태들을 배열로 저장
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
@@ -215,26 +235,36 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	return NewState; //상태 리턴
 }
 
-//데미지를 받을 시 발생하는 함수
-void UBDThorFSM::Damage(float DamageNum)
+//데미지를 받을 시 발생하는 함수, 두번째는 애니메이션을 재생할 히트 방향을 말한다.
+void UBDThorFSM::Damage(float DamageNum, EAttackDirectionType AtkDir)
 {
 	BDCurrentHP -= DamageNum;
 
 	me->UpdateHpUI(); //체력 설정
 
+	BDGetHitDirectionString(AtkDir, Str);
+
 	//피격 상태로 변경한다.
 	mState = BDThorGeneralState::BDDamage;
 
-	UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
+	//UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
 
+}
+
+void UBDThorFSM::BDGetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
+{
+	Str = UEnum::GetValueAsString(AtkDir).Mid(22);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *Str);
 }
 
 void UBDThorFSM::BDDamageState()
 {
 	if (!anim->Montage_IsPlaying(anim->BDThorDamageMontage)) {
-		UE_LOG(LogTemp, Warning, TEXT("Damage"));
+		//UE_LOG(LogTemp, Warning, TEXT("Damage"));
 		//피격 애니메이션 재생
 		anim->playBDDamage();
+		//점프
+		anim->BDJumpToHitSection(Str);
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("DamageState"));
@@ -258,11 +288,21 @@ void UBDThorFSM::BDAvoidanceState()
 //망치 날리면서 번개 공격
 void UBDThorFSM::BDHammerThrowState()
 {
+
+	//방향 돌리기
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
 	// 현재 상태가 이미 Hammer Wind라면 함수 호출을 건너뛴다.
 	if (mState != BDThorGeneralState::BDHammerThrow) {
 		return;
 	}
 
+	//애니메이션 몽타주를 재생하고 있지 않을때, 플레이어와의 현재 거리가 250 이하일때
 	if (!anim->Montage_IsPlaying(anim->BDHammerThrowMontage)) {
 		anim->playBDHammerThrow();
 	}
@@ -273,6 +313,14 @@ void UBDThorFSM::BDHammerThrowState()
 //망치 휘두르면서 바람공격
 void UBDThorFSM::BDHammerWindState()
 {
+	//방향 돌리기
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
 	if (me->IsWeaponHold == false) {
 		me->EquipWeapon(); //우선 무기를 든다.
 	}
@@ -286,22 +334,67 @@ void UBDThorFSM::BDHammerWindState()
 	if (!anim->Montage_IsPlaying(anim->BDHammerWindMontage))
 	{
 		anim->playBDHammerWind();
-		UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Wind Animation"));
+		//UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Wind Animation"));
 	}
 
 }
 
-//망치 n번 휘두르기
+//망치 3번 휘두르기
 void UBDThorFSM::BDHammerThreeSwingState()
 {
-	if (!anim->Montage_IsPlaying(anim->BDHammerThreeSwingMontage))
+	//대쉬
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
+	float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
+
+	me->AddMovementInput(dirR);
+
+	//UE_LOG(LogTemp, Warning, TEXT("bIsDash: %s"), anim->bIsDash ? TEXT("true") : TEXT("false"));
+	//몽타주 실행
+
+	anim->playBDHammerThreeSwing(); //3번 휘두르기
+
+	//타겟과 토르의 거리가 가까울 경우
+	// 타겟과 토르의 거리가 가까울 경우
+	if (anim->Montage_IsPlaying(anim->BDHammerThreeSwingMontage))
 	{
-		anim->playBDHammerThreeSwing(); //3번 휘두르기
-		UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Three Swing Animation"));
+		//UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is playing"));
+
+		if (dirR.Size() <= 200.0f)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("State1: %s"), *UEnum::GetValueAsString(mState));
+			// 몽타주 섹션을 "Attack1"으로 변경
+
+			me->GetCharacterMovement()->MaxWalkSpeed = 200.f; // 달리는 걸 멈추고
+
+			if (!bBDAttackCheck) {
+				anim->Montage_JumpToSection(FName("Attack1"), anim->BDHammerThreeSwingMontage);
+				bBDAttackCheck = true;
+			}
+			//else {
+			//	//만약 플레이어가 맞았다면
+			//	//BDSetState(BDThorGeneralState::BDIdle); //나중에 뒤로 회피 또는 옆으로 회피로 변경
+			//	//bBDAttackCheck = false; //변경
+			//}
+
+			//UE_LOG(LogTemp, Warning, TEXT("Playing Hammer Three Swing Animation"));
+		}
+		// 타겟과 토르의 거리가 멀 경우
+		else if (dirR.Size() > 200.0f)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("State2: %s"), *UEnum::GetValueAsString(mState));
+			me->GetCharacterMovement()->MaxWalkSpeed = 10000.f;
+		}
 	}
-
-
-
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is NOT playing"));
+	}
 }
 
 //플레이어 잡아서 업어치기 (카메라 컷씬)
@@ -316,36 +409,37 @@ void UBDThorFSM::BDHittingDownState()
 
 void UBDThorFSM::BDDash()
 {
-	//FVector targetLoc = Target->GetActorLocation();
-	//FVector myLoc = me->GetActorLocation();
-	//FVector dir = targetLoc - myLoc;
-	//FRotator rot = dir.Rotation();
+	//방향 돌리기
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
 
-	//me->SetActorRotation(FRotator(0, rot.Yaw, 0));
-	//float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
 
-	//me->AddMovementInput(dir);
+	float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
 
-	//bIsDash = true;
+	me->AddMovementInput(dirR);
 
-	//UE_LOG(LogTemp, Warning, TEXT("BDDash"));
-	////타겟과 토르의 거리가 가가울 경우
-	//if (dist < 200.f)
-	//{
-	//	me->GetCharacterMovement()->MaxWalkSpeed = 50.0f;
-	//}
-	////타겟과 토르의 거리가 멀 경우
-	//else if (dist < 600.f)
-	//{
-	//	me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
-	//}
-	//else
-	//{
-	//	if (me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
-	//		me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
-	//	else
-	//		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
-	//}
+	UE_LOG(LogTemp, Warning, TEXT("BDDash"));
+	//타겟과 토르의 거리가 가가울 경우
+	if (dist < 200.f)
+	{
+		me->GetCharacterMovement()->MaxWalkSpeed = 50.0f;
+	}
+	//타겟과 토르의 거리가 멀 경우
+	else if (dist < 600.f)
+	{
+		me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
+	}
+	else
+	{
+		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
+		//if (me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
+		//	me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
+		//else
+		//	me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
+	}
 
 }
 
@@ -368,7 +462,7 @@ void UBDThorFSM::BDEndState()
 		if (me->IsWeaponHold == false) {
 			me->DrawWeapon(); //무기를 내린다.
 		}
-		BDSetState(BDThorGeneralState::BDMove);
+		//BDSetState(BDThorGeneralState::BDIdle);
 	}
 	//망치를 든 원거리 공격 상태라면
 	else if (mState == BDThorGeneralState::BDHammerThrow || mState == BDThorGeneralState::BDHammerWind) {
