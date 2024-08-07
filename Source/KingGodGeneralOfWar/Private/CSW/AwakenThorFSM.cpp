@@ -39,9 +39,9 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// FString state = UEnum::GetValueAsString(State);
+	FString state = UEnum::GetValueAsString(State);
+	UE_LOG(LogTemp, Warning, TEXT("state: %s\n"), *state);
 	// FString anim = UEnum::GetValueAsString(Anim->GetState());
-	// UE_LOG(LogTemp, Warning, TEXT("state: %s, \n anim: %s"), *state, *anim);
 	
 	switch (State)
 	{
@@ -71,6 +71,9 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		break;
 	case EAwakenThorState::ClapAttack:
 		ClapAttackState();
+		break;
+	case EAwakenThorState::KickAttack:
+		KickAttackState();
 		break;
 	case EAwakenThorState::Damage:
 		DamageState();
@@ -125,9 +128,9 @@ void UAwakenThorFSM::IdleState()
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		State = NextStates[idx];
-		// State = EAwakenThorState::RangedAttackChange;
-		if (State != EAwakenThorState::Dash)
+		// State = NextStates[idx];
+		State = EAwakenThorState::MeleeAttackChange;
+		/*if (State != EAwakenThorState::Dash)
 		{
 			if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport)
 			{
@@ -136,7 +139,7 @@ void UAwakenThorFSM::IdleState()
 			}
 			else 
 				Anim->SetState(State);
-		}
+		}*/
 	}
 }
 
@@ -179,6 +182,7 @@ void UAwakenThorFSM::DashState()
 
 void UAwakenThorFSM::TeleportState()
 {
+	Anim->PlayTeleportMontage();
 }
 
 void UAwakenThorFSM::MeleeAttackChangeState()
@@ -191,7 +195,6 @@ void UAwakenThorFSM::MeleeAttackChangeState()
 	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
 	
 	State = AttackStates[idx];
-	Anim->SetState(State);
 }
 
 void UAwakenThorFSM::RangedAttackChangeState()
@@ -204,7 +207,6 @@ void UAwakenThorFSM::RangedAttackChangeState()
 	int32 idx = FMath::RandRange(0, AttackStates.Num() - 1);
 	
 	State = AttackStates[idx];
-	Anim->SetState(State);
 }
 
 void UAwakenThorFSM::JumpAttackState()
@@ -214,14 +216,17 @@ void UAwakenThorFSM::JumpAttackState()
 
 void UAwakenThorFSM::PoundAttackState()
 {
+	Anim->PlayPoundAttackMontage();
 }
 
 void UAwakenThorFSM::KickAttackState()
 {
+	Anim->PlayKickAttackMontage();
 }
 
 void UAwakenThorFSM::ClapAttackState()
 {
+	Anim->PlayClapAttackMontage();
 }
 
 void UAwakenThorFSM::DamageState()
@@ -250,7 +255,6 @@ void UAwakenThorFSM::LookTeleportDirection()
 
 void UAwakenThorFSM::ThrowForTeleport()
 {
-	
 	Me->ThrowForTeleport(Me->GetActorForwardVector());
 }
 
@@ -352,21 +356,18 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	bool isDie = Me->SetHp(Damage);
 	Me->UpdateHpUI();
 
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
-		Anim->SetState(State);
 		Anim->PlayDieMontage();
 	}
-	if (State != EAwakenThorState::Idle)
-		return ;
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);
 	State = EAwakenThorState::Damage;
-	Anim->SetState(State);
 	Anim->PlayHitMontage();
 	Anim->JumpToHitSection(Str);
 }
