@@ -68,7 +68,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 	else if (bWithdrawing)
 	{
 		// 회수: 플레이어에게 돌아오는 모션
-		if (!bRising)
+		if (!bRising) 
 		{
 			TargetLocation = Me->WithdrawPositionComp->GetComponentLocation();
 		}
