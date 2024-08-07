@@ -2,10 +2,8 @@
 
 
 #include "SG_KratosAnim.h"
-#include "Axe.h"
-#include "FlyingAxe.h"
 #include "Kismet/GameplayStatics.h"
-#include "RuneAttackField.h"
+#include "Animation/AnimMontage.h"
 USG_KratosAnim::USG_KratosAnim()
 {
 	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempAttackMontage(
@@ -131,7 +129,8 @@ void USG_KratosAnim::PlayAxeWithdrawMontage()
 				Montage_Play(AxeWithdrawMontage);
 			}
 
-		}, 1.15f, false);
+		//}, 1.15f, false);
+		}, 1.35f, false);
 }
 
 void USG_KratosAnim::PlayRuneBaseMontage()
@@ -262,6 +261,26 @@ void USG_KratosAnim::AnimNotify_RuneAttackGroundShake()
 void USG_KratosAnim::AnimNotify_ZoomOutCheck()
 {
 	Me->bZoomOut = true;
+}
+
+void USG_KratosAnim::AnimNotify_RuneReady()
+{
+	Me->OnMyRuneReady();
+}
+
+void USG_KratosAnim::AnimNotify_RuneAttackEnd()
+{
+	Me->OnMyRuneAttackEnd();
+}
+
+void USG_KratosAnim::AnimNotify_AttackComboEnd()
+{
+	Me->OnMyAttackComboEnd();
+}
+
+void USG_KratosAnim::AnimNotify_InitAttackType()
+{
+	Me->OnMyInitAttackType();
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)

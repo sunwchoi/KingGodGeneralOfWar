@@ -97,7 +97,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 			}
 			else
 			{
-				FQuat quat = FRotator(WithdrawRotationScale, -3.0f, -3.0f).Quaternion();
+				FQuat quat = FRotator(WithdrawRotationScale, -3.0f, -6.0f).Quaternion();
 				WithdrawRotationScale -= 0.33;
 				SubMeshComp->AddRelativeRotation(quat);
 				FVector nextLocation = FMath::Lerp(CurLocation, TargetLocation, LerpAlpha);

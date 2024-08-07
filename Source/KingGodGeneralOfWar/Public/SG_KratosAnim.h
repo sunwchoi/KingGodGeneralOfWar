@@ -62,34 +62,34 @@ public:
 	float Speed;
 
 	UPROPERTY()
-	UAnimMontage* WeakAttackMontage ;
+	class UAnimMontage* WeakAttackMontage ;
 
 	UPROPERTY()
-	UAnimMontage* StrongAttackMontage ;
+	class UAnimMontage* StrongAttackMontage ;
 
 	UPROPERTY()
-	UAnimMontage* DodgeMontage ;
+	class UAnimMontage* DodgeMontage;
 
 	UPROPERTY()
-	UAnimMontage* RollMontage;
+	class UAnimMontage* RollMontage;
 
 	UPROPERTY()
-	UAnimMontage* GuardMontage;
+	class UAnimMontage* GuardMontage;
 
 	UPROPERTY()
-	UAnimMontage* AxeThrowMontage;
+	class UAnimMontage* AxeThrowMontage;
 
 	UPROPERTY()
-	UAnimMontage* AxeWithdrawMontage;
+	class UAnimMontage* AxeWithdrawMontage;
 
 	UPROPERTY()
-	UAnimMontage* DashAttackMontage;
+	class UAnimMontage* DashAttackMontage;
 
 	UPROPERTY()
-	UAnimMontage* RuneBaseMontage;
+	class UAnimMontage* RuneBaseMontage;
 
 	UPROPERTY()
-	UAnimMontage* RuneAttackMontage;
+	class UAnimMontage* RuneAttackMontage;
 
 	UPROPERTY()
 	UAnimMontage* HitMontage;
@@ -133,6 +133,18 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_ZoomOutCheck();
+
+	UFUNCTION()
+	void AnimNotify_RuneReady();
+
+	UFUNCTION()
+	void AnimNotify_RuneAttackEnd();
+
+	UFUNCTION()
+	void AnimNotify_AttackComboEnd();
+
+	UFUNCTION()
+	void AnimNotify_InitAttackType();
 
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);

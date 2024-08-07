@@ -313,58 +313,25 @@ FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 
 void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 {
-	//if (bInterrupted) return;
-	if (Montage == Anim->StrongAttackMontage)
+	if (bInterrupted)
 	{
-		StrongWeakAttackEndComboState();
-		SetState(EPlayerState::Idle);
-	}
-	else if (Montage == Anim->WeakAttackMontage)
-	{
-		WeakAttackEndComboState();
-		SetState(EPlayerState::Idle);
-	}
-	else if (Montage == Anim->DodgeMontage)
-	{
-		if (State == EPlayerState::Roll || CurrentAttackType == EAttackType::DASH_ATTACK) return;
+		if (State == EPlayerState::Hit)
+		{
 
-		SetState(EPlayerState::Idle);
+		}
+		else if (Montage == Anim->DodgeMontage && State == EPlayerState::Roll)
+		{
+			return;
+		}
+		else if (Montage == Anim->DodgeMontage && CurrentAttackType == EAttackType::DASH_ATTACK)
+		{
+			return;
+		}
 	}
-	else if (Montage == Anim->RollMontage)
+	else
 	{
 		SetState(EPlayerState::Idle);
 	}
-	else if (Montage == Anim->GuardMontage)
-	{
-		GuardHitCnt = GUARD_MAX_COUNT;
-		SetState(EPlayerState::Idle);
-		
-	}
-	else if (Montage == Anim->DashAttackMontage)
-	{
-		SetState(EPlayerState::Idle);
-
-	}
-	else if (Montage == Anim->RuneBaseMontage)
-	{
-		SetState(EPlayerState::Idle);
-		if (!bInterrupted)
-			bRuneReady = true;
-	}
-	else if (Montage == Anim->RuneAttackMontage)
-	{
-		SetState(EPlayerState::Idle);
-		WeakAttackEndComboState();
-		bRuneReady = false;
-		bSuperArmor = false;
-		bZoomOut = false;
-	}
-	else if (Montage == Anim->HitMontage)
-	{
-		SetState(EPlayerState::Idle);
-	}
-
-	
 }
 
 void AKratos::SetWeapon()
@@ -391,6 +358,32 @@ void AKratos::SetShield()
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	}
 }
+
+void AKratos::OnMyRuneReady()
+{
+	bRuneReady = true;
+}
+
+void AKratos::OnMyRuneAttackEnd()
+{
+	WeakAttackEndComboState();
+	bRuneReady = false;
+	bSuperArmor = false;
+	bZoomOut = false;
+}
+
+void AKratos::OnMyAttackComboEnd()
+{
+	WeakAttackEndComboState();
+	StrongAttackEndComboState();
+	CurrentAttackType = EAttackType::NONE;
+}
+
+void AKratos::OnMyInitAttackType()
+{
+	CurrentAttackType = EAttackType::NONE;
+}
+
 
 void AKratos::CameraShakeOnAttack(float scale)
 {
@@ -556,6 +549,7 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
 		SetState(EPlayerState::GuardStart);
+		GuardHitCnt = GUARD_MAX_COUNT;
 		Anim->PlayGuardMontage();
 	}
 }
@@ -568,6 +562,7 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
 		Anim->Montage_Stop(0, Anim->GuardMontage);
+		SetState(EPlayerState::Idle);
 		//SetState(EPlayerState::GuardEnd);
 	}
 }
@@ -787,6 +782,7 @@ void AKratos::SetState(EPlayerState NextState)
 		break;
 
 	}
+
 	switch (NextState)
 	{
 	case EPlayerState::Idle:
@@ -796,6 +792,16 @@ void AKratos::SetState(EPlayerState NextState)
 
 	case EPlayerState::Parry:
 		bParrying = true;
+		break;
+	case EPlayerState::Hit:
+		WeakAttackEndComboState();
+		StrongAttackEndComboState();
+		bIsAttacking = false;
+		bParrying = false;
+		bIsDodging = false;
+		bGuardStagger = false;
+		bSuperArmor = false;
+
 		break;
 	}
 }
@@ -822,7 +828,7 @@ void AKratos::StrongAttackStartComboState()
 	CurrentStrongCombo = FMath::Clamp<int8>(CurrentStrongCombo + 1, 1, 4);
 }
 
-void AKratos::StrongWeakAttackEndComboState()
+void AKratos::StrongAttackEndComboState()
 {
 	bIsStrongComboInputOn = false;
 	CanNextStrongCombo = false;
@@ -879,7 +885,7 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 	}
 }
 
-void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee)
+bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee)
 {
 	// 회피 상태
 	if (State == EPlayerState::Dodge)
@@ -930,20 +936,22 @@ void AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			}
 		}
 	}
-	else if (State == EPlayerState::Hit)
+	else if (State == EPlayerState::Hit || State == EPlayerState::Parry)
 	{
-
+		
 	}
 	// 기본 피격
 	else
 	{
 		CurHP -= DamageValue;
 		HpBarUI->SetHP(CurHP, MaxHP);
-		if (bSuperArmor) return;
+		if (bSuperArmor) return false;
 
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		CameraShakeOnAttack(8);
 		SetState(EPlayerState::Hit);
+		return true;
 	}
+	return false;
 }

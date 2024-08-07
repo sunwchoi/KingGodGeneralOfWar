@@ -63,6 +63,7 @@ enum class EAttackType : uint8
 	RUNE_ATTACK UMETA(DisplayName = "RUNE_ATTACK"),
 	AXE_THROW_ATTACK UMETA(DisplayName = "AXE_THROW_ATTACK"),
 	DASH_ATTACK UMETA(DisplayName = "DASH_ATTACK"),
+	NONE UMETA(DisplayName = "NONE"),
 };
 UCLASS()
 class KINGGODGENERALOFWAR_API AKratos : public ACharacter
@@ -142,7 +143,16 @@ public:
 
 	// Damage Function
 	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
-	void Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
+
+	// if Kratos get damage, return true; else return false;
+	bool Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
+
+	// Rune
+	void OnMyRuneReady();
+	void OnMyRuneAttackEnd();
+
+	void OnMyAttackComboEnd();
+	void OnMyInitAttackType();
 
 	void CameraShakeOnAttack(float scale = 1.0f);
 	FString GetPlayerStateString();
@@ -157,7 +167,7 @@ private:
 
 	// Strong Attack Combo
 	void StrongAttackStartComboState();
-	void StrongWeakAttackEndComboState();
+	void StrongAttackEndComboState();
 
 	void PlayerMove();
 	void SetWeapon();
