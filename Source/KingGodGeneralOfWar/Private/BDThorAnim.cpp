@@ -71,9 +71,11 @@ void UBDThorAnim::playBDAttackRandomState()
 void UBDThorAnim::playBDHammerThreeSwing()
 {
 	if (!Montage_IsPlaying(BDHammerThreeSwingMontage)) {
+		UE_LOG(LogTemp, Warning, TEXT("ThreeSwing"));
 		Montage_Play(BDHammerThreeSwingMontage); //공격 랜덤 선택 상태가 발생할 때
 	}
 }
+
 
 void UBDThorAnim::AnimNotify_AnimEnd()
 {
@@ -102,5 +104,11 @@ void UBDThorAnim::AnimNotify_SlashWind()
 void UBDThorAnim::AnimNotify_BackMjolnir()
 {
 	bdThor->FlyWeapon->BackMjolnir(); //묠니르가 돌아오도록 호출
-	UE_LOG(LogTemp, Warning, TEXT("Notify Back1"));
+	//UE_LOG(LogTemp, Warning, TEXT("Notify Back1"));
 }
+
+void UBDThorAnim::BDJumpToHitSection(const FString& Section)
+{
+	Montage_JumpToSection(FName(*Section), BDThorDamageMontage);
+}
+

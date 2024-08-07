@@ -30,7 +30,7 @@ ABDThorMjolnir::ABDThorMjolnir()
 		MjolnirMesh->SetStaticMesh(MeshComp.Object);
 		MjolnirMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		MjolnirMesh->SetRelativeLocation(FVector(0, 0, -30.0f));
+		MjolnirMesh->SetRelativeLocation(FVector(0, 0, -50.0f));
 
 	}
 
@@ -96,13 +96,32 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 
 		//SetActorLocation(GetActorLocation() + Direction * Speed * GetWorld()->DeltaTimeSeconds);
 
-		MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
-		//UE_LOG(LogTemp, Warning, TEXT("call tick"));
+		//MovementComp->Velocity = Direction * MovementComp->InitialSpeed;
 
-
+		//거리 계산
 		float Distance = FVector::Dist(GetActorLocation(), HandLocation);
 
-		if (Distance < 200.0f) // 거리 체크
+		// 최소 거리와 최대 거리 설정
+		float MinDistance = 200.0f;
+		float MaxDistance = 2000.0f;
+
+		//토르에게 올수록 느려짐
+		// 거리 비율 계산 (0.0f에서 1.0f 사이의 값)
+		//float DistanceRatio = FMath::Clamp((Distance - MinDistance) / (MaxDistance - MinDistance), 0.0f, 1.0f);
+
+		//// 속도를 거리에 따라 조절 (거리 비율이 0에 가까울수록 속도가 느려짐)
+		//float AdjustedSpeed = FMath::Lerp(500.0f, MovementComp->InitialSpeed, DistanceRatio);
+
+		//토르에게 올수록 빨라짐
+		// 거리 비율 계산 (0.0f에서 1.0f 사이의 값)
+		float DistanceRatio = FMath::Clamp((Distance - MinDistance) / (MaxDistance - MinDistance), 0.0f, 1.0f);
+
+		//// 속도를 거리에 따라 조절 (거리 비율이 1에 가까울수록 속도가 빨라짐)
+		float AdjustedSpeed = FMath::Lerp(MovementComp->InitialSpeed, 4000.0f, 1.0f - DistanceRatio);
+
+		MovementComp->Velocity = Direction * AdjustedSpeed;
+
+		if (Distance < 170.0f) // 거리 체크
 		{
 			bReturning = false;
 			bCreateTrue = false;
@@ -115,7 +134,6 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, bCreateTrue : %s "), bReturning ? TEXT("true") : TEXT("false"), bCreateTrue ? TEXT("true") : TEXT("false"));
-
 }
 
 void ABDThorMjolnir::FireInDirection(const FVector& ShootDirection)
@@ -150,6 +168,8 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		if (AttackTarget) {
 			AttackTarget->Damage(10, EHitType::NB_HIGH, false);
+			// 플레이어에게 맞을시 콜리전 비활성화
+			MjoCol->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
 		}
 	}

@@ -12,6 +12,9 @@
 #include "BDThorHP.h"
 #include "Blueprint/UserWidget.h"
 #include "SG_GodOfWar_GameModeBase.h"
+#include "DrawDebugHelpers.h" //디버그 확인용
+#include "Components/CapsuleComponent.h"
+#include "SG_Shield.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -39,11 +42,16 @@ ABDThor::ABDThor()
 		BDWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); //임시 코드
 	}
 
+	//콜리전 설정
+	BDWeaponCol = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BDWeaponCol"));
+	BDWeaponCol->SetupAttachment(BDWeapon); //무기에 콜리전 붙이기
+	BDWeaponCol->SetCollisionProfileName(FName("BDThorMjonlr"));
+
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
 	//애니메이션 블루프린트 할당하기
-	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor'"));
+	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor_C'"));
 	if (BDThorAnimation.Succeeded()) {
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
 	}*/
@@ -54,7 +62,7 @@ void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//GetCharacterMovement()->bOrientRotationToMovement = true; //플레이어 방향으로 바라보기
+	BDWeaponCol->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDWeaponOverlap);
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
@@ -96,7 +104,8 @@ void ABDThor::EquipWeapon()
 		IsWeaponHold = true;
 		BDWeapon->SetVisibility(true);
 		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirHand"));
-		UE_LOG(LogTemp, Warning, TEXT("Equip Weapon"));
+		BDWeaponCol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//UE_LOG(LogTemp, Warning, TEXT("Equip Weapon"));
 	}
 }
 
@@ -108,6 +117,7 @@ void ABDThor::DrawWeapon()
 		IsWeaponHold = false;
 		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirHips"));
 		BDWeapon->SetVisibility(true);
+		BDWeaponCol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -118,6 +128,7 @@ void ABDThor::EquipRight()
 		IsWeaponHold = true;
 		BDWeapon->SetVisibility(true);
 		BDWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("BDMjolnirRightHand"));
+		BDWeaponCol->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 }
 
@@ -135,7 +146,7 @@ void ABDThor::visibleWeapon()
 	if (this) {
 		IsWeaponHold = true;
 		BDWeapon->SetVisibility(true); //메쉬 안보이게 하기
-		UE_LOG(LogTemp, Warning, TEXT("Visible"));
+		//UE_LOG(LogTemp, Warning, TEXT("Visible"));
 	}
 }
 
@@ -150,7 +161,7 @@ void ABDThor::BDHammerThrowHit()
 		//FVector LaunchDirection = (fsm->Target->GetActorLocation() - t.GetLocation()).GetSafeNormal();
 		FVector LaunchDirection = GetActorForwardVector();
 		FlyWeapon->FireInDirection(LaunchDirection);
-		UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
+		//UE_LOG(LogTemp, Warning, TEXT("Mjolnir spawned successfully and fired"));
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("Mjolnir spawned failed"));
@@ -188,4 +199,24 @@ void ABDThor::UpdateHpUI()
 	}
 
 }
+
+void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp) {
+		//데미지 처리
+		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
+		auto* shield = Cast<ASG_Shield>(OtherActor);
+		if (AttackTarget) {
+			fsm->bBDAttackCheck = true;
+			AttackTarget->Damage(10, EHitType::NB_HIGH, false);
+			fsm->BDSetState(BDThorGeneralState::BDIdle);
+			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
+		}
+		else if(shield){
+			UE_LOG(LogTemp, Warning, TEXT("shield Attack"));
+		}
+	}
+}
+
+
 

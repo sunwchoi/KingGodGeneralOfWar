@@ -80,6 +80,7 @@ public:
 	void playBDHammerThreeSwing();
 
 
+
 	UFUNCTION()
 	void AnimNotify_AnimEnd(); //애니메이션이 끝났을 때 상태를 바꿀 노티파이
 
@@ -92,5 +93,8 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_BackMjolnir();
-	
+
+
+	void BDJumpToHitSection(const FString& Section);
+
 };
