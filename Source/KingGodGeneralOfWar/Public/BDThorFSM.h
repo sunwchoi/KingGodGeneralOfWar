@@ -7,9 +7,9 @@
 #include "BDThorMjolnir.h"
 #include "BDThorFSM.generated.h"
 
-//ÀüÃ¼ Åë°ý »óÅÂ
-//ÇÇ°ÝÀº ¾ó¶óÀÌ¾ð½º / Attack, MoveÀº ¿­°ÅÇüÀ¸·Î °ü¸®
-//°ø°Ý, È¸ÇÇµµ ÀÌ°÷¿¡¼­ °ü¸®
+//ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//ï¿½Ç°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì¾ï¿½ / Attack, Moveï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½, È¸ï¿½Çµï¿½ ï¿½Ì°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 UENUM(BlueprintType)
 enum class BDThorGeneralState : uint8 {
 	BDIdle,
@@ -25,7 +25,7 @@ enum class BDThorGeneralState : uint8 {
 };
 
 
-//ÀÌµ¿ »óÅÂ °ü¸® ¿­°ÅÇü
+//ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 UENUM(BlueprintType)
 enum class BDThorMove : uint8 {
 	BDBackMove,
@@ -55,99 +55,99 @@ public:
 public:
 
 	UPROPERTY(EditAnywhere)
-	class ABDThor* me; //³ª ÀÚ½Å
+	class ABDThor* me; //ï¿½ï¿½ ï¿½Ú½ï¿½
 
 
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float BDAttackRange = 300.0f; // ¿¡³Ê¹Ì °ø°Ý ¹üÀ§
+	float BDAttackRange = 300.0f; // ï¿½ï¿½ï¿½Ê¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	
 
 	UPROPERTY(EditDefaultsOnly)
-	class AKratos* Target; //Å¸°Ù
+	class AKratos* Target; //Å¸ï¿½ï¿½
 	//class ACharacter* Target;
 
-	//»óÅÂ º¯¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
 	BDThorGeneralState mState = BDThorGeneralState::BDIdle;
 
 
-	// ÃÑ »óÅÂ ÃÑ°ý ÇÔ¼ö
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ°ï¿½ ï¿½Ô¼ï¿½
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDIdleState(); //´ë±â »óÅÂ
+	void BDIdleState(); //ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDMoveState(); //¿òÁ÷ÀÓ »óÅÂ
+	void BDMoveState(); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDAvoidanceState(); //È¸ÇÇ »óÅÂ
+	void BDAvoidanceState(); //È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDAttackModeChangeState(); //°ø°Ý ¸ðµå º¯°æ »óÅÂ
+	void BDAttackModeChangeState(); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
-	BDThorGeneralState RandomAttackState(); // ·£´ý °ø°Ý »óÅÂ ¼±ÅÃ ÇÔ¼ö
+	BDThorGeneralState RandomAttackState(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDDamageState(); //ÇÇ°Ý »óÅÂ
+	void BDDamageState(); //ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	//°ø°Ý ÇÔ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	UFUNCTION(BlueprintCallable, Category = Attack)
-	void BDHammerThrowState(); //¸ÁÄ¡ ³¯¸®¸é¼­ °ø°Ý
+	void BDHammerThrowState(); //ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½é¼­ ï¿½ï¿½ï¿½ï¿½
 	//UFUNCTION(BlueprintCallable, Category = Attack)
-	//void BDHammerThrowHit(); //¸ÁÄ¡¸¦ Fire ÇÏ´Â ´É·Â
+	//void BDHammerThrowHit(); //ï¿½ï¿½Ä¡ï¿½ï¿½ Fire ï¿½Ï´ï¿½ ï¿½É·ï¿½
 
 	UFUNCTION(BlueprintCallable, Category = Attack)
-	void BDHammerWindState(); //¸ÁÄ¡ ÈÖµÎ¸£¸é¼­ ¹Ù¶÷³¯¸®´Â °ø°Ý
+	void BDHammerWindState(); //ï¿½ï¿½Ä¡ ï¿½ÖµÎ¸ï¿½ï¿½é¼­ ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UFUNCTION(BlueprintCallable, Category = Attack)
-	void BDHammerThreeSwingState(); //¸ÁÄ¡ n¹ø ÈÖµÎ¸£±â
+	void BDHammerThreeSwingState(); //ï¿½ï¿½Ä¡ nï¿½ï¿½ ï¿½ÖµÎ¸ï¿½ï¿½ï¿½
 
-	//±ÙÁ¢ ÄÆ¾À °ø°Ý ÇÔ¼ö
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½Æ¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDGiveUPFlyState();
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDHittingDownState();
 
-	//±ÙÁ¢ °ø°Ý ½Ã ´ë½¬
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ë½¬
 	UFUNCTION()
 	void BDDash();
 
-	//¸ÁÄ¡ ÈÖµÎ¸£±â¿¡¼­ °ø°Ý Ã¼Å©
+	//ï¿½ï¿½Ä¡ ï¿½ÖµÎ¸ï¿½ï¿½â¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¼Å©
 	bool bBDAttackCheck;
 
 
 	UPROPERTY(EditDefaultsOnly)
-	BDThorGeneralState LastAttackState; // ¸¶Áö¸· °ø°Ý »óÅÂ¸¦ ÀúÀåÇÏ´Â º¯¼ö
+	BDThorGeneralState LastAttackState; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
-	//»ç¿ëÁßÀÎ ¾Ö´Ï¸ÞÀÌ¼Ç ºí·çÇÁ¸°Æ®
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = Anim)
 	class UBDThorAnim* anim;
 
-	//¾Ö´Ï¸ÞÀÌ¼Ç ÃÑ°ü¸® ÇÔ¼ö, ³ëÆ¼ÆÄÀÌ¸¦ ³Ö¾î¼­ ÀÌ ÇÔ¼ö¸¦ È£ÃâÇÑ´Ù. ÀÌ ÇÔ¼öµéÀ» ÀÌ¿ëÇØ ½ºÅ×ÀÌÆ®¸¦ °ü¸®ÇÑ´Ù.
+	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½, ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½Ö¾î¼­ ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Ñ´ï¿½. ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	UFUNCTION(BlueprintCallable, Category = SetState)
 	void BDEndState();
 
 	UFUNCTION(BlueprintCallable, Category = SetState)
 	void BDSetState(BDThorGeneralState BDnewState);
 
-	//´ë±â ½Ã°£
+	//ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
 	float BDidleDelayTime = 0.7f;
-	//°æ°ú ½Ã°£
+	//ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	float BDCurrentTime = 0;
 
-	//°ø°Ý ·£´ýÀ» ¼±ÅÃÇÏ±â ÀüÀÇ ´ë±â ½Ã°£
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	UPROPERTY(EditAnywhere, Category = FSM)
 	float BDAttackDelayTime = 0.3f;
 
-	//Åä¸£´Â °ø°ÝÇÏ´Â µô·¹ÀÌ ½Ã°£ÀÌ ´Ù¾çÇÏ´Ù ·£´ý ¾µ°Í
+	//ï¿½ä¸£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½Ù¾ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, Category = FSM)
 	float BDDelayTime = 0.5f;
 
-	//ÇÇ°Ý ½Ã µ¥¹ÌÁö ÇÔ¼ö, DamageNum µ¥¹ÌÁö ¼öÄ¡
+	//ï¿½Ç°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½, DamageNum ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
 	UFUNCTION()
 	void Damage(float DamageNum, EAttackDirectionType AtkDir);
 
 	UFUNCTION()
-	void BDGetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
+	void BDGetHitDirectionString(EAttackDirectionType AtkDir);
 
 	UPROPERTY()
-	FString Str; //µ¥¹ÌÁö ¹æÇâ
+	FString Str; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDMaxHp = 100.0f;

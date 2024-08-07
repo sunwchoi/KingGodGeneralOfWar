@@ -142,10 +142,9 @@ public:
 	void CatchFlyingAxe();
 
 	// Damage Function
-	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
-
 	// if Kratos get damage, return true; else return false;
 	bool Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
+	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
 
 	// Rune
 	void OnMyRuneReady();
@@ -168,6 +167,7 @@ private:
 	// Strong Attack Combo
 	void StrongAttackStartComboState();
 	void StrongAttackEndComboState();
+
 
 	void PlayerMove();
 	void SetWeapon();

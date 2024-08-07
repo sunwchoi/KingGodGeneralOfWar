@@ -45,8 +45,8 @@ void AWindSlash::OnWindOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 	AKratos* kratos = Cast <AKratos>(OtherActor);
 	if (kratos != nullptr) {
-		kratos->Damage(10, EHitType::STAGGER, false); //ÇÇ°Ý »óÅÂ ÀÓ½Ã
-		this->Destroy(); //ÇÃ·¹ÀÌ¾îÀÏ½Ã µ¥¹ÌÁö ÁÖ°í ÆÄ±«
+		//kratos->Damage(10, EHitType::STAGGER, false); //ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ó½ï¿½
+		this->Destroy(); //ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½Ä±ï¿½
 		//UE_LOG(LogTemp, Warning, TEXT("WindSlash"));
 	}
 }

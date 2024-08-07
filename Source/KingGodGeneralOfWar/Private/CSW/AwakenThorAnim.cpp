@@ -26,6 +26,7 @@ void UAwakenThorAnim::NativeUpdateAnimation(float DeltaSeconds)
 	Horizontal = FVector::DotProduct(Owner->GetActorRightVector(), v);
 }
 
+
 void UAwakenThorAnim::SetState(EAwakenThorState State)
 {
 	AnimState = State;
@@ -65,6 +66,10 @@ void UAwakenThorAnim::AnimNotify_PoundAttackReady()
 void UAwakenThorAnim::AnimNotify_PoundAttackStart()
 {
 	Fsm->StartPoundAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_PoundAttackEnd()
+{
 }
 
 void UAwakenThorAnim::AnimNotify_JumpAttackReady()

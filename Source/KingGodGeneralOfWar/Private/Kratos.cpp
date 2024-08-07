@@ -327,6 +327,14 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		{
 			return;
 		}
+		else if (Montage == Anim->GuardMontage && bGuardStagger)
+		{
+			return;
+		}
+		else
+		{
+		
+		}
 	}
 	else
 	{
@@ -357,6 +365,7 @@ void AKratos::SetShield()
 		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	}
+	//Shield->MeshComp->SetVisibility(false, true);
 }
 
 void AKratos::OnMyRuneReady()
@@ -414,8 +423,8 @@ FString AKratos::GetHitSectionName(EHitType hitType)
 FString AKratos::GetDodgeDirection(int& DodgeScale)
 {
 	float absX = abs(PrevDirection.X), absY = abs(PrevDirection.Y);
-	DodgeScale = 2000;
 	FString DodgeDirString;
+	DodgeScale = 1500;
 	if (absX <= 0.1)
 	{
 		if (PrevDirection.Y >= 0.9)
@@ -430,7 +439,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 		else
 		{
 			DodgeDirString = TEXT("B");
-			DodgeScale = 1500;
+			DodgeScale = 1100;
 		}
 	}
 	else if (PrevDirection.X >= 0.5)
@@ -446,7 +455,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 			DodgeDirString = TEXT("RB");
 		else
 			DodgeDirString = TEXT("LB");
-		DodgeScale = 1500;
+		DodgeScale = 1100;
 	}
 	return DodgeDirString;
 }
