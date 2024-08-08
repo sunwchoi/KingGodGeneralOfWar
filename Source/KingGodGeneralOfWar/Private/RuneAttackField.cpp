@@ -45,15 +45,15 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	const float fieldDalay = 0.3;
 	if (Thor)
 	{
-		Thor->fsm->Damage(fieldDamage, EAttackDirectionType::FORWARD);
+		Thor->fsm->Damage(fieldDamage, EAttackDirectionType::UP);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [Thor, fieldDamage, fieldDalay]()
 			{
-				Thor->fsm->Damage(fieldDamage+1, EAttackDirectionType::FORWARD);
+				Thor->fsm->Damage(fieldDamage+1, EAttackDirectionType::UP);
 				FTimerHandle handle1;
 				Thor->GetWorld()->GetTimerManager().SetTimer(handle1, [Thor, fieldDamage, fieldDalay]()
 					{
-						Thor->fsm->Damage(fieldDamage, EAttackDirectionType::BACKWARD);
+						Thor->fsm->Damage(fieldDamage, EAttackDirectionType::DOWN);
 
 					}, fieldDalay, false);
 			}, fieldDalay, false);
@@ -61,15 +61,15 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	else
 	{
 		auto AwakenThor= Cast<AAwakenThor>(OtherActor);
-		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::FORWARD);
+		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [AwakenThor, fieldDamage, fieldDalay]()
 			{
-				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::FORWARD);
+				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP);
 				FTimerHandle handle1;
 				AwakenThor->GetWorld()->GetTimerManager().SetTimer(handle1, [AwakenThor, fieldDamage, fieldDalay]()
 					{
-						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::BACKWARD);
+						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::DOWN);
 
 					}, fieldDalay, false);
 			}, fieldDalay, false);

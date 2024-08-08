@@ -294,6 +294,8 @@ void AKratos::PlayerMove()
 	case EPlayerState::Run:
 		MoveScale = 1.0f;
 		break;
+		case EPlayerState::Attack:
+		MoveScale = 1.0f;
 	}
 	AddMovementInput(ForwardDirection, MoveScale);
 }
@@ -397,7 +399,7 @@ void AKratos::OnMyInitAttackType()
 
 void AKratos::CameraShakeOnAttack(float scale)
 {
-	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactory, scale);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(DownAttackShakeFactory, scale);
 }
 
 EAttackDirectionType AKratos::GetAttackDirection()
@@ -477,6 +479,14 @@ void AKratos::OnMyActionMove(const FInputActionValue& Value)
 		FVector2D v = Value.Get<FVector2D>();
 		Direction.X = v.X;
 		Direction.Y = v.Y;
+	}
+	else if (State == EPlayerState::Attack)
+	{
+		FVector2D v = Value.Get<FVector2D>();
+		Direction.X = v.X;
+		Direction.Y = v.Y;
+		Direction.Normalize();
+		TargetActorRotation = FRotator(0, GetControlRotation().Yaw, 0);
 	}
 }
 
@@ -887,8 +897,10 @@ void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
 		if (bSuperArmor) break;
 		CurHP -= DamageValue;
 		HpBarUI->SetHP(CurHP, MaxHP);
+		LaunchCharacter(GetActorForwardVector() * -1 * 10000, true, false);
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("asdf")));
 		SetState(EPlayerState::Hit);
 		break;
 
@@ -936,13 +948,13 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 			if (Thor)
 			{
-				Thor->fsm->Damage(PARRYING_DAMAGE, EAttackDirectionType::FORWARD);
+				Thor->fsm->Damage(PARRYING_DAMAGE, EAttackDirectionType::UP);
 			}
 			else
 			{
 				auto AwakenThor = Cast<AAwakenThor>(Attacker);
 
-				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::FORWARD);
+				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP);
 			}
 		}
 	}
@@ -959,6 +971,8 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
+		LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("asdf")));
 		CameraShakeOnAttack(8);
 		SetState(EPlayerState::Hit);
 		return true;

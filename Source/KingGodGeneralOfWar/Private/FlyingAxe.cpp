@@ -123,7 +123,7 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 	{
 		Thor->fsm->Damage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
-		AttachToComponent(Thor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 
 	}
 	else
@@ -134,7 +134,7 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, UEnum::GetValueAsString(AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][isWithdraw]));
 			AwakenThor->getFSM()->SetDamage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
-			AttachToComponent(AwakenThor->GetMesh(), FAttachmentTransformRules::KeepWorldTransform);
+			AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 		}
 	}
 	if (!bWithdrawing)
