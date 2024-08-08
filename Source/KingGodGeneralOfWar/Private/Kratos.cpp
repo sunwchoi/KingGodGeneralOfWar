@@ -399,7 +399,7 @@ void AKratos::OnMyInitAttackType()
 
 void AKratos::CameraShakeOnAttack(float scale)
 {
-	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(DownAttackShakeFactory, scale);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(RightAttackShakeFactory, scale);
 }
 
 EAttackDirectionType AKratos::GetAttackDirection()
@@ -855,57 +855,6 @@ void AKratos::StrongAttackEndComboState()
 	CurrentStrongCombo = 0;
 }
 
-void AKratos::Damage(int DamageValue, EHitType HitType, bool IsMelee)
-{
-	switch (State)
-	{
-		// 회피 상태
-	case EPlayerState::Dodge:
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("회피 성공"));
-		break;
-		// 가드 상태
-	case EPlayerState::Guard:
-		// 가드 성공, 가드 카운트 --;
-		if (GuardHitCnt >= 1)
-		{
-			Anim->JumpToGuardMontageSection(TEXT("Guard_Block"));
-			LaunchCharacter(GetActorForwardVector() * -1 * 1500, true, false);
-			GetWorld()->SpawnActor<AActor>(GuardBlockLightFactory, Shield->GetActorTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
-			GuardHitCnt -= 1;
-		}
-		// 가드 크래쉬
-		else
-		{
-			SetState(EPlayerState::Idle);
-			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
-			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
-			GuardHitCnt = GUARD_MAX_COUNT;
-			bGuardStagger = true;
-		}
-		break;
-		// 패링 가능 상태
-	case EPlayerState::GuardStart:
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
-		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
-		bParrying = true;
-		SetState(EPlayerState::Parry);
-		break;
-		// 기본 피격
-	case EPlayerState::Hit:
-		break;
-	default:
-		if (bSuperArmor) break;
-		CurHP -= DamageValue;
-		HpBarUI->SetHP(CurHP, MaxHP);
-		LaunchCharacter(GetActorForwardVector() * -1 * 10000, true, false);
-		Anim->PlayHitMontage();
-		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("asdf")));
-		SetState(EPlayerState::Hit);
-		break;
-
-	}
-}
 
 bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee)
 {
