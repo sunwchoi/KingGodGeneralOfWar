@@ -54,23 +54,26 @@ void AAxe::Tick(float DeltaTime)
 // 도끼 공격이 닿았을 때 데미지와 공격 방향을 전달
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleAxe"), true);
+	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactoryArr[FMath::RandRange(0, BLOOD_VFX_MAX)], EdgeComp->GetComponentTransform());
 	auto* Thor = Cast<ABDThor>(OtherActor);
-
+	EAttackDirectionType attackDirection;
 	if (Thor)
 	{
-		EAttackDirectionType attackDirection = Me->GetAttackDirection();
+		attackDirection = Me->GetAttackDirection();
 		Thor->fsm->Damage(AXE_DAMAGE, attackDirection);
 	}
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
-		EAttackDirectionType attackDirection = Me->GetAttackDirection();
+		attackDirection = Me->GetAttackDirection();
 		AwakenThor->getFSM()->SetDamage(AXE_DAMAGE, attackDirection);
 	}
 
-	Me->CameraShakeOnAttack(.5);
+	if (Me->CurrentAttackType == EAttackType::WEAK_ATTACK)
+		Me->CameraShakeOnAttack(attackDirection, 1.0f);
+	else
+		Me->CameraShakeOnAttack(attackDirection, 1.2f);
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
 	FTimerHandle handle;

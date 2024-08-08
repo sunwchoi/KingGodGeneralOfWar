@@ -154,10 +154,13 @@ public:
 	void OnMyAttackComboEnd();
 	void OnMyInitAttackType();
 
-	void CameraShakeOnAttack(float scale = 1.0f);
+	void OnMyAttackProgress();
+
+	void CameraShakeOnAttack(EAttackDirectionType attackDir = EAttackDirectionType::UP, float scale = 1.0f);
 	FString GetPlayerStateString();
 	EAttackDirectionType GetAttackDirection();
 
+	
 private:
 	void SetState(EPlayerState NextState);
 
@@ -253,13 +256,16 @@ public:
 
 	// VFX & Camera Shake
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
-	TSubclassOf<class UCameraShakeBase> LeftAttackShakeFactory;
-	UPROPERTY(EditAnywhere, Category = "Camera Shake")
-	TSubclassOf<class UCameraShakeBase> RightAttackShakeFactory;
+	TSubclassOf<class UCameraShakeBase> DownAttackShakeFactory;
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<class UCameraShakeBase> UpAttackShakeFactory;
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
-	TSubclassOf<class UCameraShakeBase> DownAttackShakeFactory;
+	TSubclassOf<class UCameraShakeBase> LeftAttackShakeFactory;
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<class UCameraShakeBase> RightAttackShakeFactory;
+
+	UPROPERTY()
+	TArray< TSubclassOf<class UCameraShakeBase>> AttackShakeFactoryArr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UParticleSystem* ParryVFX;
@@ -311,7 +317,7 @@ private:
 	FVector PrevDirection;
 
 	float TargetFOV = 90;
-
+	FVector TargetCameraOffset = FVector(0, 50, 70);
 	bool bLockOn;
 	bool bIsAttacking;
 	bool bIsDodging;
