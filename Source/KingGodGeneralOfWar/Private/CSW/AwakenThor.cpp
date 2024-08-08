@@ -133,23 +133,23 @@ AAwakenThor::AAwakenThor()
 
 	LEyeLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("LEyeLight"));
 	LEyeLight->SetupAttachment(GetMesh(), FName("Head"));
-	LEyeLight->SetRelativeLocation(FVector(13.467683f, -52.458962f, 69.000000f));
+	LEyeLight->SetRelativeLocation(FVector(14.000000f,-56.000000f,69.000000f));
 	LEyeLight->SetRelativeRotation(FRotator( 0.000000f,90.000000f,0.000000f));
 	LEyeLight->SetRelativeScale3D(FVector(4.000000, 4.000000, 4.000000));
 	LEyeLight->SetIntensity(100.f);
 	LEyeLight->SetIntensityUnits(ELightUnits::Unitless);
 	LEyeLight->SetLightColor(FLinearColor(0, 63, 255, 255));
-	LEyeLight->SetAttenuationRadius(1.3f);
+	LEyeLight->SetAttenuationRadius(0.75f);
 	
 	REyeLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("REyeLight"));
 	REyeLight->SetupAttachment(GetMesh(), FName("Head"));
-	REyeLight->SetRelativeLocation(FVector(-16.285931f, -54.346958f, 66.931367f));
+	REyeLight->SetRelativeLocation(FVector(-16.285931f, -57.000000f, 66.931366f));
 	REyeLight->SetRelativeRotation(FRotator( 0.000000f,90.000000f,0.000000f));
 	REyeLight->SetRelativeScale3D(FVector(4.000000, 4.000000, 4.000000));
 	REyeLight->SetIntensity(100.f);
 	REyeLight->SetIntensityUnits(ELightUnits::Unitless);
 	REyeLight->SetLightColor(FLinearColor(0, 63, 255, 255));
-	REyeLight->SetAttenuationRadius(1.3f);
+	REyeLight->SetAttenuationRadius(0.75f);
 
 	LMjolnirLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("LMjolnirLight"));
 	LMjolnirLight->SetupAttachment(Mjolnir);
