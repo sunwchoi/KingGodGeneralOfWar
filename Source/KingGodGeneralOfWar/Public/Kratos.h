@@ -43,18 +43,19 @@ enum class EHitType : uint8
 UENUM()
 enum class EAttackDirectionType : uint8
 {
-	FORWARD = 0 UMETA(DisplayName = "FORWARD"),
-	BACKWARD UMETA(DisplayName = "BACKWARD"),
+	DOWN = 0 UMETA(DisplayName = "DOWN"),
+	UP  UMETA(DisplayName = "UP"),
 	LEFT UMETA(DisplayName = "LEFT"),
 	RIGHT UMETA(DisplayName = "RIGHT"),
 };
 
 const EAttackDirectionType AttackTypeDirectionArr[5][5] = {
-	{EAttackDirectionType::FORWARD, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT, },
-	{EAttackDirectionType::FORWARD, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
-	{EAttackDirectionType::FORWARD, EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::FORWARD, EAttackDirectionType::FORWARD},
-	{EAttackDirectionType::FORWARD, EAttackDirectionType::BACKWARD, }
+	/*WeakCombo*/	{EAttackDirectionType::DOWN, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT,},
+	/*StrongCombo*/	{EAttackDirectionType::DOWN, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::DOWN, EAttackDirectionType::DOWN},
+	/*RuneAttack*/	{EAttackDirectionType::DOWN, EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::DOWN, EAttackDirectionType::UP},
+	/*AxeThrow*/	{EAttackDirectionType::DOWN, EAttackDirectionType::UP,}
 };
+
 UENUM()
 enum class EAttackType : uint8
 {
@@ -153,10 +154,13 @@ public:
 	void OnMyAttackComboEnd();
 	void OnMyInitAttackType();
 
-	void CameraShakeOnAttack(float scale = 1.0f);
+	void OnMyAttackProgress();
+
+	void CameraShakeOnAttack(EAttackDirectionType attackDir = EAttackDirectionType::UP, float scale = 1.0f);
 	FString GetPlayerStateString();
 	EAttackDirectionType GetAttackDirection();
 
+	
 private:
 	void SetState(EPlayerState NextState);
 
@@ -252,7 +256,16 @@ public:
 
 	// VFX & Camera Shake
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
-	TSubclassOf<class UCameraShakeBase> AttackShakeFactory;
+	TSubclassOf<class UCameraShakeBase> DownAttackShakeFactory;
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<class UCameraShakeBase> UpAttackShakeFactory;
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<class UCameraShakeBase> LeftAttackShakeFactory;
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<class UCameraShakeBase> RightAttackShakeFactory;
+
+	UPROPERTY()
+	TArray< TSubclassOf<class UCameraShakeBase>> AttackShakeFactoryArr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UParticleSystem* ParryVFX;
@@ -304,7 +317,7 @@ private:
 	FVector PrevDirection;
 
 	float TargetFOV = 90;
-
+	FVector TargetCameraOffset = FVector(0, 50, 70);
 	bool bLockOn;
 	bool bIsAttacking;
 	bool bIsDodging;

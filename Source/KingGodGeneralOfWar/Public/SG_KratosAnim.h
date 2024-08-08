@@ -146,6 +146,9 @@ private:
 	UFUNCTION()
 	void AnimNotify_InitAttackType();
 
+	UFUNCTION()
+	void AnimNotify_AttackProgress();
+
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);

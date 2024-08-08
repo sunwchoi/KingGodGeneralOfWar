@@ -47,13 +47,13 @@ void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	if (Thor)
 	{
-		Thor->fsm->Damage(SHIELD_DAMAGE, EAttackDirectionType::FORWARD);
+		Thor->fsm->Damage(SHIELD_DAMAGE, EAttackDirectionType::UP);
 	}
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 
-		AwakenThor->getFSM()->SetDamage(SHIELD_DAMAGE, EAttackDirectionType::FORWARD);
+		AwakenThor->getFSM()->SetDamage(SHIELD_DAMAGE, EAttackDirectionType::UP);
 	}
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);

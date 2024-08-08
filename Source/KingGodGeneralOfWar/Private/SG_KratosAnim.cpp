@@ -112,8 +112,11 @@ void USG_KratosAnim::PlayGuardMontage()
 
 void USG_KratosAnim::PlayAxeThrowMontage()
 {
-	Montage_Play(AxeThrowMontage, 1.0f);
-	TargetRotation = Me->GetControlRotation();
+	if (!Montage_IsPlaying(AxeThrowMontage))
+	{
+		Montage_Play(AxeThrowMontage, 1.0f);
+		TargetRotation = Me->GetControlRotation();
+	}
 }
 
 void USG_KratosAnim::PlayAxeWithdrawMontage()
@@ -255,7 +258,7 @@ void USG_KratosAnim::AnimNotify_FieldSpawn()
 
 void USG_KratosAnim::AnimNotify_RuneAttackGroundShake()
 {
-	Me->CameraShakeOnAttack(5);
+	Me->CameraShakeOnAttack(EAttackDirectionType::DOWN);
 }
 
 void USG_KratosAnim::AnimNotify_ZoomOutCheck()
@@ -281,6 +284,11 @@ void USG_KratosAnim::AnimNotify_AttackComboEnd()
 void USG_KratosAnim::AnimNotify_InitAttackType()
 {
 	Me->OnMyInitAttackType();
+}
+
+void USG_KratosAnim::AnimNotify_AttackProgress()
+{
+	Me->OnMyAttackProgress();
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
