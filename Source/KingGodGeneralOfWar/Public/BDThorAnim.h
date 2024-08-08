@@ -58,9 +58,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDThorAttackRandomMontage;
 
-	// 根鸥林
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDHammerThreeSwingMontage;
+
 
 
 	//根鸥林 角青

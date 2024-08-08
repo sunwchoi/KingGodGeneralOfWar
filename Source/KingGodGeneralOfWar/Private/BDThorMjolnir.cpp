@@ -167,7 +167,7 @@ void ABDThorMjolnir::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		//데미지 처리
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		if (AttackTarget) {
-			AttackTarget->Damage(10, EHitType::NB_HIGH, false);
+			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
 			// 플레이어에게 맞을시 콜리전 비활성화
 			MjoCol->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
