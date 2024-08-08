@@ -56,9 +56,50 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	UStaticMeshComponent* Mjolnir;
+	
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* HeadCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LForeArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RForeArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RUpLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LUpLegCapsule;
+	
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	class UProjectileMovementComponent* MjolnirMoveComp;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	class UPointLightComponent* LEyeLight;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	class UPointLightComponent* REyeLight;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UPointLightComponent* LMjolnirLight;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UPointLightComponent* RMjolnirLight;
+
 	
 	UFUNCTION()
 	void SetThorLocation(FVector NewLoc);
