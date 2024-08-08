@@ -208,9 +208,10 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		auto* shield = Cast<ASG_Shield>(OtherActor);
 		if (AttackTarget) {
 			fsm->bBDAttackCheck = true;
-			AttackTarget->Damage(10, EHitType::NB_HIGH, false);
-			fsm->BDSetState(BDThorGeneralState::BDIdle);
-			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!"));
+			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
+			fsm->BDSetState(BDThorGeneralState::BDBackDodge);
+			//fsm->BDSetState(BDThorGeneralState::BDAvoidance);
+			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //회피로 변경
 		}
 		else if(shield){
 			UE_LOG(LogTemp, Warning, TEXT("shield Attack"));

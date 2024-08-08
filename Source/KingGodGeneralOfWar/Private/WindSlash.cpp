@@ -45,7 +45,7 @@ void AWindSlash::OnWindOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 	AKratos* kratos = Cast <AKratos>(OtherActor);
 	if (kratos != nullptr) {
-		kratos->Damage(10, EHitType::STAGGER, false); //피격 상태 임시
+		kratos->Damage(this, 10, EHitType::STAGGER, false); //피격 상태 임시
 		this->Destroy(); //플레이어일시 데미지 주고 파괴
 		//UE_LOG(LogTemp, Warning, TEXT("WindSlash"));
 	}

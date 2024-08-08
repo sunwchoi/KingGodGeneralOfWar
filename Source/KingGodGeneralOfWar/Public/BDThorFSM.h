@@ -15,6 +15,7 @@ enum class BDThorGeneralState : uint8 {
 	BDIdle,
 	BDMove,
 	BDAvoidance,
+	BDBackDodge,
 	BDAttackModeChange,
 	BDDamage,
 	BDHammerThrow,
@@ -23,17 +24,6 @@ enum class BDThorGeneralState : uint8 {
 	BDGiveUPFly,
 	BDHitDown,
 };
-
-
-//이동 상태 관리 열거형
-UENUM(BlueprintType)
-enum class BDThorMove : uint8 {
-	BDBackMove,
-	BDFrontMove,
-	BDRightMove,
-	BDLeftMove,
-};
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KINGGODGENERALOFWAR_API UBDThorFSM : public UActorComponent
@@ -77,7 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = State)
 	void BDMoveState(); //움직임 상태
 	UFUNCTION(BlueprintCallable, Category = State)
-	void BDAvoidanceState(); //회피 상태
+	void BDAvoidanceState(); //옆으로 회피 상태
+	UFUNCTION(BlueprintCallable, Category = State)
+	void BDBackDodgeState(); //뒤로 회피 상태
 	UFUNCTION(BlueprintCallable, Category = State)
 	void BDAttackModeChangeState(); //공격 모드 변경 상태
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
@@ -144,7 +136,7 @@ public:
 	void Damage(float DamageNum, EAttackDirectionType AtkDir);
 
 	UFUNCTION()
-	void BDGetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
+	void BDGetHitDirectionString(EAttackDirectionType AtkDir);
 
 	UPROPERTY()
 	FString Str; //데미지 방향
