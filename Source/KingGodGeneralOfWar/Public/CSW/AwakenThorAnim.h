@@ -32,9 +32,6 @@ public:
 
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	
-	UFUNCTION(BlueprintImplementableEvent, Category=FSMEvent)
-	void PlayPoundAttackAnim(FName SectionName);
 
 	void SetState(EAwakenThorState AnimState);
 	EAwakenThorState GetState() const;
@@ -50,6 +47,12 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_AwakenThorTeleport_Catch();
+
+	UFUNCTION()
+	void AnimNotify_ClapAttackStart();
+
+	UFUNCTION()
+	void AnimNotify_KickAttackStart();
 
 	UFUNCTION()
 	void AnimNotify_PoundAttackReady();
@@ -87,6 +90,7 @@ public:
 	void PlayKickAttackMontage();
 	void PlayPoundAttackMontage();
 	void PlayTeleportMontage();
+	void PlayJumpAttackMontage();
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DieMontage;
@@ -105,6 +109,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* TeleportMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* JumpAttackMontage;
 	
 	bool GetIsPlay() const;
 	void SetIsPlay(bool Value);

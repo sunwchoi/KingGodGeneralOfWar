@@ -74,11 +74,12 @@ public:
 	void StartFallAttack();
 
 	void GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
-
+	void OnEnd();
 	
 
-	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::FORWARD);
+	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::UP, bool bSuperAttack = false);
 	void SetJump(bool Value);
+	void SetSuperArmor(bool Value);
 	EAwakenThorState GetState() const;
 
 
@@ -95,7 +96,7 @@ private:
 	UPROPERTY()
 	class UAwakenThorAnim* Anim;
 	
-	float IdleDelayTime = 2.f;
+	float IdleDelayTime = 1.f;
 	float CurrentTime = 0.f;
 	
 	float TeleportDist = 1000;
@@ -108,6 +109,7 @@ private:
 	TArray<std::pair<FVector, float>> AttackZone;
 
 	bool bJump;
+	bool bSuperArmor;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
@@ -123,6 +125,8 @@ private:
 	float KickZoneRadius = 100.f;
 
 	
+
+	void SphereOverlap(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
 	
 	void SphereOverlap(float Damage, EHitType HitType, bool IsMelee);
 	void DrawAttackZoneDecal(bool isAttack = false);

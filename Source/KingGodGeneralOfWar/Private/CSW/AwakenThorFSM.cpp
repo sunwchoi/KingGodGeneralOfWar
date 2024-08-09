@@ -54,6 +54,9 @@ void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	case EAwakenThorState::Dash:
 		DashState();
 		break;
+	case EAwakenThorState::BackTeleport:
+	case EAwakenThorState::LeftTeleport:
+	case EAwakenThorState::RightTeleport:
 	case EAwakenThorState::Teleport:
 		TeleportState();
 		break;
@@ -108,11 +111,13 @@ void UAwakenThorFSM::IdleState()
 		if (dist <= 200.f)
 		{
 			NextStates.Add(EAwakenThorState::MeleeAttackChange);
+			NextStates.Add(EAwakenThorState::BackTeleport);
+			NextStates.Add(EAwakenThorState::LeftTeleport);
+			NextStates.Add(EAwakenThorState::RightTeleport);
 		}
 		else if (200.f < dist && dist <= 700.f)
 		{
 			NextStates.Add(EAwakenThorState::RangedAttackChange);
-			NextStates.Add(EAwakenThorState::BackTeleport);
 			NextStates.Add(EAwakenThorState::BackTeleport);
 			NextStates.Add(EAwakenThorState::LeftTeleport);
 			NextStates.Add(EAwakenThorState::RightTeleport);
@@ -120,26 +125,16 @@ void UAwakenThorFSM::IdleState()
 		else
 		{
 			NextStates.Add(EAwakenThorState::RangedAttackChange);
-			NextStates.Add(EAwakenThorState::Dash);
-			NextStates.Add(EAwakenThorState::Dash);
-			NextStates.Add(EAwakenThorState::Dash);
+			NextStates.Add(EAwakenThorState::Teleport);
 			NextStates.Add(EAwakenThorState::Dash);
 		}
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		// State = NextStates[idx];
-		State = EAwakenThorState::MeleeAttackChange;
-		/*if (State != EAwakenThorState::Dash)
-		{
-			if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport)
-			{
-				Anim->SetState(EAwakenThorState::Teleport);
-				CurrentTime = IdleDelayTime - 0.3f;
-			}
-			else 
-				Anim->SetState(State);
-		}*/
+		State = NextStates[idx];
+		// State = EAwakenThorState::LeftTeleport;
+		if (State != EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
+			bSuperArmor = true;
 	}
 }
 
@@ -167,16 +162,12 @@ void UAwakenThorFSM::DashState()
 		State = EAwakenThorState::MeleeAttackChange;
 		Anim->SetState(EAwakenThorState::MeleeAttackChange);
 	}
-	else if (dist < 600.f)
-	{
-		Me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
-	}
 	else
 	{
 		if (Me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
 			Me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
-		else
-			Me->GetCharacterMovement()->MaxWalkSpeed = 10000.f;
+		else if (Me->GetCharacterMovement()->MaxWalkSpeed < 8000.f)
+			Me->GetCharacterMovement()->MaxWalkSpeed += 400.f;
 	}
 }
 
@@ -211,6 +202,7 @@ void UAwakenThorFSM::RangedAttackChangeState()
 
 void UAwakenThorFSM::JumpAttackState()
 {
+	Anim->PlayJumpAttackMontage();
 }
 
 
@@ -240,15 +232,17 @@ void UAwakenThorFSM::DieState()
 void UAwakenThorFSM::LookTeleportDirection()
 {
 	FVector dir;
+	FVector fwd = Target->GetActorLocation() - Me->GetActorLocation();
+	fwd.Normalize();
 	
 	if (State == EAwakenThorState::LeftTeleport)
-		dir = Me->GetActorRightVector() * -1;
+		dir = FVector::CrossProduct(FVector::DownVector, fwd);
 	else if (State == EAwakenThorState::BackTeleport)
-		dir = Me->GetActorForwardVector() * -1;
+		dir = fwd * -1;
 	else if (State == EAwakenThorState::RightTeleport)
-		dir = Me->GetActorRightVector();
+		dir = FVector::CrossProduct(FVector::UpVector, fwd);
 	else
-		dir = Me->GetActorForwardVector();
+		dir = fwd;
 
 	Me->SetActorRotation(dir.Rotation());
 }
@@ -263,7 +257,7 @@ void UAwakenThorFSM::Teleport()
 	if (State == EAwakenThorState::Teleport)
 		Me->Teleport(Target->GetActorLocation() + Target->GetActorForwardVector() * 200);
 	else
-		Me->Teleport(Me->GetActorLocation() + Me->GetActorForwardVector() * 1000);
+		Me->Teleport(Me->GetActorLocation() + Me->GetActorForwardVector() * 700);
 }
 
 
@@ -299,19 +293,15 @@ void UAwakenThorFSM::StartPoundAttack()
 void UAwakenThorFSM::StartClapAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand"));
-
-	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(attackLoc, ClapZoneRadius));
-	SphereOverlap(10, EHitType::NB_HIGH, true);
+	
+	SphereOverlap(std::make_pair(attackLoc, ClapZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::StartKickAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
 	
-	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(attackLoc, KickZoneRadius));
-	SphereOverlap(10, EHitType::NB_HIGH, true);
+	SphereOverlap(std::make_pair(attackLoc, KickZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::ReadyJumpAttack()
@@ -354,7 +344,18 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *Str);
 }
 
-void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
+void UAwakenThorFSM::OnEnd()
+{
+	bSuperArmor = false;
+	if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport)
+		State = EAwakenThorState::BackTeleport;
+	else if (State == EAwakenThorState::Teleport)
+		State = EAwakenThorState::RangedAttackChange;
+	else
+		State = EAwakenThorState::Idle;
+}
+
+void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	bool isDie = Me->SetHp(Damage);
@@ -364,7 +365,11 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir)
 	{
 		State = EAwakenThorState::Die;
 		Anim->PlayDieMontage();
+		return;
 	}
+
+	if (bSuperArmor && !bSuperAttack)
+		return ;
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);
 	State = EAwakenThorState::Damage;
@@ -377,14 +382,44 @@ void UAwakenThorFSM::SetJump(bool Value)
 	bJump = Value;
 }
 
+void UAwakenThorFSM::SetSuperArmor(bool Value)
+{
+	bSuperArmor = Value;
+}
+
 EAwakenThorState UAwakenThorFSM::GetState() const
 {
 	return State;
 }
 
+void UAwakenThorFSM::SphereOverlap(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee)
+{
+	TArray<AActor *> OverlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
+
+	
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		Zone.first,
+		Zone.second,
+		ObjectTypes,
+		AKratos::StaticClass(),
+		TArray<AActor*>(),
+		OverlappedActors
+		);
+	if (OverlappedActors.Num() > 0)
+	{
+		if(Cast<AKratos>(OverlappedActors.Top()))
+		{
+			FString tmp = UEnum::GetValueAsString(State);
+			Target->Damage(Me, Damage, HitType, IsMelee);
+		} 
+	}	
+}
+
 void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 {
-
 	TArray<AActor *> OverlappedActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
