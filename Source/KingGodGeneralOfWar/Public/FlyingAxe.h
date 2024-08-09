@@ -36,7 +36,16 @@ public:
 	class UArrowComponent* HitArrowComp;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UArrowComponent* WithdrawTargetPosition;
+	class UArrowComponent* WithdrawTargetPosition1;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UArrowComponent* WithdrawTargetPosition2;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UArrowComponent* WithdrawTargetPosition3;
+
+	UPROPERTY()
+	TArray<class UArrowComponent*> WithdrawTargetPositionArr;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* WithdrawRotation;

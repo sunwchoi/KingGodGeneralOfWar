@@ -51,7 +51,7 @@ enum class EAttackDirectionType : uint8
 
 const EAttackDirectionType AttackTypeDirectionArr[5][5] = {
 	/*WeakCombo*/	{EAttackDirectionType::DOWN, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::LEFT,},
-	/*StrongCombo*/	{EAttackDirectionType::DOWN, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::DOWN, EAttackDirectionType::DOWN},
+	/*StrongCombo*/	{EAttackDirectionType::DOWN, EAttackDirectionType::RIGHT, EAttackDirectionType::LEFT, EAttackDirectionType::UP, EAttackDirectionType::DOWN},
 	/*RuneAttack*/	{EAttackDirectionType::DOWN, EAttackDirectionType::LEFT, EAttackDirectionType::RIGHT, EAttackDirectionType::DOWN, EAttackDirectionType::UP},
 	/*AxeThrow*/	{EAttackDirectionType::DOWN, EAttackDirectionType::UP,}
 };
@@ -159,8 +159,9 @@ public:
 	void CameraShakeOnAttack(EAttackDirectionType attackDir = EAttackDirectionType::UP, float scale = 1.0f);
 	FString GetPlayerStateString();
 	EAttackDirectionType GetAttackDirection();
-
-	
+	int32 GetCurrentWeakCombo();
+	int32 GetCurrentStrongCombo();
+	void SetGlobalTimeDilation(float Duration, float SlowScale);
 private:
 	void SetState(EPlayerState NextState);
 
@@ -263,12 +264,15 @@ public:
 	TSubclassOf<class UCameraShakeBase> LeftAttackShakeFactory;
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<class UCameraShakeBase> RightAttackShakeFactory;
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+
+	TSubclassOf<class UCameraShakeBase> CatchAxeShakeFactory;
 
 	UPROPERTY()
 	TArray< TSubclassOf<class UCameraShakeBase>> AttackShakeFactoryArr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
-	class UParticleSystem* ParryVFX;
+	class UNiagaraSystem* ParryVFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX Actor")
 	TSubclassOf<class AActor> ParryingLightFactory;
@@ -321,9 +325,9 @@ private:
 	bool bLockOn;
 	bool bIsAttacking;
 	bool bIsDodging;
-	bool bParrying;
+	bool bParrying = false;
 	bool bRuneReady;
-	bool bGuardStagger;
+	bool bGuardStagger = false;
 	bool bSuperArmor;
 
 	/// Attack Combo 를 위한 bool 변수 및 콤보 카운트

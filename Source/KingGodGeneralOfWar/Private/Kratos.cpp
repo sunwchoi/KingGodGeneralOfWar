@@ -24,6 +24,7 @@
 #include "BDThor.h"
 #include "BDThorFSM.h"
 #include "FlyingAxe.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 
 // Sets default values
 
@@ -415,12 +416,13 @@ void AKratos::OnMyInitAttackType()
 
 void AKratos::OnMyAttackProgress()
 {
-	GetMovementComponent()->Velocity = PrevDirection * 2000;
+	GetMovementComponent()->Velocity = GetActorForwardVector() * 2000;
 }
 
 
 void AKratos::CameraShakeOnAttack(EAttackDirectionType attackDir, float scale)
 {
+
 	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactoryArr[ static_cast<int8>(attackDir)], scale);
 }
 
@@ -436,6 +438,26 @@ EAttackDirectionType AKratos::GetAttackDirection()
 	EAttackDirectionType attackDirection = AttackTypeDirectionArr[static_cast<int8>(CurrentAttackType)][ComboCount];
 
 	return attackDirection;
+}
+
+int32 AKratos::GetCurrentWeakCombo()
+{
+	return CurrentWeakCombo;
+}
+
+int32 AKratos::GetCurrentStrongCombo()
+{
+	return CurrentStrongCombo;
+}
+
+void AKratos::SetGlobalTimeDilation(float Duration, float SlowScale)
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowScale);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, Duration, false);
 }
 
 FString AKratos::GetHitSectionName(EHitType hitType)
@@ -586,7 +608,11 @@ void AKratos::OnMyActionRunOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
-	if (bParrying || bGuardStagger) return;
+	if (bParrying || bGuardStagger)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%d %d"), bParrying, bGuardStagger));
+		return;
+	}
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
@@ -767,8 +793,8 @@ void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 {
 	if (bAxeGone && !bIsAxeWithdrawing)
 	{
+		WithdrawAxe();
 		bIsAxeWithdrawing = true;
-		Anim->PlayAxeWithdrawMontage();
 	}
 }
 
@@ -802,11 +828,13 @@ void AKratos::WithdrawAxe()
 
 void AKratos::CatchFlyingAxe()
 {
+	Anim->PlayAxeWithdrawMontage();
 	Axe->MeshComp->SetVisibility(true, true);
 	bAxeGone = false;
 	bIsAxeWithdrawing = false;
 	CurrentAttackType = EAttackType::NONE;
-	CameraShakeOnAttack(EAttackDirectionType::DOWN, 0.3f);
+	
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(CatchAxeShakeFactory, 0.3f);
 }
 
 void AKratos::SetState(EPlayerState NextState)
@@ -836,7 +864,7 @@ void AKratos::SetState(EPlayerState NextState)
 		break;
 	case EPlayerState::Attack:
 		TargetCameraOffset = FVector(0, 50, 77);
-
+		break;
 	case EPlayerState::Parry:
 		bParrying = true;
 		break;
@@ -917,6 +945,8 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	else if (State == EPlayerState::GuardStart)
 	{
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
+
 		CameraShakeOnAttack(EAttackDirectionType::DOWN, 0.5f);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
 		SetState(EPlayerState::Parry);

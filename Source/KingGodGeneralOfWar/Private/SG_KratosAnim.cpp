@@ -122,18 +122,19 @@ void USG_KratosAnim::PlayAxeThrowMontage()
 void USG_KratosAnim::PlayAxeWithdrawMontage()
 {
 	if (!Me) return;
-	
-	Me->WithdrawAxe();
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
-		{
-			if (AxeWithdrawMontage)
-			{
-				Montage_Play(AxeWithdrawMontage);
-			}
+	Montage_Play(AxeWithdrawMontage);
+	//
+	//
+	//FTimerHandle handle;
+	//GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+	//	{
+	//		if (AxeWithdrawMontage)
+	//		{
+	//			Montage_Play(AxeWithdrawMontage);
+	//		}
 
-		//}, 1.15f, false);
-		}, 1.35f, false);
+	//	}, 1.15f, false);
+	//	//}, 1.35f, false);
 }
 
 void USG_KratosAnim::PlayRuneBaseMontage()
@@ -243,12 +244,7 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 
 FORCEINLINE void USG_KratosAnim::AnimNotify_TimeDilation()
 {
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.06f);
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
-		{
-			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.02f, false);
+	Me->SetGlobalTimeDilation(0.02f, 0.06f);
 }
 
 void USG_KratosAnim::AnimNotify_FieldSpawn()
