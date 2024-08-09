@@ -28,16 +28,16 @@ public:
 	class UStaticMeshComponent* MeshComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-	class UParticleSystem* BloodVFX1Factory;
+	class UNiagaraSystem* BloodVFX1Factory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-	class UParticleSystem* BloodVFX2Factory;
+	class UNiagaraSystem* BloodVFX2Factory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-	class UParticleSystem* BloodVFX3Factory;
+	class UNiagaraSystem* BloodVFX3Factory;
 
 	UPROPERTY()
-	TArray<class UParticleSystem*> BloodVFXFactoryArr;
+	TArray<class UNiagaraSystem*> BloodVFXFactoryArr;
 
 	UFUNCTION()
 	void OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

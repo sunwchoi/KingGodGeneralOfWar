@@ -12,7 +12,7 @@
 #include "BDThor.h"
 #include "BDThorFSM.h"
 #include "Kismet/GameplayStatics.h"
-const float LerpInit = 0.02;
+const float LerpInit = 0.025;
 const float AXE_THROW_DAMAGE = 2;
 // Sets default values
 AFlyingAxe::AFlyingAxe()
@@ -32,9 +32,17 @@ AFlyingAxe::AFlyingAxe()
 	HitArrowComp->SetupAttachment(CapsuleComp);
 	HitArrowComp->SetRelativeRotation(FRotator(40, 180, 0));
 
-	WithdrawTargetPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition"));
-	WithdrawTargetPosition->SetupAttachment(CapsuleComp);
-	//WithdrawPosition->SetRelativeLocation(FVector());
+	WithdrawTargetPosition1 = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition1"));
+	WithdrawTargetPosition1->SetupAttachment(CapsuleComp);
+	WithdrawTargetPosition1->SetRelativeLocation(FVector(-400, 0, 330));
+
+	WithdrawTargetPosition2= CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition2"));
+	WithdrawTargetPosition2->SetupAttachment(CapsuleComp);
+	//WithdrawTargetPosition2->SetRelativeLocation(FVector());
+
+	WithdrawTargetPosition3 = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition3"));
+	WithdrawTargetPosition3->SetupAttachment(CapsuleComp);
+	//WithdrawTargetPosition3->SetRelativeLocation(FVector());
 
 	WithdrawRotation = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawRotation"));
 	WithdrawRotation->SetupAttachment(CapsuleComp);
@@ -48,6 +56,10 @@ void AFlyingAxe::BeginPlay()
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AFlyingAxe::FlyingAxeOnComponentBeginOverlap);
 	Me = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	LerpAlpha = LerpInit;
+	WithdrawTargetPositionArr.Add(WithdrawTargetPosition1);
+	WithdrawTargetPositionArr.Add(WithdrawTargetPosition2);
+	WithdrawTargetPositionArr.Add(WithdrawTargetPosition3);
+
 }
 
 // Called every frame
@@ -93,11 +105,15 @@ void AFlyingAxe::Tick(float DeltaTime)
 			{
 				FQuat quat = FRotator(-15, 0, 0).Quaternion();
 				SubMeshComp->AddRelativeRotation(quat);
-				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 4));
+				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 11));
 			}
 			else
 			{
-				FQuat quat = FRotator(WithdrawRotationScale, -3.0f, -6.0f).Quaternion();
+				TArray<FRotator> WithdrawRotationArr;
+				WithdrawRotationArr.Add(FRotator(-20, -1.0f, -2.0f));
+				WithdrawRotationArr.Add(FRotator(-1.0f, -20.0f, -2.0f));
+				WithdrawRotationArr.Add(FRotator(-2.0f, 20.0f, -1.0f));
+				FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
 				WithdrawRotationScale -= 0.33;
 				SubMeshComp->AddRelativeRotation(quat);
 				FVector nextLocation = FMath::Lerp(CurLocation, TargetLocation, LerpAlpha);
@@ -116,9 +132,9 @@ void AFlyingAxe::Tick(float DeltaTime)
 void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	bHit = true;
-	auto* Thor = Cast<ABDThor>(OtherActor);
 	SetActorEnableCollision(false); // 충돌 비활성화
-
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SetActorEnableCollision(false)")));
+	auto* Thor = Cast<ABDThor>(OtherActor);
 	if (Thor)
 	{
 		Thor->fsm->Damage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
@@ -146,7 +162,8 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 void AFlyingAxe::BackToPlayer()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("BackToPlayer")));
-	TargetLocation = WithdrawTargetPosition->GetComponentLocation();
+	int randIdx = FMath::RandRange(0, 2);
+	TargetLocation = WithdrawTargetPositionArr[randIdx]->GetComponentLocation();
 	SubMeshComp->SetRelativeRotation(WithdrawRotation->GetRelativeRotation());
 	bWithdrawing = true;
 	bRising = true;
