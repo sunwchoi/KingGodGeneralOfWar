@@ -58,6 +58,16 @@ void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Catch()
 	Fsm->Teleport();
 }
 
+void UAwakenThorAnim::AnimNotify_ClapAttackStart()
+{
+	Fsm->StartClapAttack();
+}
+
+void UAwakenThorAnim::AnimNotify_KickAttackStart()
+{
+	Fsm->StartKickAttack();
+}
+
 void UAwakenThorAnim::AnimNotify_PoundAttackReady()
 {
 	Fsm->ReadyPoundAttack();
@@ -101,8 +111,7 @@ void UAwakenThorAnim::AnimNotify_JumpAttackEnd()
 
 void UAwakenThorAnim::AnimNotify_End()
 {
-	UE_LOG(LogTemp, Warning, TEXT("End!!"));
-	Fsm->SetState(EAwakenThorState::Idle);
+	Fsm->OnEnd();
 }
 
 void UAwakenThorAnim::PlayHitMontage()
@@ -142,6 +151,12 @@ void UAwakenThorAnim::PlayTeleportMontage()
 {
 	if (!Montage_IsPlaying(TeleportMontage))
 		Montage_Play(TeleportMontage);
+}
+
+void UAwakenThorAnim::PlayJumpAttackMontage()
+{
+	if (!Montage_IsPlaying(JumpAttackMontage))
+		Montage_Play(JumpAttackMontage);
 }
 
 
