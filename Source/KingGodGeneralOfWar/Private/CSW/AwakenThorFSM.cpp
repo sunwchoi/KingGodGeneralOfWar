@@ -132,7 +132,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
-		// State = EAwakenThorState::LeftTeleport;
+		// State = EAwakenThorState::PoundAttack;
 		if (State != EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
@@ -166,7 +166,7 @@ void UAwakenThorFSM::DashState()
 	{
 		if (Me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
 			Me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
-		else if (Me->GetCharacterMovement()->MaxWalkSpeed < 8000.f)
+		else if (Me->GetCharacterMovement()->MaxWalkSpeed < 2000.f)
 			Me->GetCharacterMovement()->MaxWalkSpeed += 400.f;
 	}
 }
