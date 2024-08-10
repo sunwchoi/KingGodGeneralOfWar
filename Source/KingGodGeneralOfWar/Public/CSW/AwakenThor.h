@@ -48,8 +48,7 @@ public:
 
 	class UAwakenThorFSM* getFSM() const;
 	bool SetHp(float Damage);
-
-	void UpdateHpUI();
+	float GetHpPercent() const;
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	class UAwakenThorFSM* Fsm;
@@ -104,15 +103,6 @@ private:
 	UFUNCTION()
 	void SetThorLocation(FVector NewLoc);
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UHpBar> HpBarBPClass;
-
-	
-	UPROPERTY()
-	UHpBar* HpBar;
-
 	float MaxHp = 100.f;
 	float Hp = MaxHp;
-
-	
 };
