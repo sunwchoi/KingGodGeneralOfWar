@@ -60,6 +60,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDHammerThreeSwingMontage;
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDHitDownMontage;
 
 
 
@@ -78,6 +80,8 @@ public:
 	void playBDAttackRandomState();
 	UFUNCTION()
 	void playBDHammerThreeSwing();
+	UFUNCTION()
+	void playBDHitDown();
 
 
 
@@ -96,5 +100,7 @@ public:
 
 
 	void BDJumpToHitSection(const FString& Section);
+	UFUNCTION()
+	void AnimNotify_BDHitDown();
 
 };

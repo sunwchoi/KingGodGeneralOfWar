@@ -94,9 +94,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDHittingDownState();
 
-	//근접 공격 시 대쉬
 	UFUNCTION()
-	void BDDash();
+	void BDHitShock(); //토르가 주먹을 내려치면 생기는 충격파 영역 함수
+
+	UFUNCTION()
+	void BDSphereOverlap(float Damage, EHitType HitType, bool IsMelee);
+
+	UFUNCTION()
+	void BDInitializeThorAreaDecal(float Radi);
+
+	float Radius = 450.0f;
 
 	//망치 휘두르기에서 공격 체크
 	bool bBDAttackCheck;
@@ -135,6 +142,7 @@ public:
 	UFUNCTION()
 	void Damage(float DamageNum, EAttackDirectionType AtkDir);
 
+	//맞은 방향 출력
 	UFUNCTION()
 	void BDGetHitDirectionString(EAttackDirectionType AtkDir);
 
