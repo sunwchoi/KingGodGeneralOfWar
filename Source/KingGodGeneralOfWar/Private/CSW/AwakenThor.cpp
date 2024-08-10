@@ -174,11 +174,14 @@ AAwakenThor::AAwakenThor()
 void AAwakenThor::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 
-	HpBar = CreateWidget<UHpBar>(GetWorld(), HpBarBPClass);
-	HpBar->AddToViewport();
-	
+	GetCharacterMovement()->GravityScale = 15.f;
+	GetCharacterMovement()->MaxAcceleration = 1000000.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 50.0f;
+	GetCharacterMovement()->JumpZVelocity = 10000.0f;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called every frame
@@ -186,6 +189,7 @@ void AAwakenThor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 // Called to bind functionality to input
@@ -256,14 +260,14 @@ bool AAwakenThor::SetHp(float Damage)
 	return false;
 }
 
+float AAwakenThor::GetHpPercent() const
+{
+	return Hp / MaxHp;
+}
+
 void AAwakenThor::SetThorLocation(FVector NewLoc)
 {
 	SetActorLocation(NewLoc);
 	MjolnirMoveComp->Velocity = FVector::ZeroVector;
 	Mjolnir->SetRelativeLocation(FVector(0, 60, 20));
-}
-
-void AAwakenThor::UpdateHpUI()
-{
-	HpBar->SetHp(Hp, MaxHp);
 }

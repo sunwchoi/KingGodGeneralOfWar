@@ -95,6 +95,9 @@ private:
 
 	UPROPERTY()
 	class UAwakenThorAnim* Anim;
+
+	UPROPERTY()
+	class ACSWGameMode* GameMode;
 	
 	float IdleDelayTime = 2.f;
 	float CurrentTime = 0.f;
