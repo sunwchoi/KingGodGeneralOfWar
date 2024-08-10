@@ -15,6 +15,7 @@
 #include "DrawDebugHelpers.h" //디버그 확인용
 #include "Components/CapsuleComponent.h"
 #include "SG_Shield.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -50,6 +51,14 @@ ABDThor::ABDThor()
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
+	//ThorAreaSpere = CreateDefaultSubobject<USphereComponent>(TEXT("ThorAreaSpere")); //영역 생성
+	//if (ThorAreaSpere) {
+	//	ThorAreaSpere->InitSphereRadius(Radius); //지정한 반경으로 설정
+	//	ThorAreaSpere->SetupAttachment(RootComponent); 
+	//}
+
+
+
 	//애니메이션 블루프린트 할당하기
 	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor_C'"));
 	if (BDThorAnimation.Succeeded()) {
@@ -62,7 +71,11 @@ void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//ThorAreaSpere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //처음에 켜질땐 비활성화, 영역함수가 불릴때만 true
+
 	BDWeaponCol->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDWeaponOverlap);
+
+	//ThorAreaSpere->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDSphereOverlap);
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
@@ -218,6 +231,21 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		}
 	}
 }
+
+//영역에 플레이어가 잇을 경우 공격 데미지 들어감
+//void ABDThor::BDSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	if (OtherActor && (OtherActor != this) && OtherComp) {
+//		//데미지 처리
+//		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
+//		if (AttackTarget) {
+//			fsm->bBDAttackCheck = true;
+//			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
+//			fsm->BDSetState(BDThorGeneralState::BDIdle); //대기로 변경
+//			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //회피로 변경
+//		}
+//	}
+//}
 
 
 
