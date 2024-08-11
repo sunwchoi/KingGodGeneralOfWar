@@ -126,7 +126,8 @@ void UAwakenThorAnim::JumpToHitSection(const FString& Section)
 
 void UAwakenThorAnim::PlayDieMontage()
 {
-	Montage_Play(DieMontage);
+	if (!Montage_IsPlaying(DieMontage))
+		Montage_Play(DieMontage);
 }
 
 void UAwakenThorAnim::PlayClapAttackMontage()

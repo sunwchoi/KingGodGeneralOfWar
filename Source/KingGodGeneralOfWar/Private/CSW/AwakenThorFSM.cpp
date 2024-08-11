@@ -30,6 +30,7 @@ void UAwakenThorFSM::BeginPlay()
 	// ...
 	AKratos* tmp = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
+	GameMode->SetEnemyHpBar(1);
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
@@ -225,6 +226,7 @@ void UAwakenThorFSM::DamageState()
 
 void UAwakenThorFSM::DieState()
 {
+	Anim->PlayDieMontage();
 }
 
 void UAwakenThorFSM::LookTeleportDirection()
@@ -355,12 +357,12 @@ void UAwakenThorFSM::OnEnd()
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
 	bool isDie = Me->SetHp(Damage);
-	GameMode->SetEnemyHpBar(Me->GetHpPercent());	
+	GameMode->SetEnemyHpBar(Me->GetHpPercent());
 
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
-		Anim->PlayDieMontage();
+		GameMode->EndWithSucceed();
 		return;
 	}
 
@@ -437,7 +439,7 @@ void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 			{
 				FString tmp = UEnum::GetValueAsString(State);
 				Target->Damage(Me, Damage, HitType, IsMelee);
-			} // SetDamage
+			}
 		}
 
 		FVector newLoc(zone.first.X, zone.first.Y, 20);
