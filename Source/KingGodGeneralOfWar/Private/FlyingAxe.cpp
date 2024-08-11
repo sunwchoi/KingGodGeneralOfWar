@@ -103,9 +103,9 @@ void AFlyingAxe::Tick(float DeltaTime)
 		{
 			if (bRising)
 			{
-				FQuat quat = FRotator(-15, 0, 0).Quaternion();
+				FQuat quat = FRotator(-15, 0, 1).Quaternion();
 				SubMeshComp->AddRelativeRotation(quat);
-				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 11));
+				SetActorLocation(FMath::Lerp(GetActorLocation(), TargetLocation, DeltaTime * 6));
 			}
 			else
 			{
@@ -114,6 +114,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 				WithdrawRotationArr.Add(FRotator(-1.0f, -20.0f, -2.0f));
 				WithdrawRotationArr.Add(FRotator(-2.0f, 20.0f, -1.0f));
 				FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
+				//FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
 				WithdrawRotationScale -= 0.33;
 				SubMeshComp->AddRelativeRotation(quat);
 				FVector nextLocation = FMath::Lerp(CurLocation, TargetLocation, LerpAlpha);
