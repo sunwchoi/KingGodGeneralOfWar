@@ -28,7 +28,7 @@ void ARuneAttackField::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(destroyHandle, [&]()
 		{
 			this->Destroy();
-		}, 1.0f, false);
+		}, 3.5f, false);
 }
 
 // Called every frame
@@ -42,7 +42,7 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	const float fieldDamage = 5;
-	const float fieldDalay = 0.3;
+	const float fieldDalay = 0.5;
 	if (Thor)
 	{
 		Thor->fsm->Damage(fieldDamage, EAttackDirectionType::UP);

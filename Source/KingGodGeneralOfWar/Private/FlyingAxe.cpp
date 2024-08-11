@@ -12,7 +12,7 @@
 #include "BDThor.h"
 #include "BDThorFSM.h"
 #include "Kismet/GameplayStatics.h"
-const float LerpInit = 0.025;
+const float LerpInit = 0.022;
 const float AXE_THROW_DAMAGE = 2;
 // Sets default values
 AFlyingAxe::AFlyingAxe()

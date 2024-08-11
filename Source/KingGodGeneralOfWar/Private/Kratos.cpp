@@ -25,6 +25,7 @@
 #include "BDThorFSM.h"
 #include "FlyingAxe.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "CSW/CSWGameMode.h"
 
 // Sets default values
 
@@ -198,7 +199,7 @@ void AKratos::BeginPlay()
 			subSys->AddMappingContext(IMC_Player, 0);
 		}
 	}
-
+	GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
 	if (nullptr == Axe)
 	{
 		SetWeapon();
@@ -210,8 +211,8 @@ void AKratos::BeginPlay()
 	}
 	GuardHitCnt = GUARD_MAX_COUNT;
 
-	HpBarUI = CreateWidget<UPlayerHPUI>(GetWorld(), HpBarUIFactory);
-	HpBarUI->AddToViewport();
+	/*HpBarUI = CreateWidget<UPlayerHPUI>(GetWorld(), HpBarUIFactory);
+	HpBarUI->AddToViewport();*/
 
 	AttackShakeFactoryArr.Add(DownAttackShakeFactory);
 	AttackShakeFactoryArr.Add(UpAttackShakeFactory);
@@ -255,7 +256,7 @@ void AKratos::Tick(float DeltaTime)
 		TargetFOV = WALK_FOV;
 	}
 	// 카메라 시야각 선형 보간
-	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 6);
+	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 3);
 
 	// 카메라 오프셋 선형 보간
 	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 3);
@@ -344,6 +345,10 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		else if (Montage == Anim->GuardMontage && bGuardStagger)
 		{
 			return;
+		}
+		else if (Montage == Anim->GuardMontage && State == EPlayerState::Attack)
+		{
+			return ;
 		}
 		else
 		{
@@ -743,6 +748,11 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		Anim->PlayDashAttackMontage();
 		CurrentAttackType = EAttackType::DASH_ATTACK;
 	}
+	else if (State == EPlayerState::Parry)
+	{
+		SetState(EPlayerState::Attack);
+		Anim->PlayParryAttackMontage();
+	}
 }
 
 void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
@@ -945,7 +955,8 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	else if (State == EPlayerState::GuardStart)
 	{
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
+		UNiagaraFunctionLibrary::SpawnSystemAttached(ParryVFX, Shield->LightPosition, TEXT("ParryVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
+		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
 
 		CameraShakeOnAttack(EAttackDirectionType::DOWN, 0.5f);
 		Anim->JumpToGuardMontageSection(TEXT("Guard_Parrying"));
@@ -962,7 +973,7 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			{
 				auto AwakenThor = Cast<AAwakenThor>(Attacker);
 
-				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP);
+				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP, true);
 			}
 		}
 	}
@@ -974,7 +985,8 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	else
 	{
 		CurHP -= DamageValue;
-		HpBarUI->SetHP(CurHP, MaxHP);
+		if (GameMode)
+			GameMode->SetPlayerHpBar(CurHP / MaxHP);
 		if (bSuperArmor) return false;
 
 		Anim->PlayHitMontage();
