@@ -28,6 +28,7 @@ void ACSWGameMode::BeginPlay()
 	if (OutGameWidget)
 			OutGameWidget->AddToViewport();
 	
+	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
@@ -38,7 +39,6 @@ void ACSWGameMode::BeginPlay()
 	
 		PlayerController->SetPause(true);
 	}
-	// bFirstPhase = false; // TMP!!
 	if (bFirstPhase)
 	{
 		StartFirstPhase();
@@ -95,7 +95,23 @@ void ACSWGameMode::StartSecondPhase()
 
 void ACSWGameMode::GoToNextPhase()
 {
-	StartSecondPhase();
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(
+			handle,
+			[this, PlayerController]()
+			{
+				StartSecondPhase();
+			},
+			5.f,
+			false
+			);
+	}
+	MiddleScene = CreateWidget<>(GetWorld(), WBP_MiddleScene);
+	if (MiddleScene)
+		MiddleScene->AddToViewport();
 }
 
 void ACSWGameMode::EndWithFail()
