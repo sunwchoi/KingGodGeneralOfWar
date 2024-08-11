@@ -61,15 +61,15 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	else
 	{
 		auto AwakenThor= Cast<AAwakenThor>(OtherActor);
-		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP);
+		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [AwakenThor, fieldDamage, fieldDalay]()
 			{
-				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP);
+				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
 				FTimerHandle handle1;
 				AwakenThor->GetWorld()->GetTimerManager().SetTimer(handle1, [AwakenThor, fieldDamage, fieldDalay]()
 					{
-						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::DOWN);
+						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::DOWN, true);
 
 					}, fieldDalay, false);
 			}, fieldDalay, false);
