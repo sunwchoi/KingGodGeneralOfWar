@@ -40,6 +40,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> WBP_GameSucceed;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> WBP_MiddleScene;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AAwakenThor> BP_AwakenThor;
@@ -55,6 +58,10 @@ private:
 
 	UPROPERTY()
 	UUserWidget* EndGameWidget;
+
+	UPROPERTY()
+	UUserWidget* MiddleScene;
+	
 
 	bool bFirstPhase = true;
 	bool bEndScreenStart = false;
