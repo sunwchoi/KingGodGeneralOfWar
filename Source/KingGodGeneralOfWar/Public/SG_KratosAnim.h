@@ -39,6 +39,7 @@ public:
 	void PlayAxeWithdrawMontage();
 	void PlayDashAttackMontage();
 	void PlayRuneAttackMontage();
+	void PlayParryAttackMontage();
 
 	void JumpToAttackMontageSection(int32 NewSection);
 	void JumpToDodgeMontageSection(FString SectionName);
@@ -90,6 +91,9 @@ public:
 
 	UPROPERTY()
 	class UAnimMontage* RuneAttackMontage;
+
+	UPROPERTY()
+	class UAnimMontage* ParryAttackMontage ;
 
 	UPROPERTY()
 	UAnimMontage* HitMontage;

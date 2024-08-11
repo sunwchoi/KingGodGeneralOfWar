@@ -60,6 +60,11 @@ USG_KratosAnim::USG_KratosAnim()
 		TEXT("Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_Hit.AM_Kratos_Hit'")
 	);
 	if (TempHitMontage.Succeeded())	HitMontage = TempHitMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder <UAnimMontage> TempParryAttackMontage(
+		TEXT("/ Script / Engine.AnimMontage'/Game/JSG/Animations/AM_Kratos_ParryAttack.AM_Kratos_ParryAttack'")
+	);
+	if (TempParryAttackMontage.Succeeded())	ParryAttackMontage = TempParryAttackMontage.Object;
 }
 
 void USG_KratosAnim::NativeUpdateAnimation(float DeltaTime)
@@ -158,6 +163,12 @@ void USG_KratosAnim::PlayRuneAttackMontage()
 {
 	if (!Montage_IsPlaying(RuneAttackMontage))
 		Montage_Play(RuneAttackMontage);
+}
+
+void USG_KratosAnim::PlayParryAttackMontage()
+{
+	if (!Montage_IsPlaying(ParryAttackMontage))
+		Montage_Play(ParryAttackMontage);
 }
 
 void USG_KratosAnim::JumpToAttackMontageSection(int32 NewSection)
