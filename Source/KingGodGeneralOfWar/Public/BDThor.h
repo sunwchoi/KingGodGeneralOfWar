@@ -75,17 +75,19 @@ public:
 	void BDHammerWindSlash(); //바람 날리는 능력
 
 
-	//UI 보여주기
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
-	TSubclassOf<UUserWidget> BDThorHPClass;
+	////UI 보여주기
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
+	//TSubclassOf<UUserWidget> BDThorHPClass;
 
-	UPROPERTY()
-	class UBDThorHP* BDThorHPBar;
+	//UPROPERTY()
+	//class UBDThorHP* BDThorHPBar;
 
-	UFUNCTION()
-	void UpdateHpUI();
+	//UFUNCTION()
+	//void UpdateHpUI();
 
 	UFUNCTION()
 	void BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UCameraShakeBase> BDCameraShake; //주먹 휘둘러칠때 카메라 쉐이크 넣기
 };

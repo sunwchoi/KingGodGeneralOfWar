@@ -76,16 +76,26 @@ void UBDThorAnim::playBDHammerThreeSwing()
 	}
 }
 
+void UBDThorAnim::playBDHitDown()
+{
+	if (!Montage_IsPlaying(BDHitDownMontage)) {
+		Montage_Play(BDHitDownMontage); //주먹 내려치는 애니메이션
+	}
+}
+
+void UBDThorAnim::playBDClap()
+{
+	if (!Montage_IsPlaying(BDClapMontage)) {
+		Montage_Play(BDClapMontage); //주먹 내려치는 애니메이션
+	}
+}
+
 
 void UBDThorAnim::AnimNotify_AnimEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EndAnim"));
 	if (bdThorFSM) {
 		bdThorFSM->BDEndState(); // 애니메이션이 끝날 시 제어
 		UE_LOG(LogTemp, Warning, TEXT("Succed"));
-	}
-	else {
-		//UE_LOG(LogTemp, Warning, TEXT("Faild"));
 	}
 }
 
@@ -110,5 +120,15 @@ void UBDThorAnim::AnimNotify_BackMjolnir()
 void UBDThorAnim::BDJumpToHitSection(const FString& Section)
 {
 	Montage_JumpToSection(FName(*Section), BDThorDamageMontage);
+}
+
+void UBDThorAnim::AnimNotify_BDHitDown()
+{
+	bdThorFSM->BDHitShock();
+}
+
+void UBDThorAnim::AnimNotify_ClapAttack()
+{
+	bdThorFSM->BDClapAttack();
 }
 

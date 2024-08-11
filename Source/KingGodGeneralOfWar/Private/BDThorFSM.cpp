@@ -11,6 +11,10 @@
 #include "BDThorHP.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/DecalComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 
 
 // Sets default values for this component's properties
@@ -81,6 +85,9 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		break;
 	case BDThorGeneralState::BDHitDown:
 		BDHittingDownState(); //공격 패턴
+		break;
+	case BDThorGeneralState::BDClap:
+		BDClapState(); //공격 패턴
 		break;
 	}
 
@@ -211,8 +218,9 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 		BDThorGeneralState::BDHammerThrow,
 		BDThorGeneralState::BDHammerWind,
 		BDThorGeneralState::BDHammerThreeSwing,
-		//BDThorGeneralState::BDGiveUPFly,
-		//BDThorGeneralState::BDHitDown
+		BDThorGeneralState::BDHitDown,
+		BDThorGeneralState::BDClap,
+		//BDThorGeneralState::BDGiveUPFly
 	};
 
 	// 마지막 상태 제거
@@ -243,11 +251,14 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 //데미지를 받을 시 발생하는 함수, 두번째는 애니메이션을 재생할 히트 방향을 말한다.
 void UBDThorFSM::Damage(float DamageNum, EAttackDirectionType AtkDir)
 {
+
 	BDCurrentHP -= DamageNum;
 
-	me->UpdateHpUI(); //체력 설정
+	//me->UpdateHpUI(); //체력 설정
 
 	BDGetHitDirectionString(AtkDir);
+
+	me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
 
 	//피격 상태로 변경한다.
 	mState = BDThorGeneralState::BDDamage;
@@ -392,12 +403,7 @@ void UBDThorFSM::BDHammerThreeSwingState()
 		// 타겟과 토르의 거리가 멀 경우
 		else if (dirR.Size() > 200.0f)
 		{
-			/*if (dirR.Size() <= 100.0f) {
-				me->GetCharacterMovement()->MaxWalkSpeed = 50.f;
-				anim->Montage_JumpToSection(FName("Attack1"), anim->BDHammerThreeSwingMontage);
-				bBDAttackCheck = true;
-			}*/
-
+			
 			//UE_LOG(LogTemp, Warning, TEXT("State2: %s"), *UEnum::GetValueAsString(mState));
 			me->GetCharacterMovement()->MaxWalkSpeed = 9000.f;
 		}
@@ -416,12 +422,110 @@ void UBDThorFSM::BDGiveUPFlyState()
 //바닥을 주먹으로 내려치기
 void UBDThorFSM::BDHittingDownState()
 {
-	//
+	//일단 플레이어가 근처에 있을 경우 공격 시작
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
+	float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
+
+	anim->playBDHitDown(); //주먹 내려치는 애니메이션
+
+	if (dist < 300.0f) {
+		//애니메이션 실행 및 공격
+		if (anim->Montage_IsPlaying(anim->BDHitDownMontage)) {
+			
+			if (!bBDAttackCheck) {
+				//me->GetCharacterMovement()->MaxWalkSpeed = 0.f; // 이 부분 수정 움직이지 않도록 해야함
+				//me->GetCharacterMovement()->StopActiveMovement(); //이동 중지 하는 코드
+
+				 // 이 부분에서 이동을 완전히 중지
+				me->GetCharacterMovement()->DisableMovement();  // 캐릭터 이동을 완전히 비활성화
+
+
+				anim->Montage_JumpToSection(FName("Attack1"), anim->BDHitDownMontage);
+				bBDAttackCheck = true;
+			}
+		}
+	}
+	else {
+		//플레이어와의 거리가 멀 경우 달려가기
+		me->GetCharacterMovement()->MaxWalkSpeed = 9000.f;
+		me->AddMovementInput(dirR);
+	}
+
 }
 
-void UBDThorFSM::BDDash()
+//영역 활성화, 여기서 데미지를 줌 또한 데칼을 이용해 충격파 그리기
+void UBDThorFSM::BDHitShock()
 {
-	//방향 돌리기
+
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), me->BDCameraShake, me->GetActorLocation(), 0, 15000); //카메라 쉐이크
+
+	//노티파이 발생 시 토르를 중심으로 영역 발생, 데미지
+	BDSphereOverlap(20, EHitType::NB_HIGH, true);
+
+	//충격파 발생 
+	//데칼을 이용해 머터리얼 부름
+	BDInitializeThorAreaDecal(Radius);
+
+}
+
+void UBDThorFSM::BDSphereOverlap(float Damage, EHitType HitType, bool IsMelee)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("BDSphereOverlap"));
+
+	TArray<AActor*> OverlappedActors; //부딪힌 액터
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
+
+
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		me->GetActorLocation(), //구형의 중심 위치
+		Radius, //구형 영역의 중심 위치
+		ObjectTypes, //어떤 유형의 충돌 채널을 검색할 지 정하는 필터
+		AKratos::StaticClass(), //검색할 액터의 클래스 필터
+		TArray<AActor*>{me}, //나 자신을 제외
+		OverlappedActors 
+	);
+
+	if (OverlappedActors.Num() > 0)
+	{
+		if (Cast<AKratos>(OverlappedActors.Top()))
+		{
+			Target->Damage(me, Damage, HitType, IsMelee);
+			//UE_LOG(LogTemp, Warning, TEXT("TargetD"));
+		}
+	}
+
+}
+
+void UBDThorFSM::BDInitializeThorAreaDecal(float Radi)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Decal"));
+	FVector DecalSize = FVector(Radi, Radi, 10.0f);
+	UMaterialInterface* ThorAreaDecal;
+	ThorAreaDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/Bada/Material/M_ThorArearDecal.M_ThorArearDecal'"));
+
+	if (ThorAreaDecal)
+	{
+		// 데칼을 현재 위치에 스폰합니다.
+		FVector DecalLocation = me->GetActorLocation();
+		DecalLocation.Z = 0.0f; //Z 위치를 0으로 초기화
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), ThorAreaDecal, DecalSize, DecalLocation, FRotator::ZeroRotator, 2.5f); //z의 값 0 DecalLocation = 0
+		//UE_LOG(LogTemp, Warning, TEXT("De"));
+	}
+}
+
+void UBDThorFSM::BDClapState()
+{
+	//박수공격 스테이트
+	//대쉬
 	FVector targetLoc = Target->GetActorLocation();
 	FVector myLoc = me->GetActorLocation();
 	FVector dirR = targetLoc - myLoc;
@@ -433,27 +537,70 @@ void UBDThorFSM::BDDash()
 
 	me->AddMovementInput(dirR);
 
-	UE_LOG(LogTemp, Warning, TEXT("BDDash"));
-	//타겟과 토르의 거리가 가가울 경우
-	if (dist < 200.f)
-	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 50.0f;
-	}
-	//타겟과 토르의 거리가 멀 경우
-	else if (dist < 600.f)
-	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 3000.f;
-	}
-	else
-	{
-		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
-		//if (me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
-		//	me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
-		//else
-		//	me->GetCharacterMovement()->MaxWalkSpeed = 10000.f; //너무 먼 경우 빨리 오도록
-	}
+	//몽타주 실행
+	anim->playBDClap(); //박수 치는 몽타주 재생
 
+	//타겟과 토르의 거리가 가까울 경우
+	// 타겟과 토르의 거리가 가까울 경우
+	if (anim->Montage_IsPlaying(anim->BDClapMontage))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is playing"));
+
+		if (dirR.Size() <= 200.0f)
+		{
+			me->GetCharacterMovement()->DisableMovement();  // 캐릭터 이동을 완전히 비활성화
+			if (!bBDAttackCheck) {
+				anim->Montage_JumpToSection(FName("Attack1"), anim->BDClapMontage);
+				bBDAttackCheck = true;
+			}
+
+		}
+		// 타겟과 토르의 거리가 멀 경우
+		else if (dirR.Size() > 200.0f)
+		{
+			me->GetCharacterMovement()->MaxWalkSpeed = 20000.f;
+		}
+	}
 }
+
+//박수 공격 또는 발차기 공격 시에 나가는 함수
+void UBDThorFSM::BDClapSphereOverlap(FVector loc, float ZoneSize, float Damage, EHitType HitType, bool IsMelee)
+{
+	UE_LOG(LogTemp, Warning, TEXT("BDClapSphereOverlap"));
+
+	TArray<AActor*> OverlappedActors; //부딪힌 액터
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel3));
+
+
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		loc, //구형의 중심 위치
+		ZoneSize, //구형 영역의 중심 위치
+		ObjectTypes, //어떤 유형의 충돌 채널을 검색할 지 정하는 필터
+		AKratos::StaticClass(), //검색할 액터의 클래스 필터
+		TArray<AActor*>{me}, //나 자신을 제외
+		OverlappedActors
+	);
+
+	if (OverlappedActors.Num() > 0)
+	{
+		if (Cast<AKratos>(OverlappedActors.Top()))
+		{
+			Target->Damage(me, Damage, HitType, IsMelee);
+			UE_LOG(LogTemp, Warning, TEXT("Clap"));
+		}
+	}
+}
+
+void UBDThorFSM::BDClapAttack()
+{
+	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftHand"));
+	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
+	UE_LOG(LogTemp, Warning, TEXT("ClapAttack"));
+}
+
 
 
 //애니메이션 마지막 종료 후 상태 확인 
@@ -463,11 +610,22 @@ void UBDThorFSM::BDEndState()
 	UE_LOG(LogTemp, Warning, TEXT("End1"));
 
 	//만약 근접 공격 상태라면
-	if (mState == BDThorGeneralState::BDGiveUPFly || mState == BDThorGeneralState::BDHitDown) {
+	if (mState == BDThorGeneralState::BDGiveUPFly) {
 		//플레이어 근처에 있기 때문에 일단 회피 상태
-		BDSetState(BDThorGeneralState::BDMove);
+		BDSetState(BDThorGeneralState::BDIdle);
 
 		//UE_LOG(LogTemp, Warning, TEXT("End of Attack Animation, switching to Move after delay"));
+	}
+	else if (mState == BDThorGeneralState::BDHitDown) {
+		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
+		BDSetState(BDThorGeneralState::BDIdle);
+	}
+	else if (mState == BDThorGeneralState::BDClap) {
+		if (me->IsWeaponHold == false) {
+			me->DrawWeapon(); //무기를 내린다.
+		}
+		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
+		BDSetState(BDThorGeneralState::BDAvoidance); //뒤로 회피
 	}
 	//망치를 든 근접 공격 상태였었다면
 	else if (mState == BDThorGeneralState::BDHammerThreeSwing) {

@@ -6,6 +6,8 @@
 #include "Kratos.h"
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
+#include "CSW/CSWGameMode.h"
+#include "CSW/InGameWidget.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +29,7 @@ void UAwakenThorFSM::BeginPlay()
 
 	// ...
 	AKratos* tmp = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
@@ -38,10 +41,6 @@ void UAwakenThorFSM::BeginPlay()
 void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	FString state = UEnum::GetValueAsString(State);
-	UE_LOG(LogTemp, Warning, TEXT("state: %s\n"), *state);
-	// FString anim = UEnum::GetValueAsString(Anim->GetState());
 	
 	switch (State)
 	{
@@ -132,7 +131,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
-		// State = EAwakenThorState::LeftTeleport;
+		// State = EAwakenThorState::PoundAttack;
 		if (State != EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
@@ -155,7 +154,6 @@ void UAwakenThorFSM::DashState()
 	
 	Me->AddMovementInput(dir);
 	
-	UE_LOG(LogTemp, Warning, TEXT("Dash"));
 	if (dist < 200.f)
 	{
 		Me->GetCharacterMovement()->MaxWalkSpeed = 50.f;
@@ -166,7 +164,7 @@ void UAwakenThorFSM::DashState()
 	{
 		if (Me->GetCharacterMovement()->MaxWalkSpeed < 500.f)
 			Me->GetCharacterMovement()->MaxWalkSpeed += 10.f;
-		else if (Me->GetCharacterMovement()->MaxWalkSpeed < 8000.f)
+		else if (Me->GetCharacterMovement()->MaxWalkSpeed < 2000.f)
 			Me->GetCharacterMovement()->MaxWalkSpeed += 400.f;
 	}
 }
@@ -341,7 +339,6 @@ void UAwakenThorFSM::StartFallAttack()
 void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
 {
 	Str = UEnum::GetValueAsString(AtkDir).Mid(22);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *Str);
 }
 
 void UAwakenThorFSM::OnEnd()
@@ -357,9 +354,8 @@ void UAwakenThorFSM::OnEnd()
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	bool isDie = Me->SetHp(Damage);
-	Me->UpdateHpUI();
+	GameMode->SetEnemyHpBar(Me->GetHpPercent());	
 
 	if (isDie)
 	{
@@ -440,7 +436,6 @@ void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 			if(Cast<AKratos>(OverlappedActors.Top()))
 			{
 				FString tmp = UEnum::GetValueAsString(State);
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *tmp);
 				Target->Damage(Me, Damage, HitType, IsMelee);
 			} // SetDamage
 		}

@@ -60,6 +60,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDHammerThreeSwingMontage;
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDHitDownMontage;
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDClapMontage;
+
 
 
 
@@ -78,6 +83,10 @@ public:
 	void playBDAttackRandomState();
 	UFUNCTION()
 	void playBDHammerThreeSwing();
+	UFUNCTION()
+	void playBDHitDown();
+	UFUNCTION()
+	void playBDClap();
 
 
 
@@ -96,5 +105,9 @@ public:
 
 
 	void BDJumpToHitSection(const FString& Section);
+	UFUNCTION()
+	void AnimNotify_BDHitDown();
+	UFUNCTION()
+	void AnimNotify_ClapAttack();
 
 };

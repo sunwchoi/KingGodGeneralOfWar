@@ -95,8 +95,11 @@ private:
 
 	UPROPERTY()
 	class UAwakenThorAnim* Anim;
+
+	UPROPERTY()
+	class ACSWGameMode* GameMode;
 	
-	float IdleDelayTime = 1.f;
+	float IdleDelayTime = 2.f;
 	float CurrentTime = 0.f;
 	
 	float TeleportDist = 1000;

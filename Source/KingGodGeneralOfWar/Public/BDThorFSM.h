@@ -23,6 +23,7 @@ enum class BDThorGeneralState : uint8 {
 	BDHammerThreeSwing,
 	BDGiveUPFly,
 	BDHitDown,
+	BDClap,
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -94,9 +95,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	void BDHittingDownState();
 
-	//근접 공격 시 대쉬
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDClapState();
+
+
+
 	UFUNCTION()
-	void BDDash();
+	void BDHitShock(); //토르가 주먹을 내려치면 생기는 충격파 영역 함수
+
+	UFUNCTION()
+	void BDSphereOverlap(float Damage, EHitType HitType, bool IsMelee);
+
+	UFUNCTION()
+	void BDInitializeThorAreaDecal(float Radi);
+
+	void BDClapSphereOverlap(FVector loc, float ZoneSize, float Damage, EHitType HitType, bool IsMelee);
+
+	UFUNCTION()
+	void BDClapAttack();
+
+	float Radius = 550.0f;
 
 	//망치 휘두르기에서 공격 체크
 	bool bBDAttackCheck;
@@ -119,7 +137,7 @@ public:
 
 	//대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = FSM)
-	float BDidleDelayTime = 0.7f;
+	float BDidleDelayTime = 1.0f;
 	//경과 시간
 	float BDCurrentTime = 0;
 
@@ -135,6 +153,7 @@ public:
 	UFUNCTION()
 	void Damage(float DamageNum, EAttackDirectionType AtkDir);
 
+	//맞은 방향 출력
 	UFUNCTION()
 	void BDGetHitDirectionString(EAttackDirectionType AtkDir);
 
