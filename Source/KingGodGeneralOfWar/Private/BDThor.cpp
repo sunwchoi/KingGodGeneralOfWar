@@ -16,6 +16,7 @@
 #include "Components/CapsuleComponent.h"
 #include "SG_Shield.h"
 #include "Components/SphereComponent.h"
+#include "CSW/CSWGameMode.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -51,19 +52,12 @@ ABDThor::ABDThor()
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
-	//ThorAreaSpere = CreateDefaultSubobject<USphereComponent>(TEXT("ThorAreaSpere")); //영역 생성
-	//if (ThorAreaSpere) {
-	//	ThorAreaSpere->InitSphereRadius(Radius); //지정한 반경으로 설정
-	//	ThorAreaSpere->SetupAttachment(RootComponent); 
-	//}
-
-
-
 	//애니메이션 블루프린트 할당하기
 	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor_C'"));
 	if (BDThorAnimation.Succeeded()) {
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
 	}*/
+
 }
 
 // Called when the game starts or when spawned
@@ -80,19 +74,21 @@ void ABDThor::BeginPlay()
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
 
-	//UI 보여주기
-	if (BDThorHPClass) {
-		UUserWidget* BDHPBar = CreateWidget<UUserWidget>(GetWorld(), BDThorHPClass);
-		BDThorHPBar = Cast<UBDThorHP>(BDHPBar);
-		if (BDThorHPBar) {
-			BDThorHPBar->AddToViewport();
-			BDThorHPBar->SetVisibility(ESlateVisibility::Visible);
-		}
-	}
+	////UI 보여주기
+	//if (BDThorHPClass) {
+	//	UUserWidget* BDHPBar = CreateWidget<UUserWidget>(GetWorld(), BDThorHPClass);
+	//	BDThorHPBar = Cast<UBDThorHP>(BDHPBar);
+	//	if (BDThorHPBar) {
+	//		BDThorHPBar->AddToViewport();
+	//		BDThorHPBar->SetVisibility(ESlateVisibility::Visible);
+	//	}
+	//}
 
 	fsm->BDCurrentHP = fsm->BDMaxHp; //체력 설정
 
-	UpdateHpUI();
+	GameMode = Cast<ACSWGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	GameMode->SetEnemyHpBar(fsm->BDCurrentHP / fsm->BDMaxHp);
+	//UpdateHpUI();
 }
 
 // Called every frame
@@ -190,28 +186,28 @@ void ABDThor::BDHammerWindSlash()
 	GetWorld()->SpawnActor<AWindSlash>(SlashFat, GetActorLocation(), GetActorRotation(), parm);
 }
 
-void ABDThor::UpdateHpUI()
-{
-	if (BDThorHPBar) {
-		BDThorHPBar->SetHP(fsm->BDCurrentHP, fsm->BDMaxHp);
-	}
-
-	if (fsm->BDCurrentHP < 0) {
-		//2 페이즈로 전환
-		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //게임모드 캐스트
-
-		if (BDThorHPBar) {
-			BDThorHPBar->RemoveFromParent(); //HP가 0이 되면 삭제해라
-		}
-
-		if (BDGameMode) {
-			BDGameMode->ThorFadeOut(); //페이드 아웃 실행
-		}
-
-
-	}
-
-}
+//void ABDThor::UpdateHpUI()
+//{
+//	if (BDThorHPBar) {
+//		BDThorHPBar->SetHP(fsm->BDCurrentHP, fsm->BDMaxHp);
+//	}
+//
+//	if (fsm->BDCurrentHP < 0) {
+//		//2 페이즈로 전환
+//		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //게임모드 캐스트
+//
+//		if (BDThorHPBar) {
+//			BDThorHPBar->RemoveFromParent(); //HP가 0이 되면 삭제해라
+//		}
+//
+//		if (BDGameMode) {
+//			BDGameMode->ThorFadeOut(); //페이드 아웃 실행
+//		}
+//
+//
+//	}
+//
+//}
 
 void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

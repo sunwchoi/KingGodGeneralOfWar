@@ -281,11 +281,14 @@ public:
 	TSubclassOf<class AActor> GuardBlockLightFactory;
 
 	// UI
-	UPROPERTY(EditAnywhere, Category = "UI")
+	/*UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class UUserWidget> HpBarUIFactory;
 
 	UPROPERTY()
-	class UPlayerHPUI* HpBarUI;
+	class UPlayerHPUI* HpBarUI;*/
+
+	UPROPERTY()
+	class ACSWGameMode* GameMode;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> AimWidgetClass;

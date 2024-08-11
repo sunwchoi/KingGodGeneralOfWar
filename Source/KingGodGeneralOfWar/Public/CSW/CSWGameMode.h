@@ -24,6 +24,9 @@ public:
 
 	void StartFirstPhase();
 	void StartSecondPhase();
+	void GoToNextPhase();
+	void EndWithFail();
+	void EndWithSucceed();
 	
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -32,7 +35,12 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UInGameWidget> WBP_InGame;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UOutGameWidget> WBP_GameFail;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> WBP_GameSucceed;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AAwakenThor> BP_AwakenThor;
 
@@ -40,10 +48,14 @@ private:
 	TSubclassOf<class ABDThor> BP_BDThor;
 	
 	UPROPERTY()
-	UOutGameWidget* GameStartWidget;
+	UOutGameWidget* OutGameWidget;
 
 	UPROPERTY()
 	class UInGameWidget* InGameWidget;
 
-	
+	UPROPERTY()
+	UUserWidget* EndGameWidget;
+
+	bool bFirstPhase = true;
+	bool bEndScreenStart = false;
 };
