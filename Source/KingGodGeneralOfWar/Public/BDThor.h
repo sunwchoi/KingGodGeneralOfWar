@@ -74,6 +74,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = weapon)
 	void BDHammerWindSlash(); //바람 날리는 능력
 
+	
+	UPROPERTY(EditDefaultsOnly)
+	class ACSWGameMode* GameMode;
+
 
 	////UI 보여주기
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)

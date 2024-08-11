@@ -16,6 +16,7 @@
 #include "Components/CapsuleComponent.h"
 #include "SG_Shield.h"
 #include "Components/SphereComponent.h"
+#include "CSW/CSWGameMode.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -51,19 +52,12 @@ ABDThor::ABDThor()
 	//BDThorFSM 컴포넌트 추가
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
-	//ThorAreaSpere = CreateDefaultSubobject<USphereComponent>(TEXT("ThorAreaSpere")); //영역 생성
-	//if (ThorAreaSpere) {
-	//	ThorAreaSpere->InitSphereRadius(Radius); //지정한 반경으로 설정
-	//	ThorAreaSpere->SetupAttachment(RootComponent); 
-	//}
-
-
-
 	//애니메이션 블루프린트 할당하기
 	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor_C'"));
 	if (BDThorAnimation.Succeeded()) {
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
 	}*/
+
 }
 
 // Called when the game starts or when spawned
@@ -92,6 +86,8 @@ void ABDThor::BeginPlay()
 
 	fsm->BDCurrentHP = fsm->BDMaxHp; //체력 설정
 
+	GameMode = Cast<ACSWGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	GameMode->SetEnemyHpBar(fsm->BDCurrentHP / fsm->BDMaxHp);
 	//UpdateHpUI();
 }
 
