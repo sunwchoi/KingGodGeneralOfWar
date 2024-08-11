@@ -72,7 +72,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 	if (!(bHit || bWithdrawing))
 	{
 		SetActorLocation(GetActorLocation() + DirectionArrowComp->GetForwardVector() * MoveSpeed * DeltaTime);
-
+		MoveSpeed += 10;
 		FQuat quat = FRotator(-45, 2, 2).Quaternion();
 		SubMeshComp->AddRelativeRotation(quat);
 	}
@@ -95,8 +95,17 @@ void AFlyingAxe::Tick(float DeltaTime)
 			}
 			else
 			{
-				Me->CatchFlyingAxe();
-				this->Destroy();
+				if (Me->State != EPlayerState::Hit)
+				{
+					Me->CatchFlyingAxe();
+					this->Destroy();
+				}
+				else
+				{
+					FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
+					WithdrawRotationScale -= 0.33;
+					SubMeshComp->AddRelativeRotation(quat);
+				}
 			}
 		}
 		else
@@ -109,10 +118,6 @@ void AFlyingAxe::Tick(float DeltaTime)
 			}
 			else
 			{
-				TArray<FRotator> WithdrawRotationArr;
-				WithdrawRotationArr.Add(FRotator(-20, -1.0f, -2.0f));
-				WithdrawRotationArr.Add(FRotator(-1.0f, -20.0f, -2.0f));
-				WithdrawRotationArr.Add(FRotator(-2.0f, 20.0f, -1.0f));
 				FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
 				//FQuat quat = FRotator(WithdrawRotationScale, -1.0f, -2.0f).Quaternion();
 				WithdrawRotationScale -= 0.33;
@@ -141,7 +146,6 @@ void AFlyingAxe::FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* Overlappe
 		Thor->fsm->Damage(AXE_THROW_DAMAGE, AttackTypeDirectionArr[static_cast<int8>(EAttackType::AXE_THROW_ATTACK)][bWithdrawing]);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactory, GetActorLocation());
 		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
-
 	}
 	else
 	{

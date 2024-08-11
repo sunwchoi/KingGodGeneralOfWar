@@ -298,6 +298,21 @@ void USG_KratosAnim::AnimNotify_AttackProgress()
 	Me->OnMyAttackProgress();
 }
 
+void USG_KratosAnim::AnimNotify_GuardDisappear()
+{
+	Me->OnMyGuardDisappear();
+}
+
+void USG_KratosAnim::AnimNotify_LaunchCharacterInStrongAttack()
+{
+	Me->OnMyLaunchCharacterInStrongAttack();
+}
+
+void USG_KratosAnim::AnimNotify_JumpCharacterInStrongAttack()
+{
+	Me->OnMyJumpCharacterInStrongAttack();
+}
+
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
 {
 	return FName(*FString::Printf(TEXT("Attack%d"), Section));

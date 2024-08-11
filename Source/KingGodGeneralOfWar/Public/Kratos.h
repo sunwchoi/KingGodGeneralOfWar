@@ -136,6 +136,11 @@ public:
 	UFUNCTION()
 	void OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted);
 
+	void OnMyGuardDisappear();
+
+	void OnMyLaunchCharacterInStrongAttack();
+	void OnMyJumpCharacterInStrongAttack();
+
 	// Axe Throwing
 	void OnHideAxe();
 	void ThrowAxe(FRotator TargetRot);
@@ -319,7 +324,7 @@ private:
 	
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
-
+	float TargetGuardScale = 0;
 	FVector Direction;
 	FVector PrevDirection;
 

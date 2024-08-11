@@ -260,6 +260,8 @@ void AKratos::Tick(float DeltaTime)
 
 	// 카메라 오프셋 선형 보간
 	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 3);
+	float shieldScale = Shield->MeshComp->GetComponentScale()[0];
+	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(shieldScale, TargetGuardScale, DeltaTime * 8)));
 	if (bLockOn)
 	{
 		TargetFOV -= 10;
@@ -367,6 +369,25 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	}
 }
 
+void AKratos::OnMyGuardDisappear()
+{
+	TargetGuardScale = 0;
+}
+
+void AKratos::OnMyLaunchCharacterInStrongAttack()
+{
+	const float LaunchScale = 500;
+	LaunchCharacter(GetActorForwardVector() * LaunchScale, true, false);
+}
+
+void AKratos::OnMyJumpCharacterInStrongAttack()
+{
+	const float LaunchScale = 600;
+	FVector dir = GetActorForwardVector() + FVector(0, 0, .2);
+	dir.Normalize();
+	LaunchCharacter(dir * LaunchScale, true, true);
+}
+
 void AKratos::SetWeapon()
 {
 	FActorSpawnParameters param;
@@ -390,7 +411,7 @@ void AKratos::SetShield()
 		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	}
-	//Shield->MeshComp->SetVisibility(false, true);
+	Shield->MeshComp->SetWorldScale3D(FVector(0));
 }
 
 void AKratos::OnMyRuneReady()
@@ -475,7 +496,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 {
 	float absX = abs(PrevDirection.X), absY = abs(PrevDirection.Y);
 	FString DodgeDirString;
-	DodgeScale = 1500;
+	DodgeScale = 2000;
 	if (absX <= 0.1)
 	{
 		if (PrevDirection.Y >= 0.9)
@@ -490,7 +511,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 		else
 		{
 			DodgeDirString = TEXT("B");
-			DodgeScale = 1100;
+			DodgeScale = 1500;
 		}
 	}
 	else if (PrevDirection.X >= 0.5)
@@ -506,7 +527,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 			DodgeDirString = TEXT("RB");
 		else
 			DodgeDirString = TEXT("LB");
-		DodgeScale = 1100;
+		DodgeScale = 1500;
 	}
 	return DodgeDirString;
 }
@@ -615,16 +636,14 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
 	if (bParrying || bGuardStagger)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%d %d"), bParrying, bGuardStagger));
 		return;
 	}
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
 		SetState(EPlayerState::GuardStart);
 		GuardHitCnt = GUARD_MAX_COUNT;
 		Anim->PlayGuardMontage();
-		//GetMovementComponent()->Velocity = GetActorForwardVector() * 1000;
+		TargetGuardScale = .1f;
 	}
 }
 
@@ -634,10 +653,9 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 	bGuardStagger = false;
 	if (State == EPlayerState::Guard || State == EPlayerState::GuardStart)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
 		Anim->Montage_Stop(0, Anim->GuardMontage);
 		SetState(EPlayerState::Idle);
-		//SetState(EPlayerState::GuardEnd);
+		TargetGuardScale = 0.0f;
 	}
 }
 
@@ -748,11 +766,13 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		Anim->PlayDashAttackMontage();
 		CurrentAttackType = EAttackType::DASH_ATTACK;
 	}
-	else if (State == EPlayerState::Parry)
+	// 패링 공격
+	
+	/*else if (State == EPlayerState::Parry)
 	{
 		SetState(EPlayerState::Attack);
 		Anim->PlayParryAttackMontage();
-	}
+	}*/
 }
 
 void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
@@ -943,18 +963,19 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		// 가드 크러쉬
 		else
 		{
-			SetState(EPlayerState::Idle);
+			SetState(EPlayerState::NoneMovable);
 			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
 			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
 			GuardHitCnt = GUARD_MAX_COUNT;
 			bGuardStagger = true;
+			TargetGuardScale = 0.0f;
 			// 가드 파괴 카메라 쉐이크
 		}
 	}
 	// 패링 가능 상태
 	else if (State == EPlayerState::GuardStart)
 	{
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		UNiagaraFunctionLibrary::SpawnSystemAttached(ParryVFX, Shield->LightPosition, TEXT("ParryVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
 		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
 
@@ -991,9 +1012,13 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
-		LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("asdf")));
-		//CameraShakeOnAttack(EAttackDirectionType::DOWN, 8);
+		if (HitType == EHitType::NB_HIGH)
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
+		else if (HitType == EHitType::STAGGER)
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, .1);
+		else
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, .5);
+
 		SetState(EPlayerState::Hit);
 		return true;
 	}
