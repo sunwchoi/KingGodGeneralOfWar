@@ -89,6 +89,9 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	case BDThorGeneralState::BDClap:
 		BDClapState(); //공격 패턴
 		break;
+	case BDThorGeneralState::BDKick:
+		BDKickState(); //공격 패턴
+		break;
 	}
 
 	//실행창에 상태 메세지 출력
@@ -220,6 +223,7 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 		BDThorGeneralState::BDHammerThreeSwing,
 		BDThorGeneralState::BDHitDown,
 		BDThorGeneralState::BDClap,
+		BDThorGeneralState::BDKick,
 		//BDThorGeneralState::BDGiveUPFly
 	};
 
@@ -434,7 +438,7 @@ void UBDThorFSM::BDHittingDownState()
 
 	anim->playBDHitDown(); //주먹 내려치는 애니메이션
 
-	if (dist < 300.0f) {
+	if (dist < 250.0f) {
 		//애니메이션 실행 및 공격
 		if (anim->Montage_IsPlaying(anim->BDHitDownMontage)) {
 			
@@ -453,7 +457,7 @@ void UBDThorFSM::BDHittingDownState()
 	}
 	else {
 		//플레이어와의 거리가 멀 경우 달려가기
-		me->GetCharacterMovement()->MaxWalkSpeed = 9000.f;
+		me->GetCharacterMovement()->MaxWalkSpeed = 10000.f;
 		me->AddMovementInput(dirR);
 	}
 
@@ -546,7 +550,7 @@ void UBDThorFSM::BDClapState()
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is playing"));
 
-		if (dirR.Size() <= 200.0f)
+		if (dirR.Size() <= 170.0f)
 		{
 			me->GetCharacterMovement()->DisableMovement();  // 캐릭터 이동을 완전히 비활성화
 			if (!bBDAttackCheck) {
@@ -558,7 +562,47 @@ void UBDThorFSM::BDClapState()
 		// 타겟과 토르의 거리가 멀 경우
 		else if (dirR.Size() > 200.0f)
 		{
-			me->GetCharacterMovement()->MaxWalkSpeed = 20000.f;
+			me->GetCharacterMovement()->MaxWalkSpeed = 30000.f;
+		}
+	}
+}
+
+void UBDThorFSM::BDKickState()
+{
+	//발차기 스테이트
+	FVector targetLoc = Target->GetActorLocation();
+	FVector myLoc = me->GetActorLocation();
+	FVector dirR = targetLoc - myLoc;
+	FRotator rot = dirR.Rotation();
+
+	me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+
+	float dist = FVector::Dist(Target->GetActorLocation(), me->GetActorLocation());
+
+	me->AddMovementInput(dirR);
+
+	//몽타주 실행
+	anim->playBDKick(); //박수 치는 몽타주 재생
+
+	//타겟과 토르의 거리가 가까울 경우
+	// 타겟과 토르의 거리가 가까울 경우
+	if (anim->Montage_IsPlaying(anim->BDKickMontage))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Hammer Three Swing Montage is playing"));
+
+		if (dirR.Size() <= 170.0f)
+		{
+			me->GetCharacterMovement()->DisableMovement();  // 캐릭터 이동을 완전히 비활성화
+			if (!bBDAttackCheck) {
+				anim->Montage_JumpToSection(FName("Attack1"), anim->BDKickMontage);
+				bBDAttackCheck = true;
+			}
+
+		}
+		// 타겟과 토르의 거리가 멀 경우
+		else if (dirR.Size() > 200.0f)
+		{
+			me->GetCharacterMovement()->MaxWalkSpeed = 30000.f;
 		}
 	}
 }
@@ -598,7 +642,13 @@ void UBDThorFSM::BDClapAttack()
 {
 	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftHand"));
 	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
-	UE_LOG(LogTemp, Warning, TEXT("ClapAttack"));
+	//UE_LOG(LogTemp, Warning, TEXT("ClapAttack"));
+}
+
+void UBDThorFSM::BDKickAttack()
+{
+	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftFoot"));
+	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
 }
 
 
@@ -621,11 +671,12 @@ void UBDThorFSM::BDEndState()
 		BDSetState(BDThorGeneralState::BDIdle);
 	}
 	else if (mState == BDThorGeneralState::BDClap) {
-		if (me->IsWeaponHold == false) {
-			me->DrawWeapon(); //무기를 내린다.
-		}
 		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
-		BDSetState(BDThorGeneralState::BDAvoidance); //뒤로 회피
+		BDSetState(BDThorGeneralState::BDAvoidance); //옆으로 회피
+	}
+	else if (mState == BDThorGeneralState::BDKick) {
+		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
+		BDSetState(BDThorGeneralState::BDBackDodge); //뒤로 회피
 	}
 	//망치를 든 근접 공격 상태였었다면
 	else if (mState == BDThorGeneralState::BDHammerThreeSwing) {
@@ -641,7 +692,7 @@ void UBDThorFSM::BDEndState()
 	//옆으로 회피를 끝냈다면
 	else if (mState == BDThorGeneralState::BDAvoidance) {
 		//UE_LOG(LogTemp, Warning, TEXT("EndAvoidance"));
-		BDSetState(BDThorGeneralState::BDAttackModeChange); //원래는 공격 패턴 랜덤으로 가야함
+		BDSetState(BDThorGeneralState::BDIdle); //원래는 공격 패턴 랜덤으로 가야함
 	}
 	//뒤로 회피 했다면
 	else if (mState == BDThorGeneralState::BDBackDodge) {

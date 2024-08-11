@@ -86,7 +86,14 @@ void UBDThorAnim::playBDHitDown()
 void UBDThorAnim::playBDClap()
 {
 	if (!Montage_IsPlaying(BDClapMontage)) {
-		Montage_Play(BDClapMontage); //주먹 내려치는 애니메이션
+		Montage_Play(BDClapMontage); //박수
+	}
+}
+
+void UBDThorAnim::playBDKick()
+{
+	if (!Montage_IsPlaying(BDKickMontage)) {
+		Montage_Play(BDKickMontage); //발차기
 	}
 }
 
@@ -130,5 +137,10 @@ void UBDThorAnim::AnimNotify_BDHitDown()
 void UBDThorAnim::AnimNotify_ClapAttack()
 {
 	bdThorFSM->BDClapAttack();
+}
+
+void UBDThorAnim::AnimNotify_Kick()
+{
+	bdThorFSM->BDKickAttack();
 }
 

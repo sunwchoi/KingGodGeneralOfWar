@@ -24,6 +24,7 @@ enum class BDThorGeneralState : uint8 {
 	BDGiveUPFly,
 	BDHitDown,
 	BDClap,
+	BDKick,
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -98,6 +99,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Attack)
 	void BDClapState();
 
+	UFUNCTION(BlueprintCallable, Category = Attack)
+	void BDKickState();
+
 
 
 	UFUNCTION()
@@ -113,6 +117,8 @@ public:
 
 	UFUNCTION()
 	void BDClapAttack();
+	UFUNCTION()
+	void BDKickAttack();
 
 	float Radius = 550.0f;
 

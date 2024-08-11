@@ -64,6 +64,8 @@ public:
 	class UAnimMontage* BDHitDownMontage;
 	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
 	class UAnimMontage* BDClapMontage;
+	UPROPERTY(EditDefaultsOnly, Category = AnimMontage)
+	class UAnimMontage* BDKickMontage;
 
 
 
@@ -87,6 +89,8 @@ public:
 	void playBDHitDown();
 	UFUNCTION()
 	void playBDClap();
+	UFUNCTION()
+	void playBDKick();
 
 
 
@@ -109,5 +113,7 @@ public:
 	void AnimNotify_BDHitDown();
 	UFUNCTION()
 	void AnimNotify_ClapAttack();
+	UFUNCTION()
+	void AnimNotify_Kick();
 
 };
