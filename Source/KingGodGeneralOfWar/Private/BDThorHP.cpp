@@ -8,7 +8,7 @@ void UBDThorHP::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	BDHPBar->SetPercent(1);
+	//BDHPBar->SetPercent(1);
 
 }
 

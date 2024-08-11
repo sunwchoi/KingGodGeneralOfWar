@@ -28,7 +28,7 @@ void AWindSlash::BeginPlay()
 	
 	col->OnComponentBeginOverlap.AddDynamic(this, &AWindSlash::OnWindOverlap);
 
-	SetLifeSpan(5);
+	SetLifeSpan(4);
 }
 
 // Called every frame
