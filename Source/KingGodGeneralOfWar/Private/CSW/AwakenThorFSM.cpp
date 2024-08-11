@@ -30,7 +30,8 @@ void UAwakenThorFSM::BeginPlay()
 	// ...
 	AKratos* tmp = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
-	GameMode->SetEnemyHpBar(1);
+	if (GameMode)
+		GameMode->SetEnemyHpBar(1);
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
@@ -131,9 +132,9 @@ void UAwakenThorFSM::IdleState()
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		State = NextStates[idx];
-		// State = EAwakenThorState::PoundAttack;
-		if (State != EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
+		// State = NextStates[idx];
+		State = EAwakenThorState::PoundAttack;
+		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
 }
@@ -356,13 +357,18 @@ void UAwakenThorFSM::OnEnd()
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
+	UE_LOG(LogTemp, Warning, TEXT("%d"), bSuperArmor);
+	
 	bool isDie = Me->SetHp(Damage);
-	GameMode->SetEnemyHpBar(Me->GetHpPercent());
+
+	if (GameMode)
+		GameMode->SetEnemyHpBar(Me->GetHpPercent());
 
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
-		GameMode->EndWithSucceed();
+		if (GameMode)
+			GameMode->EndWithSucceed();
 		return;
 	}
 
