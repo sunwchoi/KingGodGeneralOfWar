@@ -12,7 +12,7 @@
 #include "BDThorHP.h"
 #include "Blueprint/UserWidget.h"
 #include "SG_GodOfWar_GameModeBase.h"
-#include "DrawDebugHelpers.h" //µð¹ö±× È®ÀÎ¿ë
+#include "DrawDebugHelpers.h" //ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½Î¿ï¿½
 #include "Components/CapsuleComponent.h"
 #include "SG_Shield.h"
 #include "Components/SphereComponent.h"
@@ -24,35 +24,35 @@ ABDThor::ABDThor()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Åä¸£ ½ºÄÌ·¹Å» ¸Þ½Ã µ¥ÀÌÅÍ ·Îµå
+	//ï¿½ä¸£ ï¿½ï¿½ï¿½Ì·ï¿½Å» ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Bada/Asset/Model/BDThor/BDThor.BDThor'"));
 	if (TempMesh.Succeeded()) {
 		GetMesh()->SetSkeletalMesh(TempMesh.Object);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//¸Þ½Ã Å©±â Á¶Á¤
+		//ï¿½Þ½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		GetMesh()->SetRelativeScale3D(FVector(0.25f));
-		GetMesh()->SetRelativeLocation(FVector(0, 0, -118.0f)); //¸Þ½¬ À§Ä¡ Á¶Á¤
+		GetMesh()->SetRelativeLocation(FVector(0, 0, -118.0f)); //ï¿½Þ½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
 	}
 
-	//¹«±â µ¥ÀÌÅÍ ·Îµå
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
 	BDWeapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BDWeapon"));
 	BDWeapon->SetupAttachment(GetMesh(), FName("BDMjolnirHips"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> WeaponMesh(TEXT("/Script/Engine.StaticMesh'/Game/Bada/Asset/Model/weapon/BDMjolnir.BDMjolnir'"));
 	if (WeaponMesh.Succeeded()) {
 		BDWeapon->SetStaticMesh(WeaponMesh.Object);
-		BDWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); //ÀÓ½Ã ÄÚµå
+		BDWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); //ï¿½Ó½ï¿½ ï¿½Úµï¿½
 	}
 
-	//ÄÝ¸®Àü ¼³Á¤
+	//ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	BDWeaponCol = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BDWeaponCol"));
-	BDWeaponCol->SetupAttachment(BDWeapon); //¹«±â¿¡ ÄÝ¸®Àü ºÙÀÌ±â
+	BDWeaponCol->SetupAttachment(BDWeapon); //ï¿½ï¿½ï¿½â¿¡ ï¿½Ý¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì±ï¿½
 	BDWeaponCol->SetCollisionProfileName(FName("BDThorMjonlr"));
 
-	//BDThorFSM ÄÄÆ÷³ÍÆ® Ãß°¡
+	//BDThorFSM ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ß°ï¿½
 	fsm = CreateDefaultSubobject<UBDThorFSM>(TEXT("FSM"));
 
-	//¾Ö´Ï¸ÞÀÌ¼Ç ºí·çÇÁ¸°Æ® ÇÒ´çÇÏ±â
+	//ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ò´ï¿½ï¿½Ï±ï¿½
 	/*ConstructorHelpers::FClassFinder<UAnimInstance> BDThorAnimation(TEXT("/Script/Engine.AnimBlueprint'/Game/Bada/BDAnimation/ABP_BDThor.ABP_BDThor_C'"));
 	if (BDThorAnimation.Succeeded()) {
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
@@ -65,16 +65,16 @@ void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//ThorAreaSpere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //Ã³À½¿¡ ÄÑÁú¶© ºñÈ°¼ºÈ­, ¿µ¿ªÇÔ¼ö°¡ ºÒ¸±¶§¸¸ true
+	//ThorAreaSpere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­, ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½Ò¸ï¿½ï¿½ï¿½ï¿½ï¿½ true
 
 	BDWeaponCol->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDWeaponOverlap);
 
 	//ThorAreaSpere->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDSphereOverlap);
 
-	//·ÎµåÇÒ ¶§ ¹«±â´Â ÀÏ´Ü Çã¸®¿¡ º¸ÀÌ°Ô ÇÏ±â
+	//ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ã¸®ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ ï¿½Ï±ï¿½
 	visibleWeapon();
 
-	////UI º¸¿©ÁÖ±â
+	////UI ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
 	//if (BDThorHPClass) {
 	//	UUserWidget* BDHPBar = CreateWidget<UUserWidget>(GetWorld(), BDThorHPClass);
 	//	BDThorHPBar = Cast<UBDThorHP>(BDHPBar);
@@ -84,7 +84,7 @@ void ABDThor::BeginPlay()
 	//	}
 	//}
 
-	fsm->BDCurrentHP = fsm->BDMaxHp; //Ã¼·Â ¼³Á¤
+	fsm->BDCurrentHP = 10; //Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 	GameMode = Cast<ACSWGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	GameMode->SetEnemyHpBar(fsm->BDCurrentHP / fsm->BDMaxHp);
@@ -106,7 +106,7 @@ void ABDThor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-//¹«±â À§Ä¡¸¦ ¼ÕÀ¸·Î º¯°æÇÏ´Â ÇÔ¼ö
+//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½
 void ABDThor::EquipWeapon()
 {
 	if (this) {
@@ -119,7 +119,7 @@ void ABDThor::EquipWeapon()
 }
 
 
-//¹«±â À§Ä¡¸¦ Çã¸®·Î º¯°æÇÏ´Â ÇÔ¼ö
+//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ã¸®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½
 void ABDThor::DrawWeapon()
 {
 	if (this) {
@@ -130,7 +130,7 @@ void ABDThor::DrawWeapon()
 	}
 }
 
-//¿À¸¥¼Õ¿¡ µé±â
+//ï¿½ï¿½ï¿½ï¿½ï¿½Õ¿ï¿½ ï¿½ï¿½ï¿½
 void ABDThor::EquipRight()
 {
 	if (this) {
@@ -146,7 +146,7 @@ void ABDThor::HiddenWeapon()
 	//UE_LOG(LogTemp, Warning, TEXT("Hidden"));
 	if (this) {
 		IsWeaponHold = false;
-		BDWeapon->SetVisibility(false); //¸Þ½¬ ¾Èº¸ÀÌ°Ô ÇÏ±â
+		BDWeapon->SetVisibility(false); //ï¿½Þ½ï¿½ ï¿½Èºï¿½ï¿½Ì°ï¿½ ï¿½Ï±ï¿½
 	}
 }
 
@@ -154,7 +154,7 @@ void ABDThor::visibleWeapon()
 {
 	if (this) {
 		IsWeaponHold = true;
-		BDWeapon->SetVisibility(true); //¸Þ½¬ ¾Èº¸ÀÌ°Ô ÇÏ±â
+		BDWeapon->SetVisibility(true); //ï¿½Þ½ï¿½ ï¿½Èºï¿½ï¿½Ì°ï¿½ ï¿½Ï±ï¿½
 		//UE_LOG(LogTemp, Warning, TEXT("Visible"));
 	}
 }
@@ -177,10 +177,10 @@ void ABDThor::BDHammerThrowHit()
 	}
 }
 
-//¹Ù¶÷ ½½·¡½¬
+//ï¿½Ù¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void ABDThor::BDHammerWindSlash()
 {
-	//¹Ù¶÷ ¾×ÅÍ ½ºÆùÇØ¼­ °ø°Ý
+	//ï¿½Ù¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½
 	FActorSpawnParameters parm;
 	parm.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	GetWorld()->SpawnActor<AWindSlash>(SlashFat, GetActorLocation(), GetActorRotation(), parm);
@@ -193,15 +193,15 @@ void ABDThor::BDHammerWindSlash()
 //	}
 //
 //	if (fsm->BDCurrentHP < 0) {
-//		//2 ÆäÀÌÁî·Î ÀüÈ¯
-//		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //°ÔÀÓ¸ðµå Ä³½ºÆ®
+//		//2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
+//		ASG_GodOfWar_GameModeBase* BDGameMode = Cast<ASG_GodOfWar_GameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); //ï¿½ï¿½ï¿½Ó¸ï¿½ï¿½ Ä³ï¿½ï¿½Æ®
 //
 //		if (BDThorHPBar) {
-//			BDThorHPBar->RemoveFromParent(); //HP°¡ 0ÀÌ µÇ¸é »èÁ¦ÇØ¶ó
+//			BDThorHPBar->RemoveFromParent(); //HPï¿½ï¿½ 0ï¿½ï¿½ ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¶ï¿½
 //		}
 //
 //		if (BDGameMode) {
-//			BDGameMode->ThorFadeOut(); //ÆäÀÌµå ¾Æ¿ô ½ÇÇà
+//			BDGameMode->ThorFadeOut(); //ï¿½ï¿½ï¿½Ìµï¿½ ï¿½Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
 //		}
 //
 //
@@ -212,15 +212,15 @@ void ABDThor::BDHammerWindSlash()
 void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && (OtherActor != this) && OtherComp) {
-		//µ¥¹ÌÁö Ã³¸®
-		auto* AttackTarget = Cast<AKratos>(OtherActor); //Å¸°ÙÀÏ¶§
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
+		auto* AttackTarget = Cast<AKratos>(OtherActor); //Å¸ï¿½ï¿½ï¿½Ï¶ï¿½
 		auto* shield = Cast<ASG_Shield>(OtherActor);
 		if (AttackTarget) {
 			fsm->bBDAttackCheck = true;
 			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
 			fsm->BDSetState(BDThorGeneralState::BDBackDodge);
 			//fsm->BDSetState(BDThorGeneralState::BDAvoidance);
-			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //È¸ÇÇ·Î º¯°æ
+			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //È¸ï¿½Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½
 		}
 		else if(shield){
 			UE_LOG(LogTemp, Warning, TEXT("shield Attack"));
@@ -228,17 +228,17 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	}
 }
 
-//¿µ¿ª¿¡ ÇÃ·¹ÀÌ¾î°¡ ÀÕÀ» °æ¿ì °ø°Ý µ¥¹ÌÁö µé¾î°¨
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î°¨
 //void ABDThor::BDSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 //{
 //	if (OtherActor && (OtherActor != this) && OtherComp) {
-//		//µ¥¹ÌÁö Ã³¸®
-//		auto* AttackTarget = Cast<AKratos>(OtherActor); //Å¸°ÙÀÏ¶§
+//		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
+//		auto* AttackTarget = Cast<AKratos>(OtherActor); //Å¸ï¿½ï¿½ï¿½Ï¶ï¿½
 //		if (AttackTarget) {
 //			fsm->bBDAttackCheck = true;
 //			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
-//			fsm->BDSetState(BDThorGeneralState::BDIdle); //´ë±â·Î º¯°æ
-//			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //È¸ÇÇ·Î º¯°æ
+//			fsm->BDSetState(BDThorGeneralState::BDIdle); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //È¸ï¿½Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½
 //		}
 //	}
 //}

@@ -43,7 +43,7 @@ void UBDThorFSM::BeginPlay()
 	anim = Cast<UBDThorAnim>(me->GetMesh()->GetAnimInstance());
 
 	//체력 설정
-	BDCurrentHP = BDMaxHp;
+	BDCurrentHP = 10;
 
 }
 

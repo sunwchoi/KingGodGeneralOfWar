@@ -104,5 +104,5 @@ private:
 	void SetThorLocation(FVector NewLoc);
 
 	float MaxHp = 100.f;
-	float Hp = MaxHp;
+	float Hp = 10.f;
 };
