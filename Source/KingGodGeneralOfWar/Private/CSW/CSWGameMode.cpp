@@ -60,16 +60,6 @@ void ACSWGameMode::Tick(float DeltaSeconds)
 		(player = Cast<AKratos>(PlayerController->GetPawn())) != nullptr)
 	{
 		SetPlayerHpBar(player->CurHP /  player->MaxHP);
-		if (player->CurHP <= 90 && !bEndScreenStart)
-		{
-			FTimerHandle timer;
-			GetWorld()->GetTimerManager().SetTimer(timer, [this]() {this->EndWithFail();}, 2.f, false);
-			bEndScreenStart = true;
-		}
-		else
-		{
-			bEndScreenStart = false;
-		}
 	}
 }
 
