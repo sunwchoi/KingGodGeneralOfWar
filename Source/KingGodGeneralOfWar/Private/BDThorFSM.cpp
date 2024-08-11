@@ -15,6 +15,7 @@
 #include "Components/DecalComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "CSW/CSWGameMode.h"
 
 
 // Sets default values for this component's properties
@@ -260,12 +261,19 @@ void UBDThorFSM::Damage(float DamageNum, EAttackDirectionType AtkDir)
 
 	//me->UpdateHpUI(); //체력 설정
 
+	me->GameMode->SetEnemyHpBar(BDCurrentHP / BDMaxHp); //체력 설정
+
 	BDGetHitDirectionString(AtkDir);
 
 	me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
 
 	//피격 상태로 변경한다.
 	mState = BDThorGeneralState::BDDamage;
+
+	if (BDCurrentHP <= 0) {
+		me->GameMode->GoToNextPhase(); //다음 페이즈로 넘어간다.
+		me->Destroy();
+	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("BDThor damage!"));
 
