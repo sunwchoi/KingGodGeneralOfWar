@@ -9,7 +9,6 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/OutGameWidget.h"
 #include "CSW/InGameWidget.h"
-#include "Kismet/GameplayStatics.h"
 
 ACSWGameMode::ACSWGameMode()
 {
@@ -20,42 +19,58 @@ ACSWGameMode::ACSWGameMode()
 void ACSWGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	InGameWidget = CreateWidget<UInGameWidget>(GetWorld(), WBP_InGame);
 	if (InGameWidget)
 		InGameWidget->AddToViewport();
 	
-	GameStartWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameStart);
-	if (GameStartWidget)
-			GameStartWidget->AddToViewport();
-
+	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameStart);
+	if (OutGameWidget)
+			OutGameWidget->AddToViewport();
+	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
 		PlayerController->bShowMouseCursor = true;
 		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(GameStartWidget->TakeWidget());
+		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
 		PlayerController->SetInputMode(InputMode);
-
+	
 		PlayerController->SetPause(true);
 	}
-	StartSecondPhase();
+	// bFirstPhase = false; // TMP!!
+	if (bFirstPhase)
+	{
+		StartFirstPhase();
+	}
+	else
+	{
+		StartSecondPhase();
+	}
 }
 
 void ACSWGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
+	
 	AKratos* player;
 	APlayerController* PlayerController;
 	
 	if ((PlayerController = GetWorld()->GetFirstPlayerController()) != nullptr &&
 		(player = Cast<AKratos>(PlayerController->GetPawn())) != nullptr)
 	{
-		InGameWidget->SetPlayerHpBar(player->CurHP /  player->MaxHP);
+		SetPlayerHpBar(player->CurHP /  player->MaxHP);
+		if (player->CurHP <= 90 && !bEndScreenStart)
+		{
+			FTimerHandle timer;
+			GetWorld()->GetTimerManager().SetTimer(timer, [this]() {this->EndWithFail();}, 2.f, false);
+			bEndScreenStart = true;
+		}
+		else
+		{
+			bEndScreenStart = false;
+		}
 	}
-	
-	
 }
 
 void ACSWGameMode::SetEnemyHpBar(float Percent)
@@ -65,24 +80,65 @@ void ACSWGameMode::SetEnemyHpBar(float Percent)
 
 void ACSWGameMode::SetPlayerHpBar(float Percent)
 {
+	InGameWidget->SetPlayerHpBar(Percent);
 }
 
 void ACSWGameMode::StartFirstPhase()
 {
+	AKratos* player;
+	APlayerController* PlayerController;
+	
+	if ((PlayerController = GetWorld()->GetFirstPlayerController()) != nullptr &&
+		(player = Cast<AKratos>(PlayerController->GetPawn())) != nullptr)
+	{
+		SetPlayerHpBar(player->CurHP /  player->MaxHP);
+	}
 	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector::ZeroVector, FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
 }
 
 void ACSWGameMode::StartSecondPhase()
 {
-	AActor* tmp = GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor);
-	ACharacter* tmpC = Cast<ACharacter>(tmp);
-
-	if (tmpC != nullptr)
-	{
-		FVector loc = tmpC->GetActorLocation(); 
-		tmpC->SetActorLocation(FVector(loc.X, loc.Y, 100));
-	}
-	
+	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor);
 	InGameWidget->SetThorName(false);
+}
+
+void ACSWGameMode::GoToNextPhase()
+{
+	StartSecondPhase();
+}
+
+void ACSWGameMode::EndWithFail()
+{
+	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameFail);
+	if (OutGameWidget)
+		OutGameWidget->AddToViewport();
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->bShowMouseCursor = true;
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
+		PlayerController->SetInputMode(InputMode);
+
+		PlayerController->SetPause(true);
+	}
+	if (bFirstPhase)
+	{
+		StartFirstPhase();
+	}
+	else
+	{
+		StartSecondPhase();
+	}
+}
+
+void ACSWGameMode::EndWithSucceed()
+{
+	EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameSucceed);
+	if (EndGameWidget)
+	{
+		EndGameWidget->AddToViewport();
+	}
 }
