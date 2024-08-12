@@ -84,11 +84,11 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//날아가는 중
-	if (!bReturning && bCreateTrue) {
+	if (!bReturning && bCreateTrue && Thor) {
 		MovementComp->Velocity = Thor->GetActorForwardVector() * MovementComp->InitialSpeed;
 	}
 	//망치 돌아옴
-	else if (bReturning && bCreateTrue)
+	else if (bReturning && bCreateTrue && Thor)
 	{
 		FVector HandLocation = Thor->GetMesh()->GetSocketLocation(TEXT("BDMjolnirHand"));
 		FVector CurrentLocation = GetActorLocation();
@@ -131,6 +131,9 @@ void ABDThorMjolnir::Tick(float DeltaTime)
 			UE_LOG(LogTemp, Warning, TEXT("Mjolnir Back"));
 
 		}
+	}
+	else {
+		this->Destroy(); //토르가 없을 땐 파괴
 	}
 
 	//UE_LOG(LogTemp, Warning, TEXT("bReturning: %s, bCreateTrue : %s "), bReturning ? TEXT("true") : TEXT("false"), bCreateTrue ? TEXT("true") : TEXT("false"));
