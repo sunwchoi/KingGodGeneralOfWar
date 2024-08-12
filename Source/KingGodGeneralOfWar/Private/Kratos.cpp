@@ -329,7 +329,6 @@ void AKratos::Tick(float DeltaTime)
 
 	// 플레이어 로테이션 선형 보간
 	SetActorRotation(UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 6, true));
-
 	switch (State)
 	{
 	case EPlayerState::Run:
@@ -355,10 +354,11 @@ void AKratos::Tick(float DeltaTime)
 	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 3);
 
 	// 카메라 오프셋 선형 보간
-	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 3);
+	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 4);
 	float shieldScale = Shield->MeshComp->GetComponentScale()[0];
-	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(shieldScale, TargetGuardScale, DeltaTime * 8)));
-	SpringArmComp->TargetArmLength = FMath::Lerp(SpringArmComp->TargetArmLength,  TargetTargetArmLength, DeltaTime * 6);
+	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(shieldScale, TargetGuardScale, DeltaTime * 6)));
+	SpringArmComp->TargetArmLength = FMath::Lerp(SpringArmComp->TargetArmLength, TargetTargetArmLength, DeltaTime * 6);
+	CameraComp->SetRelativeRotation(UKismetMathLibrary::RLerp(TargetCameraAngle, CameraComp->GetRelativeRotation(), DeltaTime * 4, true));
 	if (bLockOn)
 	{
 		TargetFOV -= 10;
@@ -414,6 +414,11 @@ void AKratos::PlayerMove()
 
 FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 {
+	if (!LockTarget)
+	{
+		bLockOn = false;
+		return;
+	}
 	if (bLockOn)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, TEXT("LockSystem On"));
@@ -447,7 +452,7 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else if (Montage == Anim->GuardMontage && State == EPlayerState::Attack)
 		{
-			return ;
+			return;
 		}
 		else
 		{
@@ -514,7 +519,7 @@ void AKratos::SetShield()
 void AKratos::OnMyRuneReady()
 {
 	bRuneReady = true;
-	
+
 }
 
 void AKratos::OnMyRuneAttackEnd()
@@ -547,7 +552,7 @@ void AKratos::OnMyAttackProgress()
 void AKratos::CameraShakeOnAttack(EAttackDirectionType attackDir, float scale)
 {
 
-	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactoryArr[ static_cast<int8>(attackDir)], scale);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(AttackShakeFactoryArr[static_cast<int8>(attackDir)], scale);
 }
 
 EAttackDirectionType AKratos::GetAttackDirection()
@@ -682,8 +687,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
 		FVector DodgeDirection = UKismetMathLibrary::TransformDirection(T, PrevDirection);
-		DodgeDirection.Z = -1;
-		//DodgeDirection.Z = 0;
+		DodgeDirection.Z = 0;
 		LaunchCharacter(DodgeDirection * DodgeScale, true, false);
 		Anim->PlayDodgeMontage();
 		Anim->JumpToDodgeMontageSection(DodgeDirString);
@@ -876,7 +880,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		CurrentAttackType = EAttackType::DASH_ATTACK;
 	}
 	// 패링 공격
-	
+
 	/*else if (State == EPlayerState::Parry)
 	{
 		SetState(EPlayerState::Attack);
@@ -975,7 +979,7 @@ void AKratos::CatchFlyingAxe()
 	bAxeGone = false;
 	bIsAxeWithdrawing = false;
 	CurrentAttackType = EAttackType::NONE;
-	
+
 	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(CatchAxeShakeFactory, 0.3f);
 }
 
@@ -1001,6 +1005,7 @@ void AKratos::SetState(EPlayerState NextState)
 	{
 	case EPlayerState::Idle:
 		TargetCameraOffset = FVector(0, 50, 70);
+		TargetCameraAngle = FRotator(0);
 		TargetTargetArmLength = 143;
 		bIsDodging = false;
 		bIsAttacking = false;
@@ -1012,8 +1017,6 @@ void AKratos::SetState(EPlayerState NextState)
 		bParrying = true;
 		break;
 	case EPlayerState::Hit:
-		TargetCameraOffset = FVector(0, 50, 10);
-		TargetTargetArmLength = 170;
 		WeakAttackEndComboState();
 		StrongAttackEndComboState();
 		bIsAttacking = false;
@@ -1115,7 +1118,7 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	}
 	else if (State == EPlayerState::Hit || State == EPlayerState::Parry)
 	{
-		
+
 	}
 	// 기본 피격
 	else
@@ -1129,7 +1132,12 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		UGameplayStatics::PlaySound2D(GetWorld(), HitSound2, 1, 1, 0.2f);
 		if (HitType == EHitType::NB_HIGH)
+		{
+			TargetCameraOffset = FVector(0, 50, 0);
+			TargetCameraAngle = FRotator(10, 0, 0);
+			TargetTargetArmLength = 180;
 			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
+		}
 		else if (HitType == EHitType::STAGGER)
 			CameraShakeOnAttack(EAttackDirectionType::DOWN, .1);
 		else

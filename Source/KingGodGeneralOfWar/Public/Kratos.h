@@ -388,8 +388,10 @@ private:
 	FVector PrevDirection;
 
 	float TargetFOV = 90;
-	FVector TargetCameraOffset = FVector(0, 50, 70);
 	float TargetTargetArmLength = 143;
+	FVector TargetCameraOffset = FVector(0, 50, 70);
+	FRotator TargetCameraAngle = FRotator(0);
+
 	bool bLockOn;
 	bool bIsAttacking;
 	bool bIsDodging;
