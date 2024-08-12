@@ -74,6 +74,10 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* Phase2Sound;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAudioComponent* AudioComp;
+	
+
 	bool bFirstPhase = true;
 	bool bEndScreenStart = false;
 };

@@ -34,7 +34,7 @@ void UOutGameWidget::OnStartButtonClick()
 		PlayerController->bShowMouseCursor = false;
 	}
 	PlayerController->SetPause(false);
-
+	
 	Destruct();
 }
 

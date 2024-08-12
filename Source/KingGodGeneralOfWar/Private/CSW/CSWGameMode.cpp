@@ -10,11 +10,14 @@
 #include "CSW/OutGameWidget.h"
 #include "CSW/InGameWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 ACSWGameMode::ACSWGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	AudioComp->SetupAttachment(RootComponent);
 }
 
 void ACSWGameMode::BeginPlay()
@@ -28,7 +31,8 @@ void ACSWGameMode::BeginPlay()
 	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameStart);
 	if (OutGameWidget)
 			OutGameWidget->AddToViewport();
-	
+	AudioComp->SetSound(IntroSound);
+	AudioComp->Play();
 	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
@@ -87,19 +91,15 @@ void ACSWGameMode::StartFirstPhase()
 	}
 	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
-	UGameplayStatics::PlaySound2D(GetWorld(), Phase1Sound);
-	// FTimerHandle handle;
-	// GetWorld()->GetTimerManager().SetTimer(handle,
-	// 	[this]()
-	// 	{
-	// 	},
-	// 	10.f,
-	// 	false);
-		
+	AudioComp->SetSound(Phase1Sound);
+	AudioComp->Play();
 }
 
 void ACSWGameMode::StartSecondPhase()
 {
+	AudioComp->Stop();
+	AudioComp->SetSound(Phase2Sound);
+	AudioComp->Play();
 	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(false);
 	UGameplayStatics::PlaySound2D(GetWorld(), Phase2Sound);	
@@ -159,6 +159,8 @@ void ACSWGameMode::EndWithSucceed()
 	{
 		EndGameWidget->AddToViewport();
 	}
-	
-	UGameplayStatics::PlaySound2D(GetWorld(), EndingSound);
+
+	AudioComp->Stop();
+	AudioComp->SetSound(EndingSound);
+	AudioComp->Play();
 }
