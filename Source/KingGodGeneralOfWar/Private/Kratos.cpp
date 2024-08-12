@@ -382,8 +382,8 @@ void AKratos::OnMyLaunchCharacterInStrongAttack()
 
 void AKratos::OnMyJumpCharacterInStrongAttack()
 {
-	const float LaunchScale = 600;
-	FVector dir = GetActorForwardVector() + FVector(0, 0, .2);
+	const float LaunchScale = 250;
+	FVector dir = GetActorForwardVector() + FVector(0, 0, 1);
 	dir.Normalize();
 	LaunchCharacter(dir * LaunchScale, true, true);
 }
