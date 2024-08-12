@@ -61,7 +61,18 @@ private:
 
 	UPROPERTY()
 	UUserWidget* MiddleScene;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* IntroSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* EndingSound;
 	
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* Phase1Sound;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* Phase2Sound;
 
 	bool bFirstPhase = true;
 	bool bEndScreenStart = false;
