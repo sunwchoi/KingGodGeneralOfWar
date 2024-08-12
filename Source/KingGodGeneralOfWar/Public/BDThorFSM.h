@@ -25,6 +25,7 @@ enum class BDThorGeneralState : uint8 {
 	BDHitDown,
 	BDClap,
 	BDKick,
+	BDRandomChange,
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -76,6 +77,11 @@ public:
 	void BDAttackModeChangeState(); //공격 모드 변경 상태
 	UFUNCTION(BlueprintCallable, Category = AttackScene)
 	BDThorGeneralState RandomAttackState(); // 랜덤 공격 상태 선택 함수
+	UFUNCTION(BlueprintCallable, Category = State)
+	void BDRandomChangeState(); //상태 랜덤 지정 상태 -> 대기, 뒤로 회피, 옆으로 회피, 공격 랜덤 공격중 고른다.
+	UFUNCTION(BlueprintCallable, Category = AttackScene)
+	BDThorGeneralState RandomChange(); // 랜덤 공격 상태 선택 함수
+
 	UFUNCTION(BlueprintCallable, Category = State)
 	void BDDamageState(); //피격 상태
 
@@ -150,6 +156,10 @@ public:
 	//공격 랜덤을 선택하기 전의 대기 시간
 	UPROPERTY(EditAnywhere, Category = FSM)
 	float BDAttackDelayTime = 0.3f;
+
+	//상태 랜덤을 선택하기 전의 대기 시간
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float BDStateDelayTime = 0.2f;
 
 	//토르는 공격하는 딜레이 시간이 다양하다 랜덤 쓸것
 	UPROPERTY(EditAnywhere, Category = FSM)

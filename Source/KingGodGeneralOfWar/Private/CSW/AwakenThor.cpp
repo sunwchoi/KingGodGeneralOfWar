@@ -179,7 +179,7 @@ AAwakenThor::AAwakenThor()
 void AAwakenThor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 
 }

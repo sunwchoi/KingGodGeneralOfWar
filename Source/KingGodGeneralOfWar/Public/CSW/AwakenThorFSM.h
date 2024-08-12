@@ -99,7 +99,7 @@ private:
 	UPROPERTY()
 	class ACSWGameMode* GameMode;
 	
-	float IdleDelayTime = 1.f;
+	float IdleDelayTime = 1.5f;
 	float CurrentTime = 0.f;
 	
 	float TeleportDist = 1000;
