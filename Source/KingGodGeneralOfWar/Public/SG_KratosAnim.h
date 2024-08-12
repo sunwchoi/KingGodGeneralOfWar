@@ -136,7 +136,10 @@ private:
 	void AnimNotify_RuneAttackGroundShake();
 
 	UFUNCTION()
-	void AnimNotify_ZoomOutCheck();
+	void AnimNotify_RuneAttackCameraSet();
+
+	UFUNCTION()
+	void AnimNotify_GetUPCameraSet();
 
 	UFUNCTION()
 	void AnimNotify_RuneReady();
@@ -158,6 +161,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_LaunchCharacterInStrongAttack();
+
+	UFUNCTION()
+	void AnimNotify_EndWithFail();
 
 	UFUNCTION()
 	void AnimNotify_JumpCharacterInStrongAttack();

@@ -57,7 +57,7 @@ AKratos::AKratos()
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
 	SpringArmComp->SocketOffset = DefaultCameraOffset;
-	SpringArmComp->TargetArmLength = TargetTargetArmLength;
+	SpringArmComp->TargetArmLength = DefaultTargetTargetArmLength;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
@@ -324,64 +324,33 @@ void AKratos::Tick(float DeltaTime)
 
 	PlayerMove();
 	LockTargetFunc(DeltaTime);
-	//SetActorRotation(YawRotation);
 	FRotator playerRotation = GetActorRotation();
 
 	// 플레이어 로테이션 선형 보간
-	SetActorRotation(UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 6, true));
-	switch (State)
-	{
-	case EPlayerState::Run:
-		TargetFOV = RUN_FOV;
-		break;
-	case EPlayerState::GuardStart:
-	case EPlayerState::Guard:
-		TargetFOV = GUARD_FOV;
-		break;
-	case EPlayerState::Aim:
-		TargetFOV = AIM_FOV;
-		break;
-	case EPlayerState::Parry:
-		TargetFOV = PARRY_FOV;
-		break;
-	case EPlayerState::Attack:
-		TargetFOV = ATTACK_FOV;
-		break;
-	default:
-		TargetFOV = WALK_FOV;
-	}
+	SetActorRotation(UKismetMathLibrary::RLerp(playerRotation, TargetActorRotation, DeltaTime * 4, true));
+
 	// 카메라 시야각 선형 보간
 	CameraComp->FieldOfView = FMath::Lerp(CameraComp->FieldOfView, TargetFOV, DeltaTime * 3);
 
+	//카메라 오육칠팔프셋 선동생 간보 
 	// 카메라 오프셋 선형 보간
-	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 4);
-	float shieldScale = Shield->MeshComp->GetComponentScale()[0];
-	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(shieldScale, TargetGuardScale, DeltaTime * 6)));
-	SpringArmComp->TargetArmLength = FMath::Lerp(SpringArmComp->TargetArmLength, TargetTargetArmLength, DeltaTime * 6);
-	CameraComp->SetRelativeRotation(UKismetMathLibrary::RLerp(TargetCameraAngle, CameraComp->GetRelativeRotation(), DeltaTime * 4, true));
-	if (bLockOn)
-	{
-		TargetFOV -= 10;
-	}
-	if (bZoomOut)
-	{
-		TargetFOV = 110;
-	}
+	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 2);
+
+	// 쉴드 스케일 선형 보간. (가드시 커짐, 평소 스케일 0) 
+	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(Shield->MeshComp->GetComponentScale().X, TargetGuardScale, DeltaTime * 8)));
+
+	// TargetArmLength 선형 보간
+	SpringArmComp->TargetArmLength = FMath::Lerp(SpringArmComp->TargetArmLength, TargetTargetArmLength, DeltaTime * 2);
+
+	// 카메라 앵글 선형 보간
+	CameraComp->SetRelativeRotation(UKismetMathLibrary::RLerp(CameraComp->GetRelativeRotation(), TargetCameraAngle, DeltaTime * 2, true));
+
 	if (bRuneReady)
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("RuneReady")));
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TargetCameraOffset.ToString());
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bIsAxeWithdrawing: %d"), bIsAxeWithdrawing));
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("bAxeGone: %d"), bAxeGone));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, FString::Printf(TEXT("Combo: %d"), CurrentWeakCombo));
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::Printf(TEXT("TargetFOV: %f"), TargetFOV));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Velocity: %f"), GetVelocity().Size()));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Black, GetPlayerStateString());
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(
-		TEXT("HP: %f"), CurHP));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, GetPlayerStateString());
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -531,6 +500,14 @@ void AKratos::OnMyRuneAttackEnd()
 	CurrentAttackType = EAttackType::NONE;
 }
 
+void AKratos::OnMyRuneAttackCameraSet()
+{
+	TargetFOV = 100;
+	TargetCameraOffset = DefaultCameraOffset + FVector(0, 20, 55);
+	TargetCameraAngle = DefaultCameraAngle + FRotator(-10, 0, 0);
+	TargetTargetArmLength = TargetTargetArmLength + 30;
+}
+
 void AKratos::OnMyAttackComboEnd()
 {
 	WeakAttackEndComboState();
@@ -548,6 +525,21 @@ void AKratos::OnMyAttackProgress()
 	GetMovementComponent()->Velocity = GetActorForwardVector() * 2000;
 }
 
+void AKratos::OnMyEndWithFail()
+{
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			GameMode->EndWithFail();
+		}, 2.0f, false);
+}
+
+void AKratos::OnMyGetUPCameraSet()
+{
+	TargetCameraOffset = DefaultCameraOffset;
+	TargetCameraAngle = DefaultCameraAngle;
+	TargetTargetArmLength = DefaultTargetTargetArmLength;
+}
 
 void AKratos::CameraShakeOnAttack(EAttackDirectionType attackDir, float scale)
 {
@@ -718,6 +710,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 		Anim->JumpToRollMontageSection(sectionIdx);
 	}
 }
+
 void AKratos::OnMyActionRunOn(const FInputActionValue& value)
 {
 	if (State == EPlayerState::Idle || State == EPlayerState::Move)
@@ -816,7 +809,6 @@ void AKratos::OnMyActionIdle(const FInputActionValue& value)
 	if (State == EPlayerState::Move || State == EPlayerState::Run)
 		SetState(EPlayerState::Idle);
 }
-
 
 void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 {
@@ -985,7 +977,7 @@ void AKratos::CatchFlyingAxe()
 
 void AKratos::SetState(EPlayerState NextState)
 {
-	UE_LOG(LogTemp, Display, TEXT("%s -> %s"), *UEnum::GetValueAsString(State), *UEnum::GetValueAsString(NextState));
+	//UE_LOG(LogTemp, Display, TEXT("%s -> %s"), *UEnum::GetValueAsString(State), *UEnum::GetValueAsString(NextState));
 	switch (State)
 	{
 	case EPlayerState::Dodge:
@@ -996,25 +988,40 @@ void AKratos::SetState(EPlayerState NextState)
 		bIsAttacking = false;
 
 		break;
-
+	case EPlayerState::Parry:
+		bParrying = false;
+		break;
 	}
-	State = NextState;
 
+	State = NextState;
 
 	switch (NextState)
 	{
 	case EPlayerState::Idle:
+		TargetFOV = DefaultTargetFOV;
 		TargetCameraOffset = DefaultCameraOffset;
 		TargetCameraAngle = FRotator(0);
 		TargetTargetArmLength = 143;
 		bIsDodging = false;
 		bIsAttacking = false;
 		break;
+	case EPlayerState::Run:
+		TargetFOV = RUN_FOV;
+		break;
 	case EPlayerState::Attack:
 		TargetCameraOffset = FVector(0, 50, 77);
+		TargetFOV = ATTACK_FOV;
+		break;
+	case EPlayerState::Guard:
+	case EPlayerState::GuardStart:
+		TargetFOV = GUARD_FOV;
+		break;
+	case EPlayerState::Aim:
+		TargetFOV = AIM_FOV;
 		break;
 	case EPlayerState::Parry:
 		bParrying = true;
+		TargetFOV = PARRY_FOV;
 		break;
 	case EPlayerState::Hit:
 		WeakAttackEndComboState();
@@ -1024,7 +1031,9 @@ void AKratos::SetState(EPlayerState NextState)
 		bIsDodging = false;
 		bGuardStagger = false;
 		bSuperArmor = false;
-
+		break;
+	default:
+		TargetFOV = TargetFOV;
 		break;
 	}
 }
@@ -1057,7 +1066,6 @@ void AKratos::StrongAttackEndComboState()
 	CanNextStrongCombo = false;
 	CurrentStrongCombo = 0;
 }
-
 
 bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee)
 {
@@ -1123,7 +1131,8 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	// 기본 피격
 	else
 	{
-		CurHP -= FMath::Max(DamageValue, 0);
+		//CurHP -= FMath::Max(DamageValue, 0);
+		CurHP = FMath::Max(CurHP - DamageValue, 0);
 		if (GameMode)
 			GameMode->SetPlayerHpBar(CurHP / MaxHP);
 		if (bSuperArmor) return false;
@@ -1136,10 +1145,10 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			TargetCameraAngle = FRotator(10, 0, 0);
 			TargetTargetArmLength = 180;
 			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
-			//GameMode->
+
 			return true;
 		}
-		
+
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		UGameplayStatics::PlaySound2D(GetWorld(), HitSound2, 1, 1, 0.2f);

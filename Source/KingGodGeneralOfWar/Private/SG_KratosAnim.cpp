@@ -270,9 +270,14 @@ void USG_KratosAnim::AnimNotify_RuneAttackGroundShake()
 	Me->CameraShakeOnAttack(EAttackDirectionType::DOWN);
 }
 
-void USG_KratosAnim::AnimNotify_ZoomOutCheck()
+void USG_KratosAnim::AnimNotify_RuneAttackCameraSet()
 {
-	Me->bZoomOut = true;
+	Me->OnMyRuneAttackCameraSet();
+}
+
+void USG_KratosAnim::AnimNotify_GetUPCameraSet()
+{
+	Me->OnMyGetUPCameraSet();
 }
 
 void USG_KratosAnim::AnimNotify_RuneReady()
@@ -308,6 +313,11 @@ void USG_KratosAnim::AnimNotify_GuardDisappear()
 void USG_KratosAnim::AnimNotify_LaunchCharacterInStrongAttack()
 {
 	Me->OnMyLaunchCharacterInStrongAttack();
+}
+
+void USG_KratosAnim::AnimNotify_EndWithFail()
+{
+	Me->OnMyEndWithFail();
 }
 
 void USG_KratosAnim::AnimNotify_JumpCharacterInStrongAttack()

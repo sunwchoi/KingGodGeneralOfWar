@@ -10,6 +10,10 @@
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
 const FVector DefaultCameraOffset = FVector(0, 50, 70);
+const FRotator DefaultCameraAngle = FRotator(0);
+const float DefaultTargetTargetArmLength = 147;
+const float DefaultTargetFOV = 90;
+
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -155,11 +159,15 @@ public:
 	// Rune
 	void OnMyRuneReady();
 	void OnMyRuneAttackEnd();
+	void OnMyRuneAttackCameraSet();
 
 	void OnMyAttackComboEnd();
 	void OnMyInitAttackType();
 
 	void OnMyAttackProgress();
+
+	void OnMyEndWithFail();
+	void OnMyGetUPCameraSet();
 
 	void CameraShakeOnAttack(EAttackDirectionType attackDir = EAttackDirectionType::UP, float scale = 1.0f);
 	FString GetPlayerStateString();
@@ -229,7 +237,7 @@ public:
 	class AActor* LockTarget;
 
 	UPROPERTY()
-	class USG_KratosAnim* Anim ;
+	class USG_KratosAnim* Anim;
 
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -379,17 +387,17 @@ public:
 	bool bZoomOut;
 
 	EAttackType CurrentAttackType;
-	
+
 private:
-	
+
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
 	float TargetGuardScale = 0;
 	FVector Direction;
 	FVector PrevDirection;
 
-	float TargetFOV = 90;
-	float TargetTargetArmLength = 143;
+	float TargetFOV = DefaultTargetFOV;
+	float TargetTargetArmLength = DefaultTargetTargetArmLength;
 	FVector TargetCameraOffset = DefaultCameraOffset;
 	FRotator TargetCameraAngle = FRotator(0);
 

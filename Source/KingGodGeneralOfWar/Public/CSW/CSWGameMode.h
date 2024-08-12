@@ -36,7 +36,7 @@ private:
 	TSubclassOf<class UInGameWidget> WBP_InGame;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UOutGameWidget> WBP_GameFail;
+	TSubclassOf<UUserWidget> WBP_GameFail;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> WBP_GameSucceed;
@@ -51,7 +51,7 @@ private:
 	TSubclassOf<class ABDThor> BP_BDThor;
 	
 	UPROPERTY()
-	UOutGameWidget* OutGameWidget;
+	UUserWidget* OutGameWidget;
 
 	UPROPERTY()
 	class UInGameWidget* InGameWidget;

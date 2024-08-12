@@ -17,7 +17,7 @@ const float AXE_THROW_DAMAGE = 2;
 // Sets default values
 AFlyingAxe::AFlyingAxe()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
@@ -36,7 +36,7 @@ AFlyingAxe::AFlyingAxe()
 	WithdrawTargetPosition1->SetupAttachment(CapsuleComp);
 	WithdrawTargetPosition1->SetRelativeLocation(FVector(-400, 0, 330));
 
-	WithdrawTargetPosition2= CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition2"));
+	WithdrawTargetPosition2 = CreateDefaultSubobject<UArrowComponent>(TEXT("WithdrawPosition2"));
 	WithdrawTargetPosition2->SetupAttachment(CapsuleComp);
 	//WithdrawTargetPosition2->SetRelativeLocation(FVector());
 
@@ -80,7 +80,7 @@ void AFlyingAxe::Tick(float DeltaTime)
 	else if (bWithdrawing)
 	{
 		// 회수: 플레이어에게 돌아오는 모션
-		if (!bRising) 
+		if (!bRising)
 		{
 			TargetLocation = Me->WithdrawPositionComp->GetComponentLocation();
 		}

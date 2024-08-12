@@ -8,7 +8,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorFSM.h"
 // Sets default values
-int8 MaxHitCnt = 5;
+int8 MaxHitCnt = 10;
 ARuneAttackField::ARuneAttackField()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -44,8 +44,8 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	if (HitCnt >= MaxHitCnt) return;
 	boxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	auto* Thor = Cast<ABDThor>(OtherActor);
-	const float fieldDamage = 5;
-	const float fieldDalay = 0.15;
+	const float fieldDamage = 3;
+	const float fieldDalay = 0.3;
 
 	if (Thor)
 	{

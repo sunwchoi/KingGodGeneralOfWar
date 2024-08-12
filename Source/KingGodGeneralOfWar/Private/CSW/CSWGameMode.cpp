@@ -128,9 +128,18 @@ void ACSWGameMode::GoToNextPhase()
 
 void ACSWGameMode::EndWithFail()
 {
-	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameFail);
+	OutGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameFail);
 	if (OutGameWidget)
 		OutGameWidget->AddToViewport();
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->bShowMouseCursor = true;
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
+		PlayerController->SetInputMode(InputMode);
+	}
 }
 
 void ACSWGameMode::EndWithSucceed()
