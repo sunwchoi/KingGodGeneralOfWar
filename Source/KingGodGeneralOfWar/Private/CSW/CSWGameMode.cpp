@@ -131,25 +131,6 @@ void ACSWGameMode::EndWithFail()
 	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameFail);
 	if (OutGameWidget)
 		OutGameWidget->AddToViewport();
-
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
-	{
-		PlayerController->bShowMouseCursor = true;
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
-		PlayerController->SetInputMode(InputMode);
-
-		PlayerController->SetPause(true);
-	}
-	if (bFirstPhase)
-	{
-		StartFirstPhase();
-	}
-	else
-	{
-		StartSecondPhase();
-	}
 }
 
 void ACSWGameMode::EndWithSucceed()
@@ -164,3 +145,4 @@ void ACSWGameMode::EndWithSucceed()
 	AudioComp->SetSound(EndingSound);
 	AudioComp->Play();
 }
+
