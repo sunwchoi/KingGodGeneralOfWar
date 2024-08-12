@@ -132,8 +132,8 @@ void UAwakenThorFSM::IdleState()
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		// State = NextStates[idx];
-		State = EAwakenThorState::JumpAttack;
+		State = NextStates[idx];
+		// State = EAwakenThorState::JumpAttack;
 		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
