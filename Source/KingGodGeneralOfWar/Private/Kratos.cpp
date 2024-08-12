@@ -26,6 +26,7 @@
 #include "FlyingAxe.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 #include "CSW/CSWGameMode.h"
+#include "Sound/SoundBase.h"
 
 // Sets default values
 
@@ -55,8 +56,8 @@ AKratos::AKratos()
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->SocketOffset = FVector(0, 45, 50);
-	SpringArmComp->TargetArmLength = 150;
+	SpringArmComp->SocketOffset = FVector(0, 50, 70);
+	SpringArmComp->TargetArmLength = TargetTargetArmLength;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
@@ -67,6 +68,83 @@ AKratos::AKratos()
 	CurHP = MaxHP;
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMaxSpeed;
 
+	// Sound Referencing
+	{
+		static ConstructorHelpers::FObjectFinder<USoundBase> avoid_sfx(TEXT("/ Script / Engine.SoundWave'/Game/JSG/SFX/RealSFX/Avoid.Avoid'"));
+		if (avoid_sfx.Succeeded())	AvoidSound = avoid_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> axeThrow_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Axe2Throw.Axe2Throw'"));
+		if (axeThrow_sfx.Succeeded())	AxeThrowSound = axeThrow_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> AxeWithdraw_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Axe3Get.Axe3Get'"));
+		if (AxeWithdraw_sfx.Succeeded())	AxeWithdrawSound = AxeWithdraw_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> hit1_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/PlayerDamaged3.PlayerDamaged3'"));
+		if (hit1_sfx.Succeeded())	HitSound1 = hit1_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> hit2_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/PlayerDamaged.PlayerDamaged'"));
+		if (hit2_sfx.Succeeded())	HitSound2 = hit2_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> hit3_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/PlayerDamaged2.PlayerDamaged2'"));
+		if (hit3_sfx.Succeeded())	HitSound3 = hit3_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> roll_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Roll.Roll'"));
+		if (roll_sfx.Succeeded())	RollSound = roll_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> runeBase_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/RuneReady.RuneReady'"));
+		if (runeBase_sfx.Succeeded())	RuneBaseSound = runeBase_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> rune1_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Rune1.Rune1'"));
+		if (rune1_sfx.Succeeded())	RuneAttack1Sound = rune1_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> rune2_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Rune2.Rune2'"));
+		if (rune2_sfx.Succeeded())	RuneAttack2Sound = rune2_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> rune3_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Rune3.Rune3'"));
+		if (rune3_sfx.Succeeded())	RuneAttack3Sound = rune3_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> rune4_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/Rune4.Rune4'"));
+		if (rune4_sfx.Succeeded())	RuneAttack4Sound = rune4_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> strong1_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/StrongAttack1.StrongAttack1'"));
+		if (strong1_sfx.Succeeded())	StrongAttack1Sound = strong1_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> strong2_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/StrongAttack2.StrongAttack2'"));
+		if (strong2_sfx.Succeeded())	StrongAttack2Sound = strong2_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> strong3_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/StrongAttack3.StrongAttack3'"));
+		if (strong3_sfx.Succeeded())	StrongAttack3Sound = strong3_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> strong4_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/StrongAttack4.StrongAttack4'"));
+		if (strong4_sfx.Succeeded())	StrongAttack4Sound = strong4_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> weak1_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/WeakAttack1.WeakAttack1'"));
+		if (weak1_sfx.Succeeded())	WeakAttack1Sound = weak1_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> weak2_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/WeakAttack2.WeakAttack2'"));
+		if (weak2_sfx.Succeeded())	WeakAttack2Sound = weak2_sfx.Object;
+
+		static ConstructorHelpers::FObjectFinder<USoundBase> weak3_sfx(TEXT("/Script/Engine.SoundWave'/Game/JSG/SFX/RealSFX/WeakAttack3.WeakAttack3'"));
+		if (weak3_sfx.Succeeded())	WeakAttack3Sound = weak3_sfx.Object;
+
+		WeakAttackSoundArr.Add(WeakAttack1Sound);
+		WeakAttackSoundArr.Add(WeakAttack1Sound);
+		WeakAttackSoundArr.Add(WeakAttack2Sound);
+		WeakAttackSoundArr.Add(WeakAttack3Sound);
+
+		StrongAttackSoundArr.Add(StrongAttack1Sound);
+		StrongAttackSoundArr.Add(StrongAttack1Sound);
+		StrongAttackSoundArr.Add(StrongAttack2Sound);
+		StrongAttackSoundArr.Add(StrongAttack3Sound);
+		StrongAttackSoundArr.Add(StrongAttack4Sound);
+
+		RuneAttackSoundArr.Add(RuneAttack1Sound);
+		RuneAttackSoundArr.Add(RuneAttack1Sound);
+		RuneAttackSoundArr.Add(RuneAttack2Sound);
+		RuneAttackSoundArr.Add(RuneAttack3Sound);
+		RuneAttackSoundArr.Add(RuneAttack4Sound);
+
+	}
 }
 // Called to bind functionality to input
 void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -154,6 +232,7 @@ void AKratos::PostInitializeComponents()
 				{
 					StrongAttackStartComboState();
 					Anim->JumpToAttackMontageSection(CurrentStrongCombo);
+					UGameplayStatics::PlaySound2D(GetWorld(), StrongAttackSoundArr[CurrentStrongCombo], 1, 1, 0.55);
 				}
 			});
 		Anim->OnNextWeakAttackCheck.AddLambda([this]() -> void
@@ -164,6 +243,23 @@ void AKratos::PostInitializeComponents()
 				{
 					WeakAttackStartComboState();
 					Anim->JumpToAttackMontageSection(CurrentWeakCombo);
+					if (CurrentAttackType == EAttackType::WEAK_ATTACK)
+					{
+						if (CurrentWeakCombo <= 2)
+							UGameplayStatics::PlaySound2D(GetWorld(), WeakAttackSoundArr[CurrentWeakCombo], 1, 1, 1.55f);
+						//else
+							//UGameplayStatics::PlaySound2D(GetWorld(), WeakAttackSoundArr[CurrentWeakCombo], 1, 1, .3f);
+
+					}
+					else
+					{
+						if (CurrentWeakCombo <= 3)
+							UGameplayStatics::PlaySound2D(GetWorld(), RuneAttackSoundArr[CurrentWeakCombo], 1, 1, 0.34);
+						else
+							UGameplayStatics::PlaySound2D(GetWorld(), RuneAttackSoundArr[CurrentWeakCombo], 1, 1, 0.65f);
+
+					}
+
 				}
 			});
 		Anim->OnMovableCheck.AddLambda([this]() -> void
@@ -260,6 +356,9 @@ void AKratos::Tick(float DeltaTime)
 
 	// 카메라 오프셋 선형 보간
 	SpringArmComp->SocketOffset = FMath::Lerp(SpringArmComp->SocketOffset, TargetCameraOffset, DeltaTime * 3);
+	float shieldScale = Shield->MeshComp->GetComponentScale()[0];
+	Shield->MeshComp->SetWorldScale3D(FVector(FMath::Lerp(shieldScale, TargetGuardScale, DeltaTime * 8)));
+	SpringArmComp->TargetArmLength = FMath::Lerp(SpringArmComp->TargetArmLength,  TargetTargetArmLength, DeltaTime * 6);
 	if (bLockOn)
 	{
 		TargetFOV -= 10;
@@ -367,6 +466,25 @@ void AKratos::OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted)
 	}
 }
 
+void AKratos::OnMyGuardDisappear()
+{
+	TargetGuardScale = 0;
+}
+
+void AKratos::OnMyLaunchCharacterInStrongAttack()
+{
+	const float LaunchScale = 500;
+	LaunchCharacter(GetActorForwardVector() * LaunchScale, true, false);
+}
+
+void AKratos::OnMyJumpCharacterInStrongAttack()
+{
+	const float LaunchScale = 250;
+	FVector dir = GetActorForwardVector() + FVector(0, 0, 1);
+	dir.Normalize();
+	LaunchCharacter(dir * LaunchScale, true, true);
+}
+
 void AKratos::SetWeapon()
 {
 	FActorSpawnParameters param;
@@ -390,12 +508,13 @@ void AKratos::SetShield()
 		Shield->K2_AttachToComponent(GetMesh(), TEXT("hand_lShieldSocket"), EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true);
 		Shield->MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	}
-	//Shield->MeshComp->SetVisibility(false, true);
+	Shield->MeshComp->SetWorldScale3D(FVector(0));
 }
 
 void AKratos::OnMyRuneReady()
 {
 	bRuneReady = true;
+	
 }
 
 void AKratos::OnMyRuneAttackEnd()
@@ -475,7 +594,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 {
 	float absX = abs(PrevDirection.X), absY = abs(PrevDirection.Y);
 	FString DodgeDirString;
-	DodgeScale = 1500;
+	DodgeScale = 2000;
 	if (absX <= 0.1)
 	{
 		if (PrevDirection.Y >= 0.9)
@@ -490,7 +609,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 		else
 		{
 			DodgeDirString = TEXT("B");
-			DodgeScale = 1100;
+			DodgeScale = 1500;
 		}
 	}
 	else if (PrevDirection.X >= 0.5)
@@ -506,7 +625,7 @@ FString AKratos::GetDodgeDirection(int& DodgeScale)
 			DodgeDirString = TEXT("RB");
 		else
 			DodgeDirString = TEXT("LB");
-		DodgeScale = 1100;
+		DodgeScale = 1500;
 	}
 	return DodgeDirString;
 }
@@ -556,13 +675,15 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 	{
 		SetState(EPlayerState::Dodge);
 		bIsDodging = true;
+		UGameplayStatics::PlaySound2D(GetWorld(), AvoidSound, 1, 1, 0.2f);
 
 		int DodgeScale;
 		FString DodgeDirString = GetDodgeDirection(DodgeScale);
 
 		FTransform T = UKismetMathLibrary::MakeTransform(FVector(0, 0, 0), GetControlRotation(), FVector(1, 1, 1));
 		FVector DodgeDirection = UKismetMathLibrary::TransformDirection(T, PrevDirection);
-		DodgeDirection.Z = 0;
+		DodgeDirection.Z = -1;
+		//DodgeDirection.Z = 0;
 		LaunchCharacter(DodgeDirection * DodgeScale, true, false);
 		Anim->PlayDodgeMontage();
 		Anim->JumpToDodgeMontageSection(DodgeDirString);
@@ -570,6 +691,7 @@ void AKratos::OnMyActionDodge(const FInputActionValue& value)
 	else if (State == EPlayerState::Dodge)
 	{
 		SetState(EPlayerState::Roll);
+		UGameplayStatics::PlaySound2D(GetWorld(), RollSound);
 		bIsDodging = true;
 		Anim->Montage_Stop(0.1f, Anim->DodgeMontage);
 		int8 sectionIdx = 3;
@@ -615,16 +737,14 @@ void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
 	if (bParrying || bGuardStagger)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%d %d"), bParrying, bGuardStagger));
 		return;
 	}
 	if (State == EPlayerState::Idle || State == EPlayerState::Move || State == EPlayerState::Run)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOn"));
 		SetState(EPlayerState::GuardStart);
 		GuardHitCnt = GUARD_MAX_COUNT;
 		Anim->PlayGuardMontage();
-		//GetMovementComponent()->Velocity = GetActorForwardVector() * 1000;
+		TargetGuardScale = .1f;
 	}
 }
 
@@ -634,10 +754,9 @@ void AKratos::OnMyActionGuardOff(const FInputActionValue& value)
 	bGuardStagger = false;
 	if (State == EPlayerState::Guard || State == EPlayerState::GuardStart)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("OnMyActionGuardOff"));
 		Anim->Montage_Stop(0, Anim->GuardMontage);
 		SetState(EPlayerState::Idle);
-		//SetState(EPlayerState::GuardEnd);
+		TargetGuardScale = 0.0f;
 	}
 }
 
@@ -718,6 +837,8 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 			WeakAttackStartComboState();
 			Anim->PlayWeakAttackMontage();
 			Anim->JumpToAttackMontageSection(1);
+			UGameplayStatics::PlaySound2D(GetWorld(), WeakAttackSoundArr[CurrentWeakCombo], 1, 1, 0.8f);
+
 			bIsAttacking = true;
 			CurrentAttackType = EAttackType::WEAK_ATTACK;
 		}
@@ -730,6 +851,7 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 			WeakAttackStartComboState();
 			Anim->PlayRuneAttackMontage();
 			Anim->JumpToAttackMontageSection(1);
+			UGameplayStatics::PlaySound2D(GetWorld(), RuneAttackSoundArr[CurrentWeakCombo], 1, 1, 0.4f);
 			bIsAttacking = true;
 			CurrentAttackType = EAttackType::RUNE_ATTACK;
 		}
@@ -737,8 +859,13 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 	// 도끼 던지기
 	else if (State == EPlayerState::Aim)
 	{
-		Anim->PlayAxeThrowMontage();
-		CurrentAttackType = EAttackType::AXE_THROW_ATTACK;
+		if (Anim->PlayAxeThrowMontage())
+		{
+			CurrentAttackType = EAttackType::AXE_THROW_ATTACK;
+			UGameplayStatics::PlaySound2D(GetWorld(), AxeThrowSound);
+
+		}
+
 	}
 	// 대시 공격
 	else if (State == EPlayerState::Dodge)
@@ -748,11 +875,13 @@ void AKratos::OnMyActionWeakAttack(const FInputActionValue& value)
 		Anim->PlayDashAttackMontage();
 		CurrentAttackType = EAttackType::DASH_ATTACK;
 	}
-	else if (State == EPlayerState::Parry)
+	// 패링 공격
+	
+	/*else if (State == EPlayerState::Parry)
 	{
 		SetState(EPlayerState::Attack);
 		Anim->PlayParryAttackMontage();
-	}
+	}*/
 }
 
 void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
@@ -775,6 +904,7 @@ void AKratos::OnMyActionStrongAttack(const FInputActionValue& value)
 		StrongAttackStartComboState();
 		Anim->PlayStrongAttackMontage();
 		Anim->JumpToAttackMontageSection(1);
+		UGameplayStatics::PlaySound2D(GetWorld(), StrongAttackSoundArr[CurrentStrongCombo], 1, 1, 0.4f);
 		bIsAttacking = true;
 		CurrentAttackType = EAttackType::STRONG_ATTACK;
 	}
@@ -805,6 +935,7 @@ void AKratos::OnMyActionWithdrawAxe(const FInputActionValue& value)
 	{
 		WithdrawAxe();
 		bIsAxeWithdrawing = true;
+		UGameplayStatics::PlaySound2D(GetWorld(), AxeWithdrawSound, 1, 1, 0.07f);
 	}
 }
 
@@ -815,6 +946,7 @@ void AKratos::OnMyActionRuneBase(const FInputActionValue& value)
 	{
 		SetState(EPlayerState::NoneMovable);
 		Anim->PlayRuneBaseMontage();
+		UGameplayStatics::PlaySound2D(GetWorld(), RuneBaseSound, 1, 1, 0.2f);
 
 	}
 }
@@ -858,7 +990,6 @@ void AKratos::SetState(EPlayerState NextState)
 
 	case EPlayerState::Attack:
 		bIsAttacking = false;
-		TargetCameraOffset = FVector(0, 50, 70);
 
 		break;
 
@@ -869,6 +1000,8 @@ void AKratos::SetState(EPlayerState NextState)
 	switch (NextState)
 	{
 	case EPlayerState::Idle:
+		TargetCameraOffset = FVector(0, 50, 70);
+		TargetTargetArmLength = 143;
 		bIsDodging = false;
 		bIsAttacking = false;
 		break;
@@ -879,6 +1012,8 @@ void AKratos::SetState(EPlayerState NextState)
 		bParrying = true;
 		break;
 	case EPlayerState::Hit:
+		TargetCameraOffset = FVector(0, 50, 10);
+		TargetTargetArmLength = 170;
 		WeakAttackEndComboState();
 		StrongAttackEndComboState();
 		bIsAttacking = false;
@@ -943,18 +1078,19 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		// 가드 크러쉬
 		else
 		{
-			SetState(EPlayerState::Idle);
+			SetState(EPlayerState::NoneMovable);
 			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
 			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
 			GuardHitCnt = GUARD_MAX_COUNT;
 			bGuardStagger = true;
+			TargetGuardScale = 0.0f;
 			// 가드 파괴 카메라 쉐이크
 		}
 	}
 	// 패링 가능 상태
 	else if (State == EPlayerState::GuardStart)
 	{
-		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform());//->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		UNiagaraFunctionLibrary::SpawnSystemAttached(ParryVFX, Shield->LightPosition, TEXT("ParryVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
 		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
 
@@ -991,9 +1127,14 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
-		LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("asdf")));
-		//CameraShakeOnAttack(EAttackDirectionType::DOWN, 8);
+		UGameplayStatics::PlaySound2D(GetWorld(), HitSound2, 1, 1, 0.2f);
+		if (HitType == EHitType::NB_HIGH)
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
+		else if (HitType == EHitType::STAGGER)
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, .1);
+		else
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, .5);
+
 		SetState(EPlayerState::Hit);
 		return true;
 	}

@@ -136,6 +136,11 @@ public:
 	UFUNCTION()
 	void OnMontageEndedDelegated(UAnimMontage* Montage, bool bInterrupted);
 
+	void OnMyGuardDisappear();
+
+	void OnMyLaunchCharacterInStrongAttack();
+	void OnMyJumpCharacterInStrongAttack();
+
 	// Axe Throwing
 	void OnHideAxe();
 	void ThrowAxe(FRotator TargetRot);
@@ -145,7 +150,6 @@ public:
 	// Damage Function
 	// if Kratos get damage, return true; else return false;
 	bool Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
-	void Damage(int DamageValue, EHitType HitType, bool IsMelee);
 
 	// Rune
 	void OnMyRuneReady();
@@ -280,12 +284,72 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "VFX Actor")
 	TSubclassOf<class AActor> GuardBlockLightFactory;
 
-	// UI
-	/*UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<class UUserWidget> HpBarUIFactory;
+	// ------------------------------------------ SFX -----------------------------------------------
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* AvoidSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* AxeThrowSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* AxeWithdrawSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* HitSound1;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* HitSound2;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* HitSound3;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RollSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RuneBaseSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RuneAttack1Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RuneAttack2Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RuneAttack3Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* RuneAttack4Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* StrongAttack1Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* StrongAttack2Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* StrongAttack3Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* StrongAttack4Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* WeakAttack1Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* WeakAttack2Sound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	class USoundBase* WeakAttack3Sound;
 
 	UPROPERTY()
-	class UPlayerHPUI* HpBarUI;*/
+	TArray<class USoundBase*> WeakAttackSoundArr;
+
+	UPROPERTY()
+	TArray<class USoundBase*> StrongAttackSoundArr;
+
+	UPROPERTY()
+	TArray<class USoundBase*> RuneAttackSoundArr;
 
 	UPROPERTY()
 	class ACSWGameMode* GameMode;
@@ -319,12 +383,13 @@ private:
 	
 	FRotator TargetCameraRotation;
 	FRotator TargetActorRotation;
-
+	float TargetGuardScale = 0;
 	FVector Direction;
 	FVector PrevDirection;
 
 	float TargetFOV = 90;
 	FVector TargetCameraOffset = FVector(0, 50, 70);
+	float TargetTargetArmLength = 143;
 	bool bLockOn;
 	bool bIsAttacking;
 	bool bIsDodging;

@@ -8,6 +8,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorFSM.h"
 // Sets default values
+int8 MaxHitCnt = 5;
 ARuneAttackField::ARuneAttackField()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -40,39 +41,35 @@ void ARuneAttackField::Tick(float DeltaTime)
 
 void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (HitCnt >= MaxHitCnt) return;
+	boxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	const float fieldDamage = 5;
-	const float fieldDalay = 0.5;
+	const float fieldDalay = 0.15;
+
 	if (Thor)
 	{
 		Thor->fsm->Damage(fieldDamage, EAttackDirectionType::UP);
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, [Thor, fieldDamage, fieldDalay]()
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 			{
-				Thor->fsm->Damage(fieldDamage+1, EAttackDirectionType::UP);
-				FTimerHandle handle1;
-				Thor->GetWorld()->GetTimerManager().SetTimer(handle1, [Thor, fieldDamage, fieldDalay]()
-					{
-						Thor->fsm->Damage(fieldDamage, EAttackDirectionType::DOWN);
+				boxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-					}, fieldDalay, false);
 			}, fieldDalay, false);
+			HitCnt++;
 	}
 	else
 	{
-		auto AwakenThor= Cast<AAwakenThor>(OtherActor);
+		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, [AwakenThor, fieldDamage, fieldDalay]()
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 			{
-				AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
-				FTimerHandle handle1;
-				AwakenThor->GetWorld()->GetTimerManager().SetTimer(handle1, [AwakenThor, fieldDamage, fieldDalay]()
-					{
-						AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::DOWN, true);
+				boxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-					}, fieldDalay, false);
 			}, fieldDalay, false);
+		HitCnt++;
 	}
+
 }
 

@@ -81,23 +81,23 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		if (curCombo >= 3)
 		{
 			Me->CameraShakeOnAttack(attackDirection, 1.0f);
-			Me->SetGlobalTimeDilation(0.004f, 0.04f);
 		}
 		else
 		{
-			Me->SetGlobalTimeDilation(0.003f, 0.05f);
-
 		}
+		Me->SetGlobalTimeDilation(0.004f, 0.04f);
 
 	}
 	else if (Me->CurrentAttackType == EAttackType::STRONG_ATTACK)
 	{
 		Me->CameraShakeOnAttack(attackDirection, 1.1f);
+		Me->SetGlobalTimeDilation(0.004f, 0.04f);
 
 	}
 	else if (Me->CurrentAttackType == EAttackType::RUNE_ATTACK)
 	{
 		Me->CameraShakeOnAttack(attackDirection, 1.2f);
+		Me->SetGlobalTimeDilation(0.004f, 0.04f);
 
 	}
 
