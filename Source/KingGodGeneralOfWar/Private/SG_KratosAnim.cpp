@@ -115,13 +115,15 @@ void USG_KratosAnim::PlayGuardMontage()
 	Montage_Play(GuardMontage, 1.0f);
 }
 
-void USG_KratosAnim::PlayAxeThrowMontage()
+bool USG_KratosAnim::PlayAxeThrowMontage()
 {
 	if (!Montage_IsPlaying(AxeThrowMontage))
 	{
 		Montage_Play(AxeThrowMontage, 1.0f);
 		TargetRotation = Me->GetControlRotation();
+		return true;
 	}
+	return false;
 }
 
 void USG_KratosAnim::PlayAxeWithdrawMontage()

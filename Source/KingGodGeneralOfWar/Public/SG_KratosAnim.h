@@ -35,7 +35,7 @@ public:
 	void PlayHitMontage();
 	void PlayWeakAttackMontage();
 	void PlayStrongAttackMontage();
-	void PlayAxeThrowMontage();
+	bool PlayAxeThrowMontage();
 	void PlayAxeWithdrawMontage();
 	void PlayDashAttackMontage();
 	void PlayRuneAttackMontage();
