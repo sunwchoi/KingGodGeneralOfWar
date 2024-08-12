@@ -93,6 +93,9 @@ void UBDThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	case BDThorGeneralState::BDKick:
 		BDKickState(); //공격 패턴
 		break;
+	case BDThorGeneralState::BDRandomChange:
+		BDRandomChangeState(); //상태를 랜덤으로 지정하는 패턴
+		break;
 	}
 
 	//실행창에 상태 메세지 출력
@@ -195,19 +198,6 @@ void UBDThorFSM::BDAttackModeChangeState()
 
 		BDCurrentTime = 0;
 	}
-
-	//타깃이 공격을 받으면 다시 이동으로 변하고 싶다.
-
-	////임시 코드, 플레이어의 Damage가 발생했을 경우 에너미의 상태를 대기 또는 이동으로 변경
-	//float distance = FVector::Distance(Target->GetActorLocation(), me->GetActorLocation());
-	////타깃의 거리가 공격 범위를 벗어났으니까
-	//if (distance > BDAttackRange) {
-	//	//상태를 잠시 대기로 전환한다.
-	//	mState = BDThorGeneralState::BDIdle;
-	//	//애니메이션 상태 동기화
-	//	anim->animState = mState;
-	//}
-
 }
 
 //공격 패턴을 랜덤으로 지정하는 함수
@@ -251,6 +241,45 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	LastAttackState = NewState;
 	//UE_LOG(LogTemp, Warning, TEXT("Random!!"));
 	return NewState; //상태 리턴
+}
+
+//상태를 랜덤으로 변경하는 함수
+void UBDThorFSM::BDRandomChangeState()
+{
+	anim->playBDAttackRandomState(); //애니메이션 몽타주 바꾸기
+
+	//1. 시간이 흐르고
+	BDCurrentTime += GetWorld()->DeltaTimeSeconds;
+	//2. 시간이 되면
+	if (BDCurrentTime > BDStateDelayTime) {
+		// 랜덤으로 상태 선택
+		mState = RandomChange();
+		anim->animState = mState;
+
+		//UE_LOG(LogTemp, Warning, TEXT("AttackModeChangeState: %s"), *UEnum::GetValueAsString(mState));
+
+		BDCurrentTime = 0;
+	}
+}
+
+BDThorGeneralState UBDThorFSM::RandomChange()
+{
+	bBDAttackCheck = false;
+
+	// 가능한 상태들을 배열로 저장
+	TArray<BDThorGeneralState> RanStates = {
+		BDThorGeneralState::BDIdle,
+		BDThorGeneralState::BDBackDodge,
+		BDThorGeneralState::BDAvoidance,
+		BDThorGeneralState::BDAvoidance,
+		//BDThorGeneralState::BDAttackModeChange,
+	};
+
+	//랜덤으로 선택
+	int32 RandomIndex = FMath::RandRange(0, RanStates.Num() - 1);
+	BDThorGeneralState NewState = RanStates[RandomIndex];
+
+	return NewState;
 }
 
 //데미지를 받을 시 발생하는 함수, 두번째는 애니메이션을 재생할 히트 방향을 말한다.
@@ -676,15 +705,19 @@ void UBDThorFSM::BDEndState()
 	}
 	else if (mState == BDThorGeneralState::BDHitDown) {
 		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
-		BDSetState(BDThorGeneralState::BDIdle);
+		//BDSetState(BDThorGeneralState::BDIdle);
+		BDSetState(BDThorGeneralState::BDRandomChange); //상태 랜덤 지정
 	}
 	else if (mState == BDThorGeneralState::BDClap) {
 		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
-		BDSetState(BDThorGeneralState::BDAvoidance); //옆으로 회피
+		//BDSetState(BDThorGeneralState::BDAvoidance); //옆으로 회피
+		BDSetState(BDThorGeneralState::BDRandomChange); //상태 랜덤 지정
+		
 	}
 	else if (mState == BDThorGeneralState::BDKick) {
 		me->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);  // 이동 재활성화
-		BDSetState(BDThorGeneralState::BDBackDodge); //뒤로 회피
+		//BDSetState(BDThorGeneralState::BDBackDodge); //뒤로 회피
+		BDSetState(BDThorGeneralState::BDRandomChange); //상태 랜덤 지정
 	}
 	//망치를 든 근접 공격 상태였었다면
 	else if (mState == BDThorGeneralState::BDHammerThreeSwing) {
@@ -712,9 +745,8 @@ void UBDThorFSM::BDEndState()
 
 		//체력이 남아있다면
 		if (BDCurrentHP > 0) {
-			//상태를 회피로 전환
-			BDSetState(BDThorGeneralState::BDAvoidance);
-			//BDSetState(BDThorGeneralState::BDMove);
+			//BDSetState(BDThorGeneralState::BDAvoidance);
+			BDSetState(BDThorGeneralState::BDRandomChange); //상태 랜덤 지정
 		}
 	}
 }
