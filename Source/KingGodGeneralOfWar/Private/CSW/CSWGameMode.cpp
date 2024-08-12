@@ -9,6 +9,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/OutGameWidget.h"
 #include "CSW/InGameWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 ACSWGameMode::ACSWGameMode()
 {
@@ -42,6 +43,7 @@ void ACSWGameMode::BeginPlay()
 	if (bFirstPhase)
 	{
 		StartFirstPhase();
+		
 	}
 	else
 	{
@@ -85,12 +87,22 @@ void ACSWGameMode::StartFirstPhase()
 	}
 	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
+	UGameplayStatics::PlaySound2D(GetWorld(), Phase1Sound);
+	// FTimerHandle handle;
+	// GetWorld()->GetTimerManager().SetTimer(handle,
+	// 	[this]()
+	// 	{
+	// 	},
+	// 	10.f,
+	// 	false);
+		
 }
 
 void ACSWGameMode::StartSecondPhase()
 {
 	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(false);
+	UGameplayStatics::PlaySound2D(GetWorld(), Phase2Sound);	
 }
 
 void ACSWGameMode::GoToNextPhase()
@@ -147,4 +159,6 @@ void ACSWGameMode::EndWithSucceed()
 	{
 		EndGameWidget->AddToViewport();
 	}
+	
+	UGameplayStatics::PlaySound2D(GetWorld(), EndingSound);
 }
