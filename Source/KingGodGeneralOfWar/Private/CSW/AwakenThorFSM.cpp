@@ -108,32 +108,32 @@ void UAwakenThorFSM::IdleState()
 	{
 		float dist = FVector::Dist(myLoc, targetLoc);
 		TArray<EAwakenThorState> NextStates;
-
+		
 		if (dist <= 200.f)
 		{
 			NextStates.Add(EAwakenThorState::MeleeAttackChange);
-			NextStates.Add(EAwakenThorState::BackTeleport);
-			NextStates.Add(EAwakenThorState::LeftTeleport);
-			NextStates.Add(EAwakenThorState::RightTeleport);
+			// NextStates.Add(EAwakenThorState::BackTeleport);
+			// NextStates.Add(EAwakenThorState::LeftTeleport);
+			// NextStates.Add(EAwakenThorState::RightTeleport);
 		}
-		else if (200.f < dist && dist <= 700.f)
+		else if (200.f < dist && dist <= 600.f)
 		{
 			NextStates.Add(EAwakenThorState::RangedAttackChange);
-			NextStates.Add(EAwakenThorState::BackTeleport);
-			NextStates.Add(EAwakenThorState::LeftTeleport);
-			NextStates.Add(EAwakenThorState::RightTeleport);
+			// NextStates.Add(EAwakenThorState::BackTeleport);
+			// NextStates.Add(EAwakenThorState::LeftTeleport);
+			// NextStates.Add(EAwakenThorState::RightTeleport);
 		}
 		else
 		{
 			NextStates.Add(EAwakenThorState::RangedAttackChange);
-			NextStates.Add(EAwakenThorState::Teleport);
+			// NextStates.Add(EAwakenThorState::Teleport);
 			NextStates.Add(EAwakenThorState::Dash);
 		}
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		// State = NextStates[idx];
-		State = EAwakenThorState::PoundAttack;
+		State = EAwakenThorState::JumpAttack;
 		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
@@ -265,22 +265,32 @@ void UAwakenThorFSM::Teleport()
 void UAwakenThorFSM::ReadyPoundAttack()
 {
 	FVector targetLoc = Target->GetActorLocation();
+
+	float x, y, dx, dy;
+	
 	float minDx = 300.f;
 	float maxDx = 1000.f;
 	float minDy = -1000.f;
 	float maxDy = 1000.f;
 	
 	AttackZone.Empty();
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X, targetLoc.Y, 0), PoundZoneRadius));
-
-	float dx = FMath::RandRange(minDx, maxDx);
-	float dy = FMath::RandRange(minDy, maxDy);
-
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X + dx, targetLoc.Y + dy, 0), PoundZoneRadius));
+	x = targetLoc.X;
+	y = targetLoc.Y;
+	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
 
 	dx = FMath::RandRange(minDx, maxDx);
 	dy = FMath::RandRange(minDy, maxDy);
-	AttackZone.Add(std::make_pair(FVector(targetLoc.X - dx, targetLoc.Y + dy, 0), PoundZoneRadius));
+	x = targetLoc.X + dx;
+	y = targetLoc.Y + dy;
+	
+	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
+
+	dx = FMath::RandRange(minDx, maxDx);
+	dy = FMath::RandRange(minDy, maxDy);
+	x = targetLoc.X + dx;
+	y = targetLoc.Y + dy;
+	
+	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
 	
 	DrawAttackZoneDecal();
 }
@@ -309,24 +319,29 @@ void UAwakenThorFSM::ReadyJumpAttack()
 {
 	FVector org = Me->GetActorLocation();
 	FVector fwd = Me->GetActorForwardVector();
-	org.Z = 0;
+	org.Z = getFloorZ(FVector2D(org.X, org.Y));
 
 	AttackZone.Empty();
 	for (int i = 0; i < 5; i++)
-		AttackZone.Add(std::make_pair(org + (fwd + FRotator(0, 75 * i, 0).Vector()) * 1000, JumpAtkZoneRaidus));
+	{
+		FVector tmp = org + (fwd + FRotator(0, 75 * i, 0).Vector()) * 1000;
+		tmp.Z = getFloorZ(FVector2D(tmp.X, tmp.Y));
+		AttackZone.Add(std::make_pair(tmp, JumpAtkZoneRaidus));
+	}
 
 	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartJumpAttack()
 {
-	SphereOverlap(10, EHitType::STUN, false);
+	for (auto zone : AttackZone)
+		SphereOverlapForPound(zone, 10, EHitType::STUN, false);
 	FVector loc = Me->GetActorLocation();
 	FVector target = Target->GetActorLocation();
 	
 	Me->SetActorLocation(FVector(target.X, target.Y, loc.Z) + Target->GetActorForwardVector() * 100);
 	FVector newLoc = Me->GetActorLocation();
-	newLoc.Z = 0;
+	newLoc.Z = getFloorZ(FVector2D(newLoc.X, newLoc.Y));
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(newLoc, JumpAtkZoneRaidus));
 
@@ -481,10 +496,10 @@ void UAwakenThorFSM::SphereOverlapForPound(const std::pair<FVector, float>& zone
 			Target->Damage(Me, Damage, HitType, IsMelee);
 		} 
 	}
-
-	FVector newLoc(zone.first.X, zone.first.Y, 20);
+	//
+	// FVector newLoc(zone.first.X, zone.first.Y, 20);
 	if (!IsMelee)
-		GetWorld()->SpawnActor<AActor>(Me->LightBPClass, newLoc, FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<AActor>(Me->LightBPClass, zone.first, FRotator::ZeroRotator);
 	if(!IsMelee)
 		DrawAttackZoneDecalForPound(zone, true);
 }
@@ -497,15 +512,30 @@ void UAwakenThorFSM::DrawAttackZoneDecalForPound(const std::pair<FVector, float>
 	if (!isAttack)
 	{
 		AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
-		size.Z = 10;
+		size.Z = 20;
 	}
 	else
 	{
 		AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-		size.Z = 3;
+		size.Z = 20;
 	}
 			
 	UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.f);
+}
+
+float UAwakenThorFSM::getFloorZ(FVector2D Loc)
+{
+	FVector start = FVector(Loc.X, Loc.Y, 1000);
+	FVector end = start + FVector::DownVector * 1000;
+
+	FHitResult hitResult;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(Me);
+	params.AddIgnoredActor(Target);
+
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params))
+		return hitResult.ImpactPoint.Z;
+	return 0;
 }
 
 void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
@@ -518,12 +548,12 @@ void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
 		if (!isAttack)
 		{
 			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
-			size.Z = 10;
+			size.Z = 20;
 		}
 		else
 		{
 			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-			size.Z = 3;
+			size.Z = 20;
 		}
 			
 		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.5f);

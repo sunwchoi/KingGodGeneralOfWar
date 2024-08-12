@@ -168,6 +168,11 @@ AAwakenThor::AAwakenThor()
 	RMjolnirLight->SetAttenuationRadius(30.f);
 
 	
+	GetCharacterMovement()->GravityScale = 15.f;
+	GetCharacterMovement()->MaxAcceleration = 1000000.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 50.0f;
+	GetCharacterMovement()->JumpZVelocity = 10000.0f;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -177,11 +182,6 @@ void AAwakenThor::BeginPlay()
 	
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 
-	GetCharacterMovement()->GravityScale = 15.f;
-	GetCharacterMovement()->MaxAcceleration = 1000000.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 50.0f;
-	GetCharacterMovement()->JumpZVelocity = 10000.0f;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called every frame
