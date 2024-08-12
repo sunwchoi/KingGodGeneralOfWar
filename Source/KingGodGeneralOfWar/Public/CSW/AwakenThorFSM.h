@@ -99,7 +99,7 @@ private:
 	UPROPERTY()
 	class ACSWGameMode* GameMode;
 	
-	float IdleDelayTime = 2.f;
+	float IdleDelayTime = 1.f;
 	float CurrentTime = 0.f;
 	
 	float TeleportDist = 1000;
@@ -136,4 +136,6 @@ private:
 
 	void SphereOverlapForPound(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
 	void DrawAttackZoneDecalForPound(const std::pair<FVector, float>& Zone, bool isAttack = false);
+
+	float getFloorZ(FVector2D Loc);
 };

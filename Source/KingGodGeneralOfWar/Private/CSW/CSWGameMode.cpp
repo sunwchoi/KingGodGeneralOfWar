@@ -83,13 +83,13 @@ void ACSWGameMode::StartFirstPhase()
 	{
 		SetPlayerHpBar(player->CurHP /  player->MaxHP);
 	}
-	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector::ZeroVector, FRotator::ZeroRotator);
+	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
 }
 
 void ACSWGameMode::StartSecondPhase()
 {
-	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor);
+	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(false);
 }
 
