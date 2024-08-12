@@ -56,7 +56,7 @@ AKratos::AKratos()
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->SocketOffset = FVector(0, 50, 70);
+	SpringArmComp->SocketOffset = DefaultCameraOffset;
 	SpringArmComp->TargetArmLength = TargetTargetArmLength;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("cameraComp"));
@@ -1004,7 +1004,7 @@ void AKratos::SetState(EPlayerState NextState)
 	switch (NextState)
 	{
 	case EPlayerState::Idle:
-		TargetCameraOffset = FVector(0, 50, 70);
+		TargetCameraOffset = DefaultCameraOffset;
 		TargetCameraAngle = FRotator(0);
 		TargetTargetArmLength = 143;
 		bIsDodging = false;
@@ -1116,26 +1116,38 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			}
 		}
 	}
-	else if (State == EPlayerState::Hit || State == EPlayerState::Parry)
+	else if (State == EPlayerState::Hit || State == EPlayerState::Parry || State == EPlayerState::Die)
 	{
 
 	}
 	// 기본 피격
 	else
 	{
-		CurHP -= DamageValue;
+		CurHP -= FMath::Max(DamageValue, 0);
 		if (GameMode)
 			GameMode->SetPlayerHpBar(CurHP / MaxHP);
 		if (bSuperArmor) return false;
-
+		if (CurHP == 0)
+		{
+			SetState(EPlayerState::Die);
+			Anim->PlayHitMontage();
+			Anim->JumpToHitMontageSection(TEXT("Death"));
+			TargetCameraOffset = FVector(0, 50, -60);
+			TargetCameraAngle = FRotator(10, 0, 0);
+			TargetTargetArmLength = 180;
+			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
+			//GameMode->
+			return true;
+		}
+		
 		Anim->PlayHitMontage();
 		Anim->JumpToHitMontageSection(GetHitSectionName(HitType));
 		UGameplayStatics::PlaySound2D(GetWorld(), HitSound2, 1, 1, 0.2f);
 		if (HitType == EHitType::NB_HIGH)
 		{
-			TargetCameraOffset = FVector(0, 50, 0);
-			TargetCameraAngle = FRotator(10, 0, 0);
-			TargetTargetArmLength = 180;
+			TargetCameraOffset = FVector(0, 50, -60);
+			TargetCameraAngle = FRotator(20, 0, 0);
+			TargetTargetArmLength = 190;
 			CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
 		}
 		else if (HitType == EHitType::STAGGER)

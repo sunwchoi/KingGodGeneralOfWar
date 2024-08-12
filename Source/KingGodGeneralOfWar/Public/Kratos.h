@@ -9,6 +9,7 @@
 #include "Kratos.generated.h"
 
 const float PlayerMaxSpeed = 900.0f; // 플레이어 최대 속도. (달리기)
+const FVector DefaultCameraOffset = FVector(0, 50, 70);
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -389,7 +390,7 @@ private:
 
 	float TargetFOV = 90;
 	float TargetTargetArmLength = 143;
-	FVector TargetCameraOffset = FVector(0, 50, 70);
+	FVector TargetCameraOffset = DefaultCameraOffset;
 	FRotator TargetCameraAngle = FRotator(0);
 
 	bool bLockOn;
