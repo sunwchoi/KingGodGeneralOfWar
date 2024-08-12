@@ -16,6 +16,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "CSW/CSWGameMode.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values for this component's properties
@@ -270,6 +271,7 @@ BDThorGeneralState UBDThorFSM::RandomChange()
 	TArray<BDThorGeneralState> RanStates = {
 		BDThorGeneralState::BDIdle,
 		BDThorGeneralState::BDBackDodge,
+		BDThorGeneralState::BDBackDodge,
 		BDThorGeneralState::BDAvoidance,
 		BDThorGeneralState::BDAvoidance,
 		//BDThorGeneralState::BDAttackModeChange,
@@ -338,6 +340,7 @@ void UBDThorFSM::BDAvoidanceState()
 
 void UBDThorFSM::BDBackDodgeState()
 {
+	me->BDWeaponCol->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	if (!anim->Montage_IsPlaying(anim->BDThorBackDodgeMontage)) {
 		anim->playBDBackDodge(); //뒤로 회피
 	}
