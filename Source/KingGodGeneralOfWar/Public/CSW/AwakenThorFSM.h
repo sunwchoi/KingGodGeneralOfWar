@@ -129,10 +129,13 @@ private:
 
 	
 
+	UPROPERTY()
+	TArray<UDecalComponent *> DecalZone;
+	
 	void SphereOverlap(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
 	
 	void SphereOverlap(float Damage, EHitType HitType, bool IsMelee);
-	void DrawAttackZoneDecal(bool isAttack = false);
+	UDecalComponent* DrawAttackZoneDecal(const std::pair<FVector, float>& Zone);
 
 	void SphereOverlapForPound(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
 	void DrawAttackZoneDecalForPound(const std::pair<FVector, float>& Zone, bool isAttack = false);
