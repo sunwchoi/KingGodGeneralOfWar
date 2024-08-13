@@ -8,7 +8,7 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorFSM.h"
 // Sets default values
-int8 MaxHitCnt = 10;
+int8 MaxHitCnt = 7;
 ARuneAttackField::ARuneAttackField()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.

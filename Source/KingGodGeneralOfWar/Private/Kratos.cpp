@@ -508,6 +508,11 @@ void AKratos::OnMyRuneAttackCameraSet()
 	TargetTargetArmLength = TargetTargetArmLength + 30;
 }
 
+void AKratos::OnMySpawnEarthCrack()
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EarthCrackVFX, Axe->MeshComp->GetComponentLocation() - FVector(0, 0, 22));
+}
+
 void AKratos::OnMyAttackComboEnd()
 {
 	WeakAttackEndComboState();
