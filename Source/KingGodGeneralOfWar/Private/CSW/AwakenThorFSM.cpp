@@ -4,6 +4,7 @@
 #include "CSW/AwakenThorFSM.h"
 
 #include "Kratos.h"
+#include "Components/DecalComponent.h"
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
 #include "CSW/CSWGameMode.h"
@@ -133,7 +134,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
-		// State = EAwakenThorState::JumpAttack;
+		State = EAwakenThorState::PoundAttack;
 		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
@@ -277,6 +278,15 @@ void UAwakenThorFSM::ReadyPoundAttack()
 	x = targetLoc.X;
 	y = targetLoc.Y;
 	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
+	DecalZone.Add(DrawAttackZoneDecal(AttackZone.Last()));
+	
+	dx = FMath::RandRange(minDx, maxDx);
+	dy = FMath::RandRange(minDy, maxDy);
+	x = targetLoc.X + dx;
+	y = targetLoc.Y + dy;
+	
+	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
+	DecalZone.Add(DrawAttackZoneDecal(AttackZone.Last()));
 
 	dx = FMath::RandRange(minDx, maxDx);
 	dy = FMath::RandRange(minDy, maxDy);
@@ -284,21 +294,16 @@ void UAwakenThorFSM::ReadyPoundAttack()
 	y = targetLoc.Y + dy;
 	
 	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
-
-	dx = FMath::RandRange(minDx, maxDx);
-	dy = FMath::RandRange(minDy, maxDy);
-	x = targetLoc.X + dx;
-	y = targetLoc.Y + dy;
+	DecalZone.Add(DrawAttackZoneDecal(AttackZone.Last()));
 	
-	AttackZone.Add(std::make_pair(FVector(x, y, getFloorZ(FVector2D(x, y))), PoundZoneRadius));
-	
-	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartPoundAttack()
 {
 	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
-	SphereOverlapForPound(AttackZone.Pop(), 10, EHitType::STUN, false);
+	SphereOverlap(AttackZone.Pop(), 10, EHitType::STUN, false);
+	DecalZone.Top()->DestroyComponent();
+	DecalZone.Pop();
 }
 
 void UAwakenThorFSM::StartClapAttack()
@@ -328,8 +333,6 @@ void UAwakenThorFSM::ReadyJumpAttack()
 		tmp.Z = getFloorZ(FVector2D(tmp.X, tmp.Y));
 		AttackZone.Add(std::make_pair(tmp, JumpAtkZoneRaidus));
 	}
-
-	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartJumpAttack()
@@ -344,8 +347,6 @@ void UAwakenThorFSM::StartJumpAttack()
 	newLoc.Z = getFloorZ(FVector2D(newLoc.X, newLoc.Y));
 	AttackZone.Empty();
 	AttackZone.Add(std::make_pair(newLoc, JumpAtkZoneRaidus));
-
-	DrawAttackZoneDecal();
 }
 
 void UAwakenThorFSM::StartFallAttack()
@@ -468,8 +469,6 @@ void UAwakenThorFSM::SphereOverlap(float Damage, EHitType HitType, bool IsMelee)
 			GetWorld()->SpawnActor<AActor>(Me->LightBPClass, newLoc, FRotator::ZeroRotator);
 		// DrawDebugSphere(GetWorld(), zone.first, zone.second, 32, FColor::Green, false, 1.f);
 	}
-	if(!IsMelee)
-	DrawAttackZoneDecal(true);
 }
 
 void UAwakenThorFSM::SphereOverlapForPound(const std::pair<FVector, float>& zone, float Damage, EHitType HitType, bool IsMelee)
@@ -538,25 +537,11 @@ float UAwakenThorFSM::getFloorZ(FVector2D Loc)
 	return 0;
 }
 
-void UAwakenThorFSM::DrawAttackZoneDecal(bool isAttack)
+UDecalComponent* UAwakenThorFSM::DrawAttackZoneDecal(const std::pair<FVector, float>& Zone)
 {
-	for (auto zone : AttackZone)
-	{
-		FVector size = FVector(zone.second, zone.second,0);
-
-		UMaterialInterface* AttackZoneDecal;
-		if (!isAttack)
-		{
-			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
-			size.Z = 20;
-		}
-		else
-		{
-			AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone.AttackZone'"));
-			size.Z = 20;
-		}
-			
-		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, zone.first, FRotator::ZeroRotator, 2.5f);
-	}
+	FVector size = FVector(40, Zone.second,Zone.second);
+	UMaterialInterface* AttackZoneDecal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.Material'/Game/CSW/Material/AttackZone1.AttackZone1'"));
+	
+	return UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, Zone.first - FVector(0, 0, 50), FRotator(-90, 0, 0));
 }
 
