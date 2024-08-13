@@ -38,6 +38,34 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = weapon)
 	class UCapsuleComponent* BDWeaponCol; //무기 콜리전
 
+	//몸 콜리전
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* HeadCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LForeArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RForeArmCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* RUpLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LLegCapsule;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* LUpLegCapsule;
+
 	//공격할 때 손으로 위치 바꾸기
 	UFUNCTION()
 	void EquipWeapon();

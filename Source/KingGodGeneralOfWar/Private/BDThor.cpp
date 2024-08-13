@@ -58,6 +58,89 @@ ABDThor::ABDThor()
 		GetMesh()->SetAnimInstanceClass(BDThorAnimation.Class);
 	}*/
 
+	GetCapsuleComponent()->SetCapsuleHalfHeight(110.f);
+	GetCapsuleComponent()->SetCapsuleRadius(60.f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Enemy"));
+	GetCapsuleComponent()->SetCapsuleHalfHeight(110.f);
+	GetCapsuleComponent()->SetCapsuleRadius(25.f);
+
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -110.0f));
+	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	GetMesh()->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.25f));
+
+
+	//몸 콜리전
+	HeadCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HeadCapsule"));
+	HeadCapsule->SetupAttachment(GetMesh(), FName("Head"));
+	HeadCapsule->SetCapsuleHalfHeight(90.f);
+	HeadCapsule->SetCapsuleRadius(90.f);
+	HeadCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	HeadCapsule->SetRelativeLocation(FVector(-0.000000f, -40.000002f, 0.000000f));
+
+	LArmCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LArmCapsule"));
+	LArmCapsule->SetupAttachment(GetMesh(), FName("LeftArm"));
+	LArmCapsule->SetCapsuleHalfHeight(110.f);
+	LArmCapsule->SetCapsuleRadius(70.f);
+	LArmCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	LArmCapsule->SetRelativeLocation(FVector(-0.000000f, -40.000002f, -0.000000f));
+	LArmCapsule->SetRelativeRotation(FRotator(90.000000f, 26.565051f, -63.434949f));
+
+	RArmCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RArmCapsule"));
+	RArmCapsule->SetupAttachment(GetMesh(), FName("RightArm"));
+	RArmCapsule->SetCapsuleHalfHeight(110.f);
+	RArmCapsule->SetCapsuleRadius(70.f);
+	RArmCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	RArmCapsule->SetRelativeLocation(FVector(0.000000f, -40.000002f, 0.000000f));
+	RArmCapsule->SetRelativeRotation(FRotator(90.000000f, 14.036243f, -75.963757f));
+
+	LForeArmCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LForeArmCapsule"));
+	LForeArmCapsule->SetupAttachment(GetMesh(), FName("LeftForeArm"));
+	LForeArmCapsule->SetCapsuleHalfHeight(100.f);
+	LForeArmCapsule->SetCapsuleRadius(60.f);
+	LForeArmCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	LForeArmCapsule->SetRelativeLocation(FVector(0.000000f, -120.000007f, -0.000000f));
+	LForeArmCapsule->SetRelativeRotation(FRotator(90.000000f, -7.125016f, -97.125016f));
+
+	RForeArmCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RForeArmCapsule"));
+	RForeArmCapsule->SetupAttachment(GetMesh(), FName("RightForeArm"));
+	RForeArmCapsule->SetCapsuleHalfHeight(100.f);
+	RForeArmCapsule->SetCapsuleRadius(60.f);
+	RForeArmCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	RForeArmCapsule->SetRelativeLocation(FVector(-0.000000f, -120.000007f, -0.000000f));
+	RForeArmCapsule->SetRelativeRotation(FRotator(90.000000f, 90.000000f, 0.000000f));
+
+	RLegCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RLegCapsule"));
+	RLegCapsule->SetupAttachment(GetMesh(), FName("RightLeg"));
+	RLegCapsule->SetCapsuleHalfHeight(130.f);
+	RLegCapsule->SetCapsuleRadius(70.f);
+	RLegCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	RLegCapsule->SetRelativeLocation(FVector(0.000000f, -80.000005f, 0.000000f));
+	RLegCapsule->SetRelativeRotation(FRotator(90.000000f, 90.000000f, 0.000000f));
+
+	RUpLegCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RUpLegCapsule"));
+	RUpLegCapsule->SetupAttachment(GetMesh(), FName("RightUpLeg"));
+	RUpLegCapsule->SetCapsuleHalfHeight(160.f);
+	RUpLegCapsule->SetCapsuleRadius(90.f);
+	RUpLegCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	RUpLegCapsule->SetRelativeLocation(FVector(-0.000000f, -80.000005f, 0.000000f));
+	RUpLegCapsule->SetRelativeRotation(FRotator(90.000000f, 90.000000f, 0.000000f));
+
+	LLegCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LLegCapsule"));
+	LLegCapsule->SetupAttachment(GetMesh(), FName("LeftLeg"));
+	LLegCapsule->SetCapsuleHalfHeight(130.f);
+	LLegCapsule->SetCapsuleRadius(70.f);
+	LLegCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	LLegCapsule->SetRelativeLocation(FVector(0.000000f, -80.000005f, 0.000000f));
+	LLegCapsule->SetRelativeRotation(FRotator(90.000000f, 90.000000f, 0.000000f));
+
+	LUpLegCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LUpLegCapsule"));
+	LUpLegCapsule->SetupAttachment(GetMesh(), FName("LeftUpLeg"));
+	LUpLegCapsule->SetCapsuleHalfHeight(160.f);
+	LUpLegCapsule->SetCapsuleRadius(90.f);
+	LUpLegCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	LUpLegCapsule->SetRelativeLocation(FVector(-0.000000f, -80.000005f, 0.000000f));
+	LUpLegCapsule->SetRelativeRotation(FRotator(90.000000f, 90.000000f, 0.000000f));
+
 }
 
 // Called when the game starts or when spawned
@@ -65,11 +148,9 @@ void ABDThor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//ThorAreaSpere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //처음에 켜질땐 비활성화, 영역함수가 불릴때만 true
 
 	BDWeaponCol->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDWeaponOverlap);
 
-	//ThorAreaSpere->OnComponentBeginOverlap.AddDynamic(this, &ABDThor::BDSphereOverlap);
 
 	//로드할 때 무기는 일단 허리에 보이게 하기
 	visibleWeapon();
@@ -215,7 +296,8 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		//데미지 처리
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		auto* shield = Cast<ASG_Shield>(OtherActor);
-		if (AttackTarget) {
+		//플레이어가 맞고, 플레이어에게 데미지가 들어가는 상태, true를 return할때 계속 공격
+		if (AttackTarget && AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false) == true) {
 			fsm->bBDAttackCheck = true;
 			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
 			fsm->BDSetState(BDThorGeneralState::BDBackDodge);
@@ -227,21 +309,6 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		}
 	}
 }
-
-//영역에 플레이어가 잇을 경우 공격 데미지 들어감
-//void ABDThor::BDSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-//{
-//	if (OtherActor && (OtherActor != this) && OtherComp) {
-//		//데미지 처리
-//		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
-//		if (AttackTarget) {
-//			fsm->bBDAttackCheck = true;
-//			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, false);
-//			fsm->BDSetState(BDThorGeneralState::BDIdle); //대기로 변경
-//			//UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //회피로 변경
-//		}
-//	}
-//}
 
 
 

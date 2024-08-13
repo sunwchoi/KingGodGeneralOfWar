@@ -46,6 +46,10 @@ void UBDThorFSM::BeginPlay()
 	//체력 설정
 	BDCurrentHP = BDMaxHp;
 
+	//if (GEngine) {
+	//	GEngine->bEnableOnScreenDebugMessages = false; //디버그 메세지 안보이게 하기
+	//}
+
 }
 
 
