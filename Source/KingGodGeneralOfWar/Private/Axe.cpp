@@ -61,7 +61,8 @@ void AAxe::Tick(float DeltaTime)
 // 도끼 공격이 닿았을 때 데미지와 공격 방향을 전달
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Me->IncreaseTargetTargetArmLength(-7.5);
+	Me->IncreaseTargetTargetArmLength(-5);
+	Me->IncreaseTargetCameraOffset(FVector(0, 0, -10));
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodVFXFactoryArr[FMath::RandRange(0, BLOOD_VFX_MAX)], EdgeComp->GetComponentLocation());
 	auto* Thor = Cast<ABDThor>(OtherActor);

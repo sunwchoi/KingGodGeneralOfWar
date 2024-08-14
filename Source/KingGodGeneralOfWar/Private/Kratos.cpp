@@ -352,6 +352,7 @@ void AKratos::Tick(float DeltaTime)
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, GetPlayerStateString());
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("TargetTargetArmLength: %f"), TargetTargetArmLength));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("TargetCameraOffset: %s"), *TargetCameraOffset.ToString()));
 
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
@@ -464,6 +465,11 @@ void AKratos::OnMyJumpCharacterInStrongAttack()
 void AKratos::IncreaseTargetTargetArmLength(float value)
 {
 	TargetTargetArmLength += value;
+}
+
+void AKratos::IncreaseTargetCameraOffset(FVector value)
+{
+	TargetCameraOffset += value;
 }
 
 void AKratos::SetWeapon()

@@ -147,6 +147,7 @@ public:
 	void OnMyJumpCharacterInStrongAttack();
 
 	void IncreaseTargetTargetArmLength(float value);
+	void IncreaseTargetCameraOffset(FVector value);
 
 	// Axe Throwing
 	void OnHideAxe();
