@@ -146,6 +146,8 @@ public:
 	void OnMyLaunchCharacterInStrongAttack();
 	void OnMyJumpCharacterInStrongAttack();
 
+	void IncreaseTargetTargetArmLength(float value);
+
 	// Axe Throwing
 	void OnHideAxe();
 	void ThrowAxe(FRotator TargetRot);
@@ -287,6 +289,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UNiagaraSystem* ParryVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	class UNiagaraSystem* GuardBlockVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	class UNiagaraSystem* GuardCrashVFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UNiagaraSystem* EarthCrackVFX;

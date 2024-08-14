@@ -170,6 +170,13 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_JumpCharacterInStrongAttack();
+
+	UFUNCTION()
+	void AnimNotify_DelayStart();
+
+	UFUNCTION()
+	void AnimNotify_DelayEnd();
+
 	FName GetAttackMontageSection(int32 Section);
 	FName GetRollMontageSection(int32 Section);
 	FName GetGuardMontageSection(int32 Section);

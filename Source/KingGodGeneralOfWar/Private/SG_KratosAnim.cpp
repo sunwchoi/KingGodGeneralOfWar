@@ -288,6 +288,7 @@ void USG_KratosAnim::AnimNotify_RuneReady()
 void USG_KratosAnim::AnimNotify_RuneAttackEnd()
 {
 	Me->OnMyRuneAttackEnd();
+	Montage_SetPlayRate(GuardMontage, 0.5f);
 }
 
 void USG_KratosAnim::AnimNotify_SpawnEarthCrack()
@@ -328,6 +329,17 @@ void USG_KratosAnim::AnimNotify_EndWithFail()
 void USG_KratosAnim::AnimNotify_JumpCharacterInStrongAttack()
 {
 	Me->OnMyJumpCharacterInStrongAttack();
+}
+
+void USG_KratosAnim::AnimNotify_DelayStart()
+{
+	Montage_SetPlayRate(AxeThrowMontage, 0.5f);
+}
+
+void USG_KratosAnim::AnimNotify_DelayEnd()
+{
+	Montage_SetPlayRate(AxeThrowMontage, 1.0f);
+
 }
 
 FName USG_KratosAnim::GetAttackMontageSection(int32 Section)
