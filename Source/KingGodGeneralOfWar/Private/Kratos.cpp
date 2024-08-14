@@ -351,6 +351,8 @@ void AKratos::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("CurrentAttackType: %s"), *UEnum::GetValueAsString(CurrentAttackType)));
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, GetPlayerStateString());
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("TargetTargetArmLength: %f"), TargetTargetArmLength));
+
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
 
@@ -1015,7 +1017,7 @@ void AKratos::SetState(EPlayerState NextState)
 		break;
 	case EPlayerState::Attack:
 		TargetCameraOffset = FVector(0, 50, 77);
-		TargetFOV = ATTACK_FOV;
+		//TargetFOV = ATTACK_FOV;
 		break;
 	case EPlayerState::Guard:
 	case EPlayerState::GuardStart:
@@ -1048,6 +1050,7 @@ void AKratos::WeakAttackStartComboState()
 	CanNextWeakCombo = true;
 	bIsWeakComboInputOn = false;
 	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
+	TargetTargetArmLength -= 7.5;
 }
 
 void AKratos::WeakAttackEndComboState()
@@ -1063,6 +1066,7 @@ void AKratos::StrongAttackStartComboState()
 	CanNextStrongCombo = true;
 	bIsStrongComboInputOn = false;
 	CurrentStrongCombo = FMath::Clamp<int8>(CurrentStrongCombo + 1, 1, 4);
+	TargetTargetArmLength -= 7.5;
 }
 
 void AKratos::StrongAttackEndComboState()
