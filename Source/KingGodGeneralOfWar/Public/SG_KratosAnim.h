@@ -148,6 +148,9 @@ private:
 	void AnimNotify_RuneAttackEnd();
 
 	UFUNCTION()
+	void AnimNotify_SpawnEarthCrack();
+
+	UFUNCTION()
 	void AnimNotify_AttackComboEnd();
 
 	UFUNCTION()

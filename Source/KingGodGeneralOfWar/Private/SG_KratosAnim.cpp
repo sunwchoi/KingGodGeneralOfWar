@@ -290,6 +290,11 @@ void USG_KratosAnim::AnimNotify_RuneAttackEnd()
 	Me->OnMyRuneAttackEnd();
 }
 
+void USG_KratosAnim::AnimNotify_SpawnEarthCrack()
+{
+	Me->OnMySpawnEarthCrack();
+}
+
 void USG_KratosAnim::AnimNotify_AttackComboEnd()
 {
 	Me->OnMyAttackComboEnd();
