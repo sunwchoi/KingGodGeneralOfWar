@@ -160,6 +160,7 @@ public:
 	void OnMyRuneReady();
 	void OnMyRuneAttackEnd();
 	void OnMyRuneAttackCameraSet();
+	void OnMySpawnEarthCrack();
 
 	void OnMyAttackComboEnd();
 	void OnMyInitAttackType();
@@ -286,6 +287,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UNiagaraSystem* ParryVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	class UNiagaraSystem* EarthCrackVFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX Actor")
 	TSubclassOf<class AActor> ParryingLightFactory;
