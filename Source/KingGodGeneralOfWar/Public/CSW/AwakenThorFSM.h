@@ -86,7 +86,7 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=FSM, meta=(AllowPrivateAccess))
 	EAwakenThorState State = EAwakenThorState::Idle;
-
+	
 	UPROPERTY(VisibleAnywhere, Category=FSM)
 	AKratos* Target;
 	
@@ -114,6 +114,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
 	UNiagaraSystem* ClapVFX;
+	
 	
 	TArray<std::pair<FVector, float>> AttackZone;
 
