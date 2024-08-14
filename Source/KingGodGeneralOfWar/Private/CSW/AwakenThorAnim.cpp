@@ -114,6 +114,11 @@ void UAwakenThorAnim::AnimNotify_End()
 	Fsm->OnEnd();
 }
 
+void UAwakenThorAnim::AnimNotify_OffTrail()
+{
+	Owner->OffAllTrail();
+}
+
 void UAwakenThorAnim::PlayHitMontage()
 {
 	Montage_Play(HitMontage);

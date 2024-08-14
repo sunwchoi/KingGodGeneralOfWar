@@ -81,6 +81,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_End();
 
+	UFUNCTION()
+	void AnimNotify_OffTrail();
+
 	void PlayHitMontage();
 	void JumpToHitSection(const FString& Section);
 

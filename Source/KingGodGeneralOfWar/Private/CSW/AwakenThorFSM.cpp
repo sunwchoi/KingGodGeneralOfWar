@@ -134,8 +134,16 @@ void UAwakenThorFSM::IdleState()
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		State = NextStates[idx];
-		State = EAwakenThorState::ClapAttack;
+		// State = NextStates[idx];
+		State = EAwakenThorState::JumpAttack;
+		// Me->OnWeaponTrail();
+		Me->OnBodyTrail();
+		// Me->OnLHandTrail();
+		Me->OnRFootTrail();
+		if (State == EAwakenThorState::Dash)
+		{
+			Me->OnBodyTrail();
+		}
 		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
@@ -373,6 +381,7 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::OnEnd()
 {
+	Me->OffAllTrail();
 	bSuperArmor = false;
 	if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport)
 		State = EAwakenThorState::BackTeleport;
