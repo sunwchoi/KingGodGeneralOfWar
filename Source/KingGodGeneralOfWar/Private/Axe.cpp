@@ -15,7 +15,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 
 const float AXE_DAMAGE = 3;
-const int BLOOD_VFX_MAX = 2;
+const int BLOOD_VFX_MAX = 7;
 // Sets default values
 AAxe::AAxe()
 {
@@ -43,6 +43,12 @@ void AAxe::BeginPlay()
 	BloodVFXFactoryArr.Add(BloodVFX1Factory);
 	BloodVFXFactoryArr.Add(BloodVFX2Factory);
 	BloodVFXFactoryArr.Add(BloodVFX3Factory);
+	BloodVFXFactoryArr.Add(BloodVFX4Factory);
+	BloodVFXFactoryArr.Add(BloodVFX5Factory);
+	BloodVFXFactoryArr.Add(BloodVFX6Factory);
+	BloodVFXFactoryArr.Add(BloodVFX7Factory);
+	BloodVFXFactoryArr.Add(BloodVFX8Factory);
+	
 }
 
 // Called every frame
@@ -56,7 +62,6 @@ void AAxe::Tick(float DeltaTime)
 void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	MeshComp->UPrimitiveComponent::SetCollisionProfileName(TEXT("IdleWeapon"), true);
-	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodVFXFactoryArr[FMath::RandRange(0, BLOOD_VFX_MAX)], EdgeComp->GetComponentTransform());
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodVFXFactoryArr[FMath::RandRange(0, BLOOD_VFX_MAX)], EdgeComp->GetComponentLocation());
 	auto* Thor = Cast<ABDThor>(OtherActor);
 	EAttackDirectionType attackDirection = EAttackDirectionType::UP;
