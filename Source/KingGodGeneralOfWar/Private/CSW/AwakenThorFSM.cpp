@@ -135,7 +135,7 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		// State = NextStates[idx];
-		State = EAwakenThorState::JumpAttack;
+		State = EAwakenThorState::Dash;
 		// Me->OnWeaponTrail();
 		Me->OnBodyTrail();
 		// Me->OnLHandTrail();
@@ -485,7 +485,7 @@ void UAwakenThorFSM::SpawnThunderVFX(FVector Location)
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		ThunderVFX,
-		Location - FVector(0, 0, 100)
+		Location - FVector(0, 0, 20)
 		);
 
 }
