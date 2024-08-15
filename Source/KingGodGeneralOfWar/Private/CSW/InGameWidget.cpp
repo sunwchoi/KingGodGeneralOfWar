@@ -39,3 +39,16 @@ void UInGameWidget::SetThorName(bool IsThor)
 	else
 		AwakenThorText->SetVisibility(ESlateVisibility::Visible); //Awaken Thor
 }
+
+void UInGameWidget::PlayFadeInAnim()
+{
+	if (HPUIFadeIn)
+		PlayAnimation(HPUIFadeIn);
+}
+
+void UInGameWidget::PlayFadeOutAnim()
+{
+	if (HPUIFadeOut)
+		PlayAnimation(HPUIFadeOut);
+}
+

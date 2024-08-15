@@ -29,12 +29,21 @@ public:
 	UFUNCTION()
 	void SetThorName(bool Value);
 
+	void PlayFadeInAnim();
+	void PlayFadeOutAnim();
 private:
 	UPROPERTY(meta=(BindWidget))
 	class UProgressBar* PlayerHpBar;
 
 	UPROPERTY(meta=(BindWidget))
 	class UProgressBar* EnemyHpBar;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* HPUIFadeIn;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* HPUIFadeOut;
+	
 
 	UPROPERTY(meta=(BindWidget))
 	class UImage* ThorText;

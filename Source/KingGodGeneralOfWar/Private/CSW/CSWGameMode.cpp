@@ -24,11 +24,21 @@ ACSWGameMode::ACSWGameMode()
 
 	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
 	AudioComp->SetupAttachment(RootComponent);
+
+	AmbientAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AmbientAudioComp"));
+	AmbientAudioComp->SetupAttachment(RootComponent);
 }
 
 void ACSWGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		FInputModeGameOnly InputMode;
+		PlayerController->SetInputMode(InputMode);
+	}
 
 	InGameWidget = CreateWidget<UInGameWidget>(GetWorld(), WBP_InGame);
 	if (InGameWidget)
@@ -37,32 +47,8 @@ void ACSWGameMode::BeginPlay()
 	HitWidget = CreateWidget<UHitWidget>(GetWorld(), WBP_Hit);
 	if (HitWidget)
 		HitWidget->AddToViewport();
-	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameStart);
-	if (OutGameWidget)
-			OutGameWidget->AddToViewport();
-
-	AudioComp->SetSound(IntroSound);
-	AudioComp->Play();
 	
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
-	{
-		PlayerController->bShowMouseCursor = true;
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
-		PlayerController->SetInputMode(InputMode);
-	
-		PlayerController->SetPause(true);
-	}
-	if (bFirstPhase)
-	{
-		StartFirstPhase();
-		
-	}
-	else
-	{
-		StartSecondPhase();
-	}
+	StartFirstPhase();
 }
 
 void ACSWGameMode::Tick(float DeltaSeconds)
@@ -86,27 +72,32 @@ void ACSWGameMode::PlayHitWidgetAnim()
 	HitWidget->PlayHitAnimation();
 }
 
+void ACSWGameMode::PlayHpUIFadeInAnim()
+{
+	InGameWidget->PlayFadeInAnim();
+}
+
+void ACSWGameMode::PlayHpUIFadeOutAnim()
+{
+	InGameWidget->PlayFadeOutAnim();	
+}
+
 void ACSWGameMode::StartFirstPhase()
 {
-	AKratos* player;
-	APlayerController* PlayerController;
-	
-	if ((PlayerController = GetWorld()->GetFirstPlayerController()) != nullptr &&
-		(player = Cast<AKratos>(PlayerController->GetPawn())) != nullptr)
-	{
-		SetPlayerHpBar(player->CurHP /  player->MaxHP);
-	}
 	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
 	AudioComp->SetSound(Phase1Sound);
 	AudioComp->Play();
+	AmbientAudioComp->SetSound(Phase1AmbientSound);
+	AmbientAudioComp->Play();
 }
 
 void ACSWGameMode::StartSecondPhase()
 {
-	AudioComp->Stop();
 	AudioComp->SetSound(Phase2Sound);
 	AudioComp->Play();
+	AmbientAudioComp->SetSound(Phase2AmbientSound);
+	AmbientAudioComp->Play();
 	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(false);
 	UGameplayStatics::PlaySound2D(GetWorld(), Phase2Sound);	
@@ -114,38 +105,25 @@ void ACSWGameMode::StartSecondPhase()
 
 void ACSWGameMode::GoToNextPhase()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Goto"));
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
-		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(
-			handle,
-			[this, PlayerController]()
-			{
-				StartSecondPhase();
-			},
-			5.f,
-			false
-			);
+		StartSecondPhase();
 	}
-	MiddleScene = CreateWidget<>(GetWorld(), WBP_MiddleScene);
-	if (MiddleScene)
-		MiddleScene->AddToViewport();
 }
 
 void ACSWGameMode::EndWithFail()
 {
-	OutGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameFail);
-	if (OutGameWidget)
-		OutGameWidget->AddToViewport();
+	EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameFail);
+	if (EndGameWidget)
+		EndGameWidget->AddToViewport();
 	 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
 		PlayerController->bShowMouseCursor = true;
 		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(OutGameWidget->TakeWidget());
+		InputMode.SetWidgetToFocus(EndGameWidget->TakeWidget());
 		PlayerController->SetInputMode(InputMode);
 	}
 }
@@ -169,6 +147,8 @@ void ACSWGameMode::EndFirstThor()
 	ABDThor* BDThor = Cast<ABDThor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass()));
 
 	if (BDThor->fsm->BDCurrentHP <= 140.0f) {
+		AudioComp->Stop();
+		AmbientAudioComp->Stop();
 		if (SQ_middleScene)
 		{
 			ALevelSequenceActor* outActor;
@@ -186,7 +166,7 @@ void ACSWGameMode::EndFirstThor()
 					handle,
 					this,
 					&ACSWGameMode::GoToNextPhase,
-					20.f, // �������� ��� �ð��� ���⿡ �ش��ϴ� �ð����� ����
+					25.f, // �������� ��� �ð��� ���⿡ �ش��ϴ� �ð����� ����
 					false
 				);
 			}
@@ -219,6 +199,7 @@ void ACSWGameMode::EndGame()
 	}
 
 	AudioComp->Stop();
+	AmbientAudioComp->Stop();
 	AudioComp->SetSound(EndingSound);
 	AudioComp->Play();
 }

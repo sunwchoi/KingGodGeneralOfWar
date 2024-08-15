@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InGameWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "CSWGameMode.generated.h"
 
@@ -23,6 +24,8 @@ public:
 	void SetPlayerHpBar(float Percent);
 
 	void PlayHitWidgetAnim();
+	void PlayHpUIFadeInAnim();
+	void PlayHpUIFadeOutAnim();
 
 	void StartFirstPhase();
 	void StartSecondPhase();
@@ -39,9 +42,6 @@ public:
 	void EndGame();
 private:
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UOutGameWidget> WBP_GameStart;
-
-	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UInGameWidget> WBP_InGame;
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -52,9 +52,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> WBP_GameSucceed;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UUserWidget> WBP_MiddleScene;
 
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -71,10 +68,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Cinematic")
 	class ULevelSequence* SQ_middleScene;
-
-	UPROPERTY()
-	UUserWidget* OutGameWidget;
-
+	
 	UPROPERTY()
 	class UInGameWidget* InGameWidget;
 
@@ -84,12 +78,6 @@ private:
 	UPROPERTY()
 	UUserWidget* EndGameWidget;
 
-	UPROPERTY()
-	UUserWidget* MiddleScene;
-
-	UPROPERTY(EditDefaultsOnly)
-	USoundBase* IntroSound;
-
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* EndingSound;
 	
@@ -97,12 +85,23 @@ private:
 	USoundBase* Phase1Sound;
 
 	UPROPERTY(EditDefaultsOnly)
+	USoundBase* Phase1AmbientSound;
+
+	UPROPERTY(EditDefaultsOnly)
 	USoundBase* Phase2Sound;
 
 	UPROPERTY(EditDefaultsOnly)
+	USoundBase* Phase2AmbientSound;
+
+	UPROPERTY(EditDefaultsOnly)
 	UAudioComponent* AudioComp;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAudioComponent* AmbientAudioComp;
 	
 
 	bool bFirstPhase = true;
 	bool bEndScreenStart = false;
 };
+
+

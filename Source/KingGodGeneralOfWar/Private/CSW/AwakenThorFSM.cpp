@@ -32,7 +32,10 @@ void UAwakenThorFSM::BeginPlay()
 	AKratos* tmp = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
 	if (GameMode)
+	{
 		GameMode->SetEnemyHpBar(1);
+		GameMode->PlayHpUIFadeInAnim();
+	}
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
