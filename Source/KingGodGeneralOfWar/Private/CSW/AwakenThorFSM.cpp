@@ -318,7 +318,12 @@ void UAwakenThorFSM::StartClapAttack()
 void UAwakenThorFSM::StartKickAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
-
+	
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ClapVFX,
+			attackLoc
+			);
 	SphereOverlap(std::make_pair(attackLoc, KickZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
