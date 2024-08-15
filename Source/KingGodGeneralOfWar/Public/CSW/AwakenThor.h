@@ -107,6 +107,9 @@ private:
 	UFUNCTION()
 	void SetThorLocation(FVector NewLoc);
 
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	float MaxHp = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	float Hp = MaxHp;
 };
