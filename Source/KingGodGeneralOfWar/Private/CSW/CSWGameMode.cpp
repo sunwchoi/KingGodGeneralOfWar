@@ -4,6 +4,7 @@
 #include "CSW/CSWGameMode.h"
 
 #include "BDThor.h"
+#include "BDThorFSM.h"
 #include "Kratos.h"
 #include "Blueprint/UserWidget.h"
 #include "CSW/AwakenThor.h"
@@ -109,6 +110,7 @@ void ACSWGameMode::StartSecondPhase()
 
 void ACSWGameMode::GoToNextPhase()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Goto"));
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
@@ -164,4 +166,36 @@ void ACSWGameMode::EndWithSucceed()
 	//AudioComp->SetSound(EndingSound);
 	//AudioComp->Play();
 }
+
+void ACSWGameMode::EndFirstThor()
+{
+	ABDThor* BDThor = Cast<ABDThor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass()));
+
+	if (BDThor->fsm->BDCurrentHP <= 140.0f) {
+		if (SQ_middleScene)
+		{
+			ALevelSequenceActor* outActor;
+			ULevelSequencePlayer* BDSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_middleScene, FMovieSceneSequencePlaybackSettings(), outActor);
+			
+			// 시퀀스 재생이 끝나면 GoToNextPhase를 호출하도록 바인딩
+			//BDSequencePlayer->OnFinished.AddDynamic(this, &ACSWGameMode::GoToNextPhase);
+
+			if (BDSequencePlayer)
+			{
+				BDSequencePlayer->Play();
+				FTimerHandle handle;
+				// 시퀀스가 끝난 후 함수를 호출하도록 타이머 설정 (예: 10초 후)
+				GetWorld()->GetTimerManager().SetTimer(
+					handle,
+					this,
+					&ACSWGameMode::GoToNextPhase,
+					20.f, // 시퀀스의 재생 시간이 여기에 해당하는 시간으로 설정
+					false
+				);
+			}
+			
+		}
+	}
+}
+
 

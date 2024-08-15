@@ -25,8 +25,10 @@ public:
 	void StartFirstPhase();
 	void StartSecondPhase();
 	void GoToNextPhase();
+
 	void EndWithFail();
 	void EndWithSucceed();
+	void EndFirstThor();
 	
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -52,6 +54,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Cinematic")
 	class ULevelSequence* SQ_FinalScene;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic")
+	class ULevelSequence* SQ_middleScene;
 
 	UPROPERTY()
 	UUserWidget* OutGameWidget;
