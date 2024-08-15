@@ -4,6 +4,7 @@
 #include "CSW/CSWGameMode.h"
 
 #include "BDThor.h"
+#include "BDThorFSM.h"
 #include "Kratos.h"
 #include "Blueprint/UserWidget.h"
 #include "CSW/AwakenThor.h"
@@ -163,5 +164,19 @@ void ACSWGameMode::EndWithSucceed()
 	//AudioComp->Stop();
 	//AudioComp->SetSound(EndingSound);
 	//AudioComp->Play();
+}
+
+void ACSWGameMode::EndFirstThor()
+{
+	ABDThor* BDThor = Cast<ABDThor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass()));
+
+	if (BDThor->fsm->BDCurrentHP <= 120.0f) {
+		if (SQ_middleScene)
+		{
+			ALevelSequenceActor* outActor;
+			ULevelSequencePlayer* BDSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_middleScene, FMovieSceneSequencePlaybackSettings(), outActor);
+			BDSequencePlayer->Play();
+		}
+	}
 }
 
