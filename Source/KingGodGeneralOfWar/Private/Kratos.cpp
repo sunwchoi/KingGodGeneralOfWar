@@ -1221,5 +1221,6 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 
 void AKratos::LaunchKratos(float LaunchScale)
 {
+	CameraShakeOnAttack(EAttackDirectionType::DOWN, 1);
 	LaunchCharacter(GetActorForwardVector() * -1 * LaunchScale, true, false);
 }
