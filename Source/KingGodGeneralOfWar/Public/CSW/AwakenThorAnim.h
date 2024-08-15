@@ -38,10 +38,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_AwakenThorTeleport_Play();
-
-	UFUNCTION()
-	void AnimNotify_AwakenThorTeleport_End();
-
+	
 	UFUNCTION()
 	void AnimNotify_AwakenThorTeleport_Throw();
 

@@ -42,12 +42,6 @@ void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Play()
 	Fsm->LookTeleportDirection();
 }
 
-void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_End()
-{
-	AnimState = EAwakenThorState::Idle;
-	Fsm->SetState(EAwakenThorState::Idle);
-}
-
 void UAwakenThorAnim::AnimNotify_AwakenThorTeleport_Throw()
 {
 	Fsm->ThrowForTeleport();
@@ -116,7 +110,6 @@ void UAwakenThorAnim::AnimNotify_End()
 
 void UAwakenThorAnim::AnimNotify_OffTrail()
 {
-	Owner->OffAllTrail();
 }
 
 void UAwakenThorAnim::PlayHitMontage()
