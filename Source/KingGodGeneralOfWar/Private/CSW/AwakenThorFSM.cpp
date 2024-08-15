@@ -414,7 +414,7 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		return;
 	}
 
-	ArmorGage += Damage * 4;
+	ArmorGage += Damage * 6;
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ArmorGage);
 	if (ArmorGage >= 100.f)
 	{
@@ -424,13 +424,16 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		FTimerHandle tmp0;
 		GetWorld()->GetTimerManager().SetTimer(tmp0, [this]()
 		{
-			SetGlobalTimeDilation(0.1f, 0.2f);
-		}, 0.03f, false);
+			SetGlobalTimeDilation(0.05f, 0.2f);
+		}, 0.3f, false);
 		FTimerHandle tmp1;
 		GetWorld()->GetTimerManager().SetTimer(tmp1, [this]()
 		{
 			bSuperArmor = true;
 		}, 4.f, false);
+		State = EAwakenThorState::Damage;
+		Anim->PlayKnockBackMontage();
+		return;
 	}
 
 	if (State != EAwakenThorState::Idle && (bSuperArmor && !bSuperAttack))
@@ -438,8 +441,7 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);
 	State = EAwakenThorState::Damage;
-	Anim->PlayHitMontage();
-	Anim->JumpToHitSection(Str);
+	Anim->PlayHitMontage(Str);
 }
 
 void UAwakenThorFSM::SetJump(bool Value)

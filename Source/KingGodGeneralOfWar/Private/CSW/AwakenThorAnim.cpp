@@ -112,14 +112,11 @@ void UAwakenThorAnim::AnimNotify_OffTrail()
 {
 }
 
-void UAwakenThorAnim::PlayHitMontage()
+void UAwakenThorAnim::PlayHitMontage(const FString& Section)
 {
-	Montage_Play(HitMontage);
-}
-
-void UAwakenThorAnim::JumpToHitSection(const FString& Section)
-{
-	Montage_JumpToSection(FName(*Section), HitMontage);
+	int32 rand = FMath::RandRange(0, HitMontageArr.Num() - 1);
+	Montage_Play(HitMontageArr[rand]);
+	Montage_JumpToSection(FName(*Section), HitMontageArr[rand]);
 }
 
 void UAwakenThorAnim::PlayDieMontage()
@@ -156,6 +153,12 @@ void UAwakenThorAnim::PlayJumpAttackMontage()
 {
 	if (!Montage_IsPlaying(JumpAttackMontage))
 		Montage_Play(JumpAttackMontage);
+}
+
+void UAwakenThorAnim::PlayKnockBackMontage()
+{
+	if (!Montage_IsPlaying(KnockBackMontage))
+		Montage_Play(KnockBackMontage);
 }
 
 
