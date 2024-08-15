@@ -409,8 +409,15 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
+		Anim->PlayDieMontage();
 		if (GameMode)
-			GameMode->EndWithSucceed();
+		{
+			FTimerHandle handle;
+			GetWorld()->GetTimerManager().SetTimer(handle, [ this ]()
+			{
+				GameMode->EndWithSucceed();
+			}, 2.f, false);
+		}
 		return;
 	}
 
