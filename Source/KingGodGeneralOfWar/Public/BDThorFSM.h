@@ -195,4 +195,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
 	class UNiagaraSystem* BDThreeSwingVFX; //세번 휘두르기 VFX
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	class UNiagaraSystem* BDEmberVFX; //음파
+
+
 };
