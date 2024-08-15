@@ -196,8 +196,6 @@ void AAwakenThor::BeginPlay()
 void AAwakenThor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetCharacterMovement()->MaxWalkSpeed);
 }
 
 // Called to bind functionality to input
