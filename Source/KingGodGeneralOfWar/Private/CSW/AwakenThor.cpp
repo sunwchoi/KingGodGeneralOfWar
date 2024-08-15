@@ -4,11 +4,9 @@
 #include "CSW/AwakenThor.h"
 
 #include "Kratos.h"
-#include "NiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
 #include "CSW/AwakenThorFSM.h"
-#include "CSW/HpBar.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -18,13 +16,14 @@ AAwakenThor::AAwakenThor()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	GetCapsuleComponent()->SetCapsuleHalfHeight(110.f);
-	GetCapsuleComponent()->SetCapsuleRadius(60.f);
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Enemy"));
+	GetCapsuleComponent()->SetRelativeScale3D(FVector(1.1, 1.09, 1.09));
+	GetCapsuleComponent()->SetCapsuleHalfHeight(100.f);
+	GetCapsuleComponent()->SetCapsuleRadius(80.f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 	GetCapsuleComponent()->SetCapsuleHalfHeight(110.f);
 	GetCapsuleComponent()->SetCapsuleRadius(25.f);
 
-	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -110.0f));
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -125.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	GetMesh()->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.25f));
 	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Script/Engine.AnimBlueprint'/Game/CSW/Blueprints/ABP_AwakenThor.ABP_AwakenThor_C'"));
@@ -45,6 +44,14 @@ AAwakenThor::AAwakenThor()
 	HeadCapsule->SetCapsuleRadius(90.f);
 	HeadCapsule->SetCollisionProfileName(TEXT("Enemy"));
 	HeadCapsule->SetRelativeLocation(FVector(-0.000000f, -40.000002f, 0.000000f));
+
+	BodyCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCapsule"));
+	BodyCapsule->SetupAttachment(GetMesh(), FName("Hips"));
+	BodyCapsule->SetCapsuleHalfHeight(220.f);
+	BodyCapsule->SetCapsuleRadius(130.f);
+	BodyCapsule->SetCollisionProfileName(TEXT("Enemy"));
+	BodyCapsule->SetRelativeLocation(FVector(0.000000f, -90.f, 0.000000f));
+	BodyCapsule->SetRelativeRotation(FRotator(0.000000f,0.000000f,-90.000000f));
 	
 	LArmCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LArmCapsule"));
 	LArmCapsule->SetupAttachment(GetMesh(), FName("LeftArm"));
@@ -174,21 +181,6 @@ AAwakenThor::AAwakenThor()
 	GetCharacterMovement()->MaxWalkSpeed = 50.0f;
 	GetCharacterMovement()->JumpZVelocity = 10000.0f;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
-	BodyTrailVfxComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BodyTrailVfxComp"));
-	BodyTrailVfxComp->SetupAttachment(GetMesh());
-
-	WeaponTrailVfxComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponTrailVfxComp"));
-	WeaponTrailVfxComp->SetupAttachment(GetMesh());
-	WeaponTrailVfxComp->bAutoActivate = false;
-
-	RFootTrailVfxComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("RFootTrailVfxComp"));
-	RFootTrailVfxComp->SetupAttachment(GetMesh());
-	RFootTrailVfxComp->bAutoActivate = false;
-
-	LHandTrailVfxComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("LFootTrailVfxComp"));
-	LHandTrailVfxComp->SetupAttachment(GetMesh());
-	LHandTrailVfxComp->bAutoActivate = false;
 }
 
 // Called when the game starts or when spawned
@@ -279,54 +271,6 @@ bool AAwakenThor::SetHp(float Damage)
 float AAwakenThor::GetHpPercent() const
 {
 	return Hp / MaxHp;
-}
-
-void AAwakenThor::OnBodyTrail()
-{
-	BodyTrailVfxComp->Activate();
-}
-
-void AAwakenThor::OffBodyTrail()
-{
-	BodyTrailVfxComp->Deactivate();
-}
-
-void AAwakenThor::OnLHandTrail()
-{
-	LHandTrailVfxComp->Activate();
-}
-
-void AAwakenThor::OffLHandTrail()
-{
-	LHandTrailVfxComp->Deactivate();
-}
-
-void AAwakenThor::OnRFootTrail()
-{
-	RFootTrailVfxComp->Activate();
-}
-
-void AAwakenThor::OffRFootTrail()
-{
-	RFootTrailVfxComp->Deactivate();
-}
-
-void AAwakenThor::OnWeaponTrail()
-{
-	WeaponTrailVfxComp->Activate();
-}
-
-void AAwakenThor::OffWeaponTrail()
-{
-	WeaponTrailVfxComp->Deactivate();
-}
-
-void AAwakenThor::OffAllTrail()
-{
-	OffBodyTrail();
-	OffWeaponTrail();
-	OffLHandTrail();
-	OffRFootTrail();
 }
 
 void AAwakenThor::SetThorLocation(FVector NewLoc)

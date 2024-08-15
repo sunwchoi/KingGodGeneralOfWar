@@ -110,11 +110,16 @@ private:
 	bool bPlay;
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
-	UNiagaraSystem* ThunderVFX;
+	TArray<UNiagaraSystem*> ThunderVFXarr;
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
-	UNiagaraSystem* ClapVFX;
+	UNiagaraSystem* ThunderVFX;
 	
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	UNiagaraSystem* ClapVFX;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	UNiagaraSystem* KickVFX;
 	
 	TArray<std::pair<FVector, float>> AttackZone;
 
@@ -142,6 +147,10 @@ private:
 	void SphereOverlap(const std::pair<FVector, float>& Zone, float Damage, EHitType HitType, bool IsMelee);
 	UDecalComponent* DrawAttackZoneDecal(const std::pair<FVector, float>& Zone);
 
-	void SpawnThunderVFX(FVector Location);
+	void SpawnRandomThunderVFX(const FVector& Location);
+	void SpawnThunderVFX(const FVector& Location);
+	
+
+
 	float getFloorZ(FVector2D Loc);
 };

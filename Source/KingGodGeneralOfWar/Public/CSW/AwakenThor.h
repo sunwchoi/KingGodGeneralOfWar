@@ -49,20 +49,6 @@ public:
 	class UAwakenThorFSM* getFSM() const;
 	bool SetHp(float Damage);
 	float GetHpPercent() const;
-
-	void OnBodyTrail();
-	void OffBodyTrail();
-
-	void OnLHandTrail();
-	void OffLHandTrail();
-
-	void OnRFootTrail();
-	void OffRFootTrail();
-
-	void OnWeaponTrail();
-	void OffWeaponTrail();
-
-	void OffAllTrail();
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess))
@@ -74,6 +60,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	UCapsuleComponent* HeadCapsule;
 
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
+	UCapsuleComponent* BodyCapsule;
+	
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	UCapsuleComponent* LArmCapsule;
 
@@ -113,18 +102,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
 	UPointLightComponent* RMjolnirLight;
-
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
-	class UNiagaraComponent* BodyTrailVfxComp;
-
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
-	class UNiagaraComponent* LHandTrailVfxComp;
-
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
-	class UNiagaraComponent* RFootTrailVfxComp;
-
-	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess))
-	class UNiagaraComponent* WeaponTrailVfxComp;
 	
 	
 	UFUNCTION()

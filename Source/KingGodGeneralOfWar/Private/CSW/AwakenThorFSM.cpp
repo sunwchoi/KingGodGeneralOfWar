@@ -9,7 +9,6 @@
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorAnim.h"
 #include "CSW/CSWGameMode.h"
-#include "CSW/InGameWidget.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -127,8 +126,7 @@ void UAwakenThorFSM::IdleState()
 		}
 		else
 		{
-			NextStates.Add(EAwakenThorState::RangedAttackChange);
-			// NextStates.Add(EAwakenThorState::Teleport);
+			NextStates.Add(EAwakenThorState::Teleport);
 			NextStates.Add(EAwakenThorState::Dash);
 		}
 		
@@ -136,19 +134,10 @@ void UAwakenThorFSM::IdleState()
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		// State = NextStates[idx];
 		State = EAwakenThorState::Dash;
-		// Me->OnWeaponTrail();
-		Me->OnBodyTrail();
-		// Me->OnLHandTrail();
-		Me->OnRFootTrail();
-		if (State == EAwakenThorState::Dash)
-		{
-			Me->OnBodyTrail();
-		}
 		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
 			bSuperArmor = true;
 	}
 }
-
 
 void UAwakenThorFSM::MoveState()
 {
@@ -309,7 +298,7 @@ void UAwakenThorFSM::ReadyPoundAttack()
 void UAwakenThorFSM::StartPoundAttack()
 {
 	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
-	SpawnThunderVFX(AttackZone.Top().first);
+	SpawnRandomThunderVFX(AttackZone.Top().first);
 	SphereOverlap(AttackZone.Pop(), 10, EHitType::STUN, false);
 	DecalZone.Pop()->DestroyComponent();
 }
@@ -318,14 +307,18 @@ void UAwakenThorFSM::StartClapAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("LeftHand"));
 
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ClapVFX, attackLoc);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		ClapVFX,
+		attackLoc
+		);
 	SphereOverlap(std::make_pair(attackLoc, ClapZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
 void UAwakenThorFSM::StartKickAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
-	
+
 	SphereOverlap(std::make_pair(attackLoc, KickZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
@@ -349,7 +342,7 @@ void UAwakenThorFSM::StartJumpAttack()
 {
 	while (!AttackZone.IsEmpty())
 	{
-		SpawnThunderVFX(AttackZone.Top().first);
+		SpawnRandomThunderVFX(AttackZone.Top().first);
 		SphereOverlap(AttackZone.Pop(), 10, EHitType::STUN, false);
 		DecalZone.Pop()->DestroyComponent();
 	}
@@ -381,8 +374,17 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::OnEnd()
 {
-	Me->OffAllTrail();
 	bSuperArmor = false;
+	if (!DecalZone.IsEmpty())
+	{
+		for (auto zone: DecalZone)
+			zone->DestroyComponent();
+		DecalZone.Empty();
+	}
+	if (!AttackZone.IsEmpty())
+	{
+		AttackZone.Empty();
+	}
 	if (State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport)
 		State = EAwakenThorState::BackTeleport;
 	else if (State == EAwakenThorState::Teleport)
@@ -393,7 +395,8 @@ void UAwakenThorFSM::OnEnd()
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%d"), bSuperArmor);
+	if (State == EAwakenThorState::Die)
+		return ;
 	
 	bool isDie = Me->SetHp(Damage);
 
@@ -480,13 +483,28 @@ UDecalComponent* UAwakenThorFSM::DrawAttackZoneDecal(const std::pair<FVector, fl
 	return UGameplayStatics::SpawnDecalAtLocation(GetWorld(), AttackZoneDecal, size, Zone.first - FVector(0, 0, 50), FRotator(-90, 0, 0));
 }
 
-void UAwakenThorFSM::SpawnThunderVFX(FVector Location)
+void UAwakenThorFSM::SpawnRandomThunderVFX(const FVector& Location)
+{
+	if (ThunderVFXarr.IsEmpty())
+		return ;
+	
+	int rand = FMath::RandRange(0, ThunderVFXarr.Num() - 1);
+
+	
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		ThunderVFXarr[rand],
+		Location - FVector(0, 0, 20)
+		);
+
+}
+
+void UAwakenThorFSM::SpawnThunderVFX(const FVector& Location)
 {
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		ThunderVFX,
 		Location - FVector(0, 0, 20)
 		);
-
 }
 
