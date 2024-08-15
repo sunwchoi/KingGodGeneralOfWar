@@ -132,10 +132,8 @@ void UAwakenThorFSM::IdleState()
 		
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
-		// State = NextStates[idx];
-		State = EAwakenThorState::Dash;
-		if (State == EAwakenThorState::Dash || State == EAwakenThorState::LeftTeleport || State == EAwakenThorState::RightTeleport || State == EAwakenThorState::BackTeleport || State == EAwakenThorState::Teleport)
-			bSuperArmor = true;
+		State = NextStates[idx];
+		// State = EAwakenThorState::PoundAttack;
 	}
 }
 
@@ -318,7 +316,12 @@ void UAwakenThorFSM::StartClapAttack()
 void UAwakenThorFSM::StartKickAttack()
 {
 	FVector attackLoc = Me->GetMesh()->GetBoneLocation(FName("RightFoot"));
-
+	
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ClapVFX,
+			attackLoc
+			);
 	SphereOverlap(std::make_pair(attackLoc, KickZoneRadius), 10, EHitType::NB_HIGH, true);
 }
 
@@ -374,7 +377,6 @@ void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString&
 
 void UAwakenThorFSM::OnEnd()
 {
-	bSuperArmor = false;
 	if (!DecalZone.IsEmpty())
 	{
 		for (auto zone: DecalZone)
@@ -391,6 +393,7 @@ void UAwakenThorFSM::OnEnd()
 		State = EAwakenThorState::RangedAttackChange;
 	else
 		State = EAwakenThorState::Idle;
+	Me->EquipWeapon();
 }
 
 void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
@@ -399,7 +402,7 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		return ;
 	
 	bool isDie = Me->SetHp(Damage);
-
+	
 	if (GameMode)
 		GameMode->SetEnemyHpBar(Me->GetHpPercent());
 
@@ -411,7 +414,26 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		return;
 	}
 
-	if (bSuperArmor && !bSuperAttack)
+	ArmorGage += Damage * 4;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), ArmorGage);
+	if (ArmorGage >= 100.f)
+	{
+		bSuperArmor = false;
+		ArmorGage = 0.f;
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EmberVFX, Me->GetActorLocation(), FRotator::ZeroRotator, FVector(10));
+		FTimerHandle tmp0;
+		GetWorld()->GetTimerManager().SetTimer(tmp0, [this]()
+		{
+			SetGlobalTimeDilation(0.1f, 0.2f);
+		}, 0.03f, false);
+		FTimerHandle tmp1;
+		GetWorld()->GetTimerManager().SetTimer(tmp1, [this]()
+		{
+			bSuperArmor = true;
+		}, 4.f, false);
+	}
+
+	if (State != EAwakenThorState::Idle && (bSuperArmor && !bSuperAttack))
 		return ;
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);
@@ -506,5 +528,15 @@ void UAwakenThorFSM::SpawnThunderVFX(const FVector& Location)
 		ThunderVFX,
 		Location - FVector(0, 0, 20)
 		);
+}
+
+void UAwakenThorFSM::SetGlobalTimeDilation(float Duration, float SlowScale)
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowScale);
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, Duration, false);
 }
 

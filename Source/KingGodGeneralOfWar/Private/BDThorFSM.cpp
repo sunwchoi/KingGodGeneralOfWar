@@ -215,11 +215,11 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 
 	// 가능한 상태들을 배열로 저장
 	TArray<BDThorGeneralState> AttackStates = {
-		/*BDThorGeneralState::BDHammerThrow,
-		BDThorGeneralState::BDHammerThreeSwing,
-		BDThorGeneralState::BDHitDown,*/
-		BDThorGeneralState::BDHammerWind,
-		//BDThorGeneralState::BDClap,
+		BDThorGeneralState::BDHammerThrow,
+		//BDThorGeneralState::BDHammerThreeSwing,
+		//BDThorGeneralState::BDHitDown,
+		//BDThorGeneralState::BDHammerWind,
+		BDThorGeneralState::BDClap,
 		BDThorGeneralState::BDKick,
 		//BDThorGeneralState::BDGiveUPFly
 	};
@@ -514,12 +514,16 @@ void UBDThorFSM::BDHitShock()
 
 	UGameplayStatics::PlayWorldCameraShake(GetWorld(), me->BDCameraShake, me->GetActorLocation(), 0, 15000); //카메라 쉐이크
 
+	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftHand"));
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDHitDownVFX, attackLoc - FVector(0,0,150.f)); //이펙트
+
 	//노티파이 발생 시 토르를 중심으로 영역 발생, 데미지
 	BDSphereOverlap(20, EHitType::NB_HIGH, true);
 
 	//충격파 발생 
 	//데칼을 이용해 머터리얼 부름
-	BDInitializeThorAreaDecal(Radius);
+	//BDInitializeThorAreaDecal(Radius);
 
 }
 
@@ -686,14 +690,15 @@ void UBDThorFSM::BDClapSphereOverlap(FVector loc, float ZoneSize, float Damage, 
 void UBDThorFSM::BDClapAttack()
 {
 	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftHand"));
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDClapVFX, attackLoc); //이펙트
+	//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDEmberVFX, attackLoc); //음파 이펙트
+	//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDClapVFX, attackLoc); //이펙트
 	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
 }
 
 void UBDThorFSM::BDKickAttack()
 {
 	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftFoot"));
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDKickVFX, attackLoc); //이펙트
+	//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDKickVFX, attackLoc); //이펙트
 	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
 }
 
