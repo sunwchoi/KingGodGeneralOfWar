@@ -1178,7 +1178,11 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		//CurHP -= FMath::Max(DamageValue, 0);
 		CurHP = FMath::Max(CurHP - DamageValue, 0);
 		if (GameMode)
+		{
 			GameMode->SetPlayerHpBar(CurHP / MaxHP);
+			GameMode->PlayHitWidgetAnim();
+		}
+		
 		if (bSuperArmor) return false;
 		if (CurHP == 0)
 		{

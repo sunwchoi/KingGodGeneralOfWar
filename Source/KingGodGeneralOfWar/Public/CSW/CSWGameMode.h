@@ -32,6 +32,11 @@ public:
 	void EndWithSucceed();
 	void EndFirstThor();
 	
+	UFUNCTION()
+	void PlayFinalSequence();
+
+	UFUNCTION()
+	void EndGame();
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UOutGameWidget> WBP_GameStart;
@@ -60,6 +65,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Cinematic")
 	class ULevelSequence* SQ_FinalScene;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic")
+	class ULevelSequence* SQ_FinalFadeIn;
 
 	UPROPERTY(EditAnywhere, Category = "Cinematic")
 	class ULevelSequence* SQ_middleScene;

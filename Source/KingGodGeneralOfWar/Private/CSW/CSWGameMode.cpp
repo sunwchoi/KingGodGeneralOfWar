@@ -140,7 +140,7 @@ void ACSWGameMode::EndWithFail()
 	OutGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameFail);
 	if (OutGameWidget)
 		OutGameWidget->AddToViewport();
-
+	 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
@@ -153,22 +153,16 @@ void ACSWGameMode::EndWithFail()
 
 void ACSWGameMode::EndWithSucceed()
 {
-	if (SQ_FinalScene)
+	// 페이드인
+	if (SQ_FinalFadeIn)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SQ_FinalFadeIn")));
 		ALevelSequenceActor* outActor;
-		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalScene, FMovieSceneSequencePlaybackSettings(), outActor);
+		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalFadeIn, FMovieSceneSequencePlaybackSettings(), outActor);
 		SequencePlayer->Play();
+		SequencePlayer->OnFinished.AddDynamic(this, &ACSWGameMode::PlayFinalSequence);
 	}
 
-	//EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameSucceed);
-	//if (EndGameWidget)
-	//{
-	//	EndGameWidget->AddToViewport();
-	//}
-
-	//AudioComp->Stop();
-	//AudioComp->SetSound(EndingSound);
-	//AudioComp->Play();
 }
 
 void ACSWGameMode::EndFirstThor()
@@ -200,6 +194,34 @@ void ACSWGameMode::EndFirstThor()
 			
 		}
 	}
+}
+
+void ACSWGameMode::PlayFinalSequence()
+{
+	if(SQ_FinalScene)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SQ_FinalScene")));
+		ALevelSequenceActor* outActor;
+		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalScene, FMovieSceneSequencePlaybackSettings(), outActor);
+		SequencePlayer->Play();
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &ACSWGameMode::EndGame, 5.0f);
+		//
+	}
+}
+
+void ACSWGameMode::EndGame()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("EndGame")));
+	EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameSucceed);
+	if (EndGameWidget)
+	{
+		EndGameWidget->AddToViewport();
+	}
+
+	AudioComp->Stop();
+	AudioComp->SetSound(EndingSound);
+	AudioComp->Play();
 }
 
 
