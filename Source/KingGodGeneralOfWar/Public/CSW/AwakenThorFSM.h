@@ -76,7 +76,7 @@ public:
 	void GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
 	void OnEnd();
 	
-
+	void SetGlobalTimeDilation(float Duration, float SlowScale);
 	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::UP, bool bSuperAttack = false);
 	void SetJump(bool Value);
 	void SetSuperArmor(bool Value);
@@ -102,6 +102,8 @@ private:
 	float IdleDelayTime = 1.5f;
 	float CurrentTime = 0.f;
 	
+	float ArmorGage = 0.f;
+	
 	float TeleportDist = 1000;
 
 	FTimerHandle MoveTimerHandle;
@@ -120,11 +122,14 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
 	UNiagaraSystem* KickVFX;
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	UNiagaraSystem* EmberVFX;
 	
 	TArray<std::pair<FVector, float>> AttackZone;
 
 	bool bJump;
-	bool bSuperArmor;
+	bool bSuperArmor = true;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")
