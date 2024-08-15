@@ -81,8 +81,7 @@ public:
 	UFUNCTION()
 	void AnimNotify_OffTrail();
 
-	void PlayHitMontage();
-	void JumpToHitSection(const FString& Section);
+	void PlayHitMontage(const FString& Section);
 
 	void PlayDieMontage();
 
@@ -91,13 +90,17 @@ public:
 	void PlayPoundAttackMontage();
 	void PlayTeleportMontage();
 	void PlayJumpAttackMontage();
+	void PlayKnockBackMontage();
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DieMontage;
 
 	UPROPERTY(EditDefaultsOnly)
-	UAnimMontage* HitMontage;
+	TArray<UAnimMontage*> HitMontageArr;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* KnockBackMontage;
+	
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* ClapAttackMontage;
 
