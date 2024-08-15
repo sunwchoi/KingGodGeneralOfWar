@@ -22,6 +22,8 @@ public:
 	void SetEnemyHpBar(float Percent);
 	void SetPlayerHpBar(float Percent);
 
+	void PlayHitWidgetAnim();
+
 	void StartFirstPhase();
 	void StartSecondPhase();
 	void GoToNextPhase();
@@ -38,6 +40,9 @@ private:
 	TSubclassOf<class UInGameWidget> WBP_InGame;
 	
 	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UHitWidget> WBP_Hit;
+	
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> WBP_GameFail;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -45,6 +50,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> WBP_MiddleScene;
+
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AAwakenThor> BP_AwakenThor;
@@ -63,6 +69,9 @@ private:
 
 	UPROPERTY()
 	class UInGameWidget* InGameWidget;
+
+	UPROPERTY()
+	class UHitWidget* HitWidget;
 
 	UPROPERTY()
 	UUserWidget* EndGameWidget;

@@ -15,6 +15,9 @@
 #include "MovieSceneSequencePlaybackSettings.h"
 
 #include <Runtime/LevelSequence/Public/LevelSequencePlayer.h>
+
+#include "CSW/HitWidget.h"
+
 ACSWGameMode::ACSWGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -31,9 +34,13 @@ void ACSWGameMode::BeginPlay()
 	if (InGameWidget)
 		InGameWidget->AddToViewport();
 	
+	HitWidget = CreateWidget<UHitWidget>(GetWorld(), WBP_Hit);
+	if (HitWidget)
+		HitWidget->AddToViewport();
 	OutGameWidget = CreateWidget<UOutGameWidget>(GetWorld(), WBP_GameStart);
 	if (OutGameWidget)
 			OutGameWidget->AddToViewport();
+
 	AudioComp->SetSound(IntroSound);
 	AudioComp->Play();
 	
@@ -47,6 +54,7 @@ void ACSWGameMode::BeginPlay()
 	
 		PlayerController->SetPause(true);
 	}
+	bFirstPhase = false;
 	if (bFirstPhase)
 	{
 		StartFirstPhase();
@@ -62,14 +70,6 @@ void ACSWGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	AKratos* player;
-	APlayerController* PlayerController;
-	
-	if ((PlayerController = GetWorld()->GetFirstPlayerController()) != nullptr &&
-		(player = Cast<AKratos>(PlayerController->GetPawn())) != nullptr)
-	{
-		SetPlayerHpBar(player->CurHP /  player->MaxHP);
-	}
 }
 
 void ACSWGameMode::SetEnemyHpBar(float Percent)
@@ -80,6 +80,11 @@ void ACSWGameMode::SetEnemyHpBar(float Percent)
 void ACSWGameMode::SetPlayerHpBar(float Percent)
 {
 	InGameWidget->SetPlayerHpBar(Percent);
+}
+
+void ACSWGameMode::PlayHitWidgetAnim()
+{
+	HitWidget->PlayHitAnimation();
 }
 
 void ACSWGameMode::StartFirstPhase()
@@ -148,7 +153,6 @@ void ACSWGameMode::EndWithFail()
 
 void ACSWGameMode::EndWithSucceed()
 {
-
 	if (SQ_FinalScene)
 	{
 		ALevelSequenceActor* outActor;
@@ -177,19 +181,19 @@ void ACSWGameMode::EndFirstThor()
 			ALevelSequenceActor* outActor;
 			ULevelSequencePlayer* BDSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_middleScene, FMovieSceneSequencePlaybackSettings(), outActor);
 			
-			// ½ÃÄö½º Àç»ýÀÌ ³¡³ª¸é GoToNextPhase¸¦ È£ÃâÇÏµµ·Ï ¹ÙÀÎµù
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ GoToNextPhaseï¿½ï¿½ È£ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½
 			//BDSequencePlayer->OnFinished.AddDynamic(this, &ACSWGameMode::GoToNextPhase);
 
 			if (BDSequencePlayer)
 			{
 				BDSequencePlayer->Play();
 				FTimerHandle handle;
-				// ½ÃÄö½º°¡ ³¡³­ ÈÄ ÇÔ¼ö¸¦ È£ÃâÇÏµµ·Ï Å¸ÀÌ¸Ó ¼³Á¤ (¿¹: 10ÃÊ ÈÄ)
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½: 10ï¿½ï¿½ ï¿½ï¿½)
 				GetWorld()->GetTimerManager().SetTimer(
 					handle,
 					this,
 					&ACSWGameMode::GoToNextPhase,
-					20.f, // ½ÃÄö½ºÀÇ Àç»ý ½Ã°£ÀÌ ¿©±â¿¡ ÇØ´çÇÏ´Â ½Ã°£À¸·Î ¼³Á¤
+					20.f, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					false
 				);
 			}

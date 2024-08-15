@@ -190,6 +190,7 @@ void AAwakenThor::BeginPlay()
 
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
 
+	Hp = 5.f;
 }
 
 // Called every frame

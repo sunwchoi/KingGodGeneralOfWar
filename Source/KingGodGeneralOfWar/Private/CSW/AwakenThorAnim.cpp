@@ -121,8 +121,8 @@ void UAwakenThorAnim::PlayHitMontage(const FString& Section)
 
 void UAwakenThorAnim::PlayDieMontage()
 {
-	if (!Montage_IsPlaying(DieMontage))
-		Montage_Play(DieMontage);
+	UE_LOG(LogTemp, Warning, TEXT("DIE"));
+	Montage_Play(DieMontage);
 }
 
 void UAwakenThorAnim::PlayClapAttackMontage()
