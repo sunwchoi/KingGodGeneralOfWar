@@ -158,6 +158,7 @@ public:
 	// Damage Function
 	// if Kratos get damage, return true; else return false;
 	bool Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
+	void LaunchKratos();
 
 	// Rune
 	void OnMyRuneReady();

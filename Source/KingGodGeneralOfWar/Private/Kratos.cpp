@@ -750,6 +750,7 @@ void AKratos::OnMyActionRunOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
+	LaunchKratos();
 	if (bParrying || bGuardStagger)
 	{
 		return;
@@ -1216,4 +1217,10 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		return true;
 	}
 	return false;
+}
+
+void AKratos::LaunchKratos()
+{
+	const float LaunchScale = 2000;
+	LaunchCharacter(GetActorForwardVector() * -1 * LaunchScale, true, false);
 }
