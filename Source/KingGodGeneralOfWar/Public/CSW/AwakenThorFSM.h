@@ -104,7 +104,7 @@ private:
 	UPROPERTY()
 	class ACSWGameMode* GameMode;
 	
-	float IdleDelayTime = 1.5f;
+	float IdleDelayTime = 0.9f;
 	float CurrentTime = 0.f;
 	
 	float ArmorGage = 0.f;

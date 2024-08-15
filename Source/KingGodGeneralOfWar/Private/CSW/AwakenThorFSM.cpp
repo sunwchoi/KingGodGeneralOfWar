@@ -443,7 +443,7 @@ bool UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		return true;
 	}
 
-	ArmorGage += Damage * 6;
+	ArmorGage += Damage * 3;
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ArmorGage);
 	if (ArmorGage >= 100.f)
 	{
