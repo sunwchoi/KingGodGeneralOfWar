@@ -53,7 +53,13 @@ void ASG_Shield::OnShieldAttackOverlap(UPrimitiveComponent* OverlappedComponent,
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
 
-		AwakenThor->getFSM()->SetDamage(SHIELD_DAMAGE, EAttackDirectionType::UP);
+		bool bThorDead = AwakenThor->getFSM()->SetDamage(SHIELD_DAMAGE, EAttackDirectionType::UP);
+		if (bThorDead)
+		{
+			auto* Me = Cast<AKratos>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+			if (Me)
+				Me->SetState(EPlayerState::NoneMovable);
+		}
 	}
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.01f);

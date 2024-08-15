@@ -7,6 +7,8 @@
 #include "BDThorFSM.h"
 #include "CSW/AwakenThor.h"
 #include "CSW/AwakenThorFSM.h"
+#include "Kratos.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 int8 MaxHitCnt = 4;
 ARuneAttackField::ARuneAttackField()
@@ -61,7 +63,7 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 	else
 	{
 		auto AwakenThor = Cast<AAwakenThor>(OtherActor);
-		AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
+		bool bThorDead = AwakenThor->getFSM()->SetDamage(fieldDamage, EAttackDirectionType::UP, true);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [this]()
 			{
@@ -69,6 +71,12 @@ void ARuneAttackField::OnFieldOverlap(UPrimitiveComponent* OverlappedComponent, 
 
 			}, fieldDalay, false);
 		HitCnt++;
+		if (bThorDead)
+		{
+			auto* Me = Cast<AKratos>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+			if (Me)
+				Me->SetState(EPlayerState::NoneMovable);
+		}
 	}
 
 }

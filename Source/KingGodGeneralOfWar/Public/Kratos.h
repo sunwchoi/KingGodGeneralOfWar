@@ -180,8 +180,8 @@ public:
 	int32 GetCurrentWeakCombo();
 	int32 GetCurrentStrongCombo();
 	void SetGlobalTimeDilation(float Duration, float SlowScale);
-private:
 	void SetState(EPlayerState NextState);
+private:
 
 	// Weak Attack Combo
 	void WeakAttackStartComboState();

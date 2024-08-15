@@ -78,7 +78,11 @@ void AAxe::OnAxeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 		if (AwakenThor)
 		{
 			attackDirection = Me->GetAttackDirection();
-			AwakenThor->getFSM()->SetDamage(AXE_DAMAGE, attackDirection);
+			bool bThorDead = AwakenThor->getFSM()->SetDamage(AXE_DAMAGE, attackDirection);
+			if (bThorDead)
+			{
+				Me->SetState(EPlayerState::NoneMovable);
+			}
 		}
 	}
 

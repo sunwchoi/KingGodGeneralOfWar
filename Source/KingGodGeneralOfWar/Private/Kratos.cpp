@@ -1165,7 +1165,12 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 			{
 				auto AwakenThor = Cast<AAwakenThor>(Attacker);
 
-				AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP, true);
+				//AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP, true);
+				bool bThorDead = AwakenThor->getFSM()->SetDamage(PARRYING_DAMAGE, EAttackDirectionType::UP);
+				if (bThorDead)
+				{
+					SetState(EPlayerState::NoneMovable);
+				}
 			}
 		}
 	}
