@@ -27,6 +27,7 @@ public:
 	void GoToNextPhase();
 	void EndWithFail();
 	void EndWithSucceed();
+	void EndFirstThor();
 	
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -53,6 +54,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Cinematic")
 	class ULevelSequence* SQ_FinalScene;
 
+	UPROPERTY(EditAnywhere, Category = "Cinematic")
+	class ULevelSequence* SQ_middleScene;
+
 	UPROPERTY()
 	UUserWidget* OutGameWidget;
 
@@ -76,6 +80,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* Phase2Sound;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* MiddleSound;
 
 	UPROPERTY(EditDefaultsOnly)
 	UAudioComponent* AudioComp;
