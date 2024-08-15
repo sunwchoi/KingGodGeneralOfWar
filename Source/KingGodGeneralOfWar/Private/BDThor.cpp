@@ -17,6 +17,7 @@
 #include "SG_Shield.h"
 #include "Components/SphereComponent.h"
 #include "CSW/CSWGameMode.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 
 // Sets default values
 ABDThor::ABDThor()
@@ -297,12 +298,15 @@ void ABDThor::BDWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		auto* AttackTarget = Cast<AKratos>(OtherActor); //타겟일때
 		auto* shield = Cast<ASG_Shield>(OtherActor);
 		//플레이어가 맞고, 플레이어에게 데미지가 들어가는 상태, true를 return할때 계속 공격
-		if (AttackTarget && AttackTarget->Damage(this, 10, EHitType::NB_HIGH, true) == true) {
-			fsm->bBDAttackCheck = true;
-			AttackTarget->Damage(this, 10, EHitType::NB_HIGH, true);
-			fsm->BDSetState(BDThorGeneralState::BDBackDodge);
-			//fsm->BDSetState(BDThorGeneralState::BDAvoidance);
-			UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //회피로 변경
+		if (AttackTarget) {
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), fsm->BDThreeSwingVFX, BDWeaponCol->GetComponentLocation()); //이펙트
+			if (AttackTarget->Damage(this, 10, EHitType::NB_HIGH, true) == true) {
+				fsm->bBDAttackCheck = true;
+				AttackTarget->Damage(this, 10, EHitType::NB_HIGH, true);
+				fsm->BDSetState(BDThorGeneralState::BDBackDodge);
+				//fsm->BDSetState(BDThorGeneralState::BDAvoidance);
+				UE_LOG(LogTemp, Warning, TEXT("Kratos Attack!!")); //회피로 변경
+			}
 		}
 		else if(shield){
 			UE_LOG(LogTemp, Warning, TEXT("shield Attack"));
