@@ -158,7 +158,7 @@ public:
 	// Damage Function
 	// if Kratos get damage, return true; else return false;
 	bool Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool IsMelee);
-	void LaunchKratos();
+	void LaunchKratos(float LaunchScale = 2000);
 
 	// Rune
 	void OnMyRuneReady();
@@ -291,6 +291,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UNiagaraSystem* ParryVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	class UNiagaraSystem* ShockWaveVFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	class UNiagaraSystem* GuardBlockVFX;

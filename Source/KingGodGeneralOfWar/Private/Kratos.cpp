@@ -750,7 +750,6 @@ void AKratos::OnMyActionRunOff(const FInputActionValue& value)
 
 void AKratos::OnMyActionGuardOn(const FInputActionValue& value)
 {
-	LaunchKratos();
 	if (bParrying || bGuardStagger)
 	{
 		return;
@@ -1148,6 +1147,7 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	{
 		GetWorld()->SpawnActor<AActor>(ParryingLightFactory, Shield->LightPosition->GetComponentTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
 		UNiagaraFunctionLibrary::SpawnSystemAttached(ParryVFX, Shield->LightPosition, TEXT("ParryVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
+		UNiagaraFunctionLibrary::SpawnSystemAttached(ShockWaveVFX, Shield->LightPosition, TEXT("ShockWaveVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
 		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryVFX, Shield->GetActorLocation(), FRotator(0), FVector(0.0001f));
 
 		CameraShakeOnAttack(EAttackDirectionType::DOWN, 0.5f);
@@ -1219,8 +1219,7 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 	return false;
 }
 
-void AKratos::LaunchKratos()
+void AKratos::LaunchKratos(float LaunchScale)
 {
-	const float LaunchScale = 2000;
 	LaunchCharacter(GetActorForwardVector() * -1 * LaunchScale, true, false);
 }
