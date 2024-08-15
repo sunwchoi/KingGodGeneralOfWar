@@ -224,7 +224,7 @@ void UAwakenThorFSM::DamageState()
 
 void UAwakenThorFSM::DieState()
 {
-	Anim->PlayDieMontage();
+
 }
 
 void UAwakenThorFSM::LookTeleportDirection()
