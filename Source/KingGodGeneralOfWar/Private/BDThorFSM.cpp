@@ -17,6 +17,7 @@
 #include "Materials/MaterialInterface.h"
 #include "CSW/CSWGameMode.h"
 #include "Components/CapsuleComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 
 
 // Sets default values for this component's properties
@@ -685,13 +686,14 @@ void UBDThorFSM::BDClapSphereOverlap(FVector loc, float ZoneSize, float Damage, 
 void UBDThorFSM::BDClapAttack()
 {
 	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftHand"));
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDClapVFX, attackLoc); //이펙트
 	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
-	//UE_LOG(LogTemp, Warning, TEXT("ClapAttack"));
 }
 
 void UBDThorFSM::BDKickAttack()
 {
 	FVector attackLoc = me->GetMesh()->GetBoneLocation(FName("LeftFoot"));
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BDKickVFX, attackLoc); //이펙트
 	BDClapSphereOverlap(attackLoc, 200.f, 10, EHitType::NB_HIGH, true);
 }
 

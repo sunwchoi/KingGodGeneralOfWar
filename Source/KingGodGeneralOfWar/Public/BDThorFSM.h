@@ -181,5 +181,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;
-		
+
+
+	//이펙트
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	class UNiagaraSystem* BDClapVFX; //박수 VFX
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	class UNiagaraSystem* BDKickVFX; //발차기 VFX
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	class UNiagaraSystem* BDHitDownVFX; //주먹으로 내려치기 VFX
+
+	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess), Category="VFX")
+	class UNiagaraSystem* BDThreeSwingVFX; //세번 휘두르기 VFX
 };
