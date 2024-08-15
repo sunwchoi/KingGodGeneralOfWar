@@ -11,7 +11,9 @@
 #include "CSW/InGameWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
+#include "MovieSceneSequencePlaybackSettings.h"
 
+#include <Runtime/LevelSequence/Public/LevelSequencePlayer.h>
 ACSWGameMode::ACSWGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -144,14 +146,22 @@ void ACSWGameMode::EndWithFail()
 
 void ACSWGameMode::EndWithSucceed()
 {
-	EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameSucceed);
-	if (EndGameWidget)
+
+	if (SQ_FinalScene)
 	{
-		EndGameWidget->AddToViewport();
+		ALevelSequenceActor* outActor;
+		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalScene, FMovieSceneSequencePlaybackSettings(), outActor);
+		SequencePlayer->Play();
 	}
 
-	AudioComp->Stop();
-	AudioComp->SetSound(EndingSound);
-	AudioComp->Play();
+	//EndGameWidget = CreateWidget<UUserWidget>(GetWorld(), WBP_GameSucceed);
+	//if (EndGameWidget)
+	//{
+	//	EndGameWidget->AddToViewport();
+	//}
+
+	//AudioComp->Stop();
+	//AudioComp->SetSound(EndingSound);
+	//AudioComp->Play();
 }
 

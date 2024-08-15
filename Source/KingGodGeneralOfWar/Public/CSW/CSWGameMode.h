@@ -50,6 +50,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ABDThor> BP_BDThor;
 	
+	UPROPERTY(EditAnywhere, Category = "Cinematic")
+	class ULevelSequence* SQ_FinalScene;
+
 	UPROPERTY()
 	UUserWidget* OutGameWidget;
 

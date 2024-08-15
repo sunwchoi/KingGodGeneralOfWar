@@ -818,6 +818,23 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	if (bLockOn)
 	{
 		LockTarget = OutHit.GetActor();
+
+		// **********************************************************************
+		auto* Thor = Cast<ABDThor>(LockTarget = OutHit.GetActor());
+		EAttackDirectionType attackDirection = EAttackDirectionType::UP;
+		if (Thor)
+		{
+			Thor->fsm->Damage(100, attackDirection);
+		}
+		else
+		{
+			auto AwakenThor = Cast<AAwakenThor>(LockTarget);
+			if (AwakenThor)
+			{
+				AwakenThor->getFSM()->SetDamage(100, attackDirection);
+			}
+		}
+		// **********************************************************************
 	}
 
 }

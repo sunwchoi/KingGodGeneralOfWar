@@ -9,7 +9,7 @@ public class KingGodGeneralOfWar : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG"
-		, "Niagara" });
+		, "Niagara", "MovieScene", "LevelSequence" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
