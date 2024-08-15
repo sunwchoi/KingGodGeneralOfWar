@@ -54,7 +54,6 @@ void ACSWGameMode::BeginPlay()
 	
 		PlayerController->SetPause(true);
 	}
-	bFirstPhase = false;
 	if (bFirstPhase)
 	{
 		StartFirstPhase();
