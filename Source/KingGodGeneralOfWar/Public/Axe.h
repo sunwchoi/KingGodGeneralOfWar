@@ -36,6 +36,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
 	class UNiagaraSystem* BloodVFX3Factory;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	class UNiagaraSystem* BloodVFX4Factory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	class UNiagaraSystem* BloodVFX5Factory;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	class UNiagaraSystem* BloodVFX6Factory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	class UNiagaraSystem* BloodVFX7Factory;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	class UNiagaraSystem* BloodVFX8Factory;
+
+
 	UPROPERTY()
 	TArray<class UNiagaraSystem*> BloodVFXFactoryArr;
 

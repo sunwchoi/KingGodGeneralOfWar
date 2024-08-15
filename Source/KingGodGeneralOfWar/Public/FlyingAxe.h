@@ -54,7 +54,7 @@ public:
 	class AKratos* Me;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UParticleSystem* BloodVFXFactory;
+	class UNiagaraSystem* BloodVFXFactory;
 
 	UFUNCTION()
 	void FlyingAxeOnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

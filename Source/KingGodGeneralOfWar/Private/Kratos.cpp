@@ -352,6 +352,7 @@ void AKratos::Tick(float DeltaTime)
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, GetPlayerStateString());
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("TargetTargetArmLength: %f"), TargetTargetArmLength));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::White, FString::Printf(TEXT("TargetCameraOffset: %s"), *TargetCameraOffset.ToString()));
 
 }
 // -------------------------------------------------- TICK -------------------------------------------------------------
@@ -459,6 +460,16 @@ void AKratos::OnMyJumpCharacterInStrongAttack()
 	FVector dir = GetActorForwardVector() + FVector(0, 0, 1);
 	dir.Normalize();
 	LaunchCharacter(dir * LaunchScale, true, true);
+}
+
+void AKratos::IncreaseTargetTargetArmLength(float value)
+{
+	TargetTargetArmLength += value;
+}
+
+void AKratos::IncreaseTargetCameraOffset(FVector value)
+{
+	TargetCameraOffset += value;
 }
 
 void AKratos::SetWeapon()
@@ -807,6 +818,23 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	if (bLockOn)
 	{
 		LockTarget = OutHit.GetActor();
+
+		// **********************************************************************
+		auto* Thor = Cast<ABDThor>(LockTarget = OutHit.GetActor());
+		EAttackDirectionType attackDirection = EAttackDirectionType::UP;
+		if (Thor)
+		{
+			Thor->fsm->Damage(100, attackDirection);
+		}
+		else
+		{
+			auto AwakenThor = Cast<AAwakenThor>(LockTarget);
+			if (AwakenThor)
+			{
+				AwakenThor->getFSM()->SetDamage(100, attackDirection);
+			}
+		}
+		// **********************************************************************
 	}
 
 }
@@ -998,6 +1026,11 @@ void AKratos::SetState(EPlayerState NextState)
 	case EPlayerState::Parry:
 		bParrying = false;
 		break;
+
+	case EPlayerState::GuardStart:
+	case EPlayerState::Guard:
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		break;
 	}
 
 	State = NextState;
@@ -1022,6 +1055,7 @@ void AKratos::SetState(EPlayerState NextState)
 	case EPlayerState::Guard:
 	case EPlayerState::GuardStart:
 		TargetFOV = GUARD_FOV;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		break;
 	case EPlayerState::Aim:
 		TargetFOV = AIM_FOV;
@@ -1050,7 +1084,6 @@ void AKratos::WeakAttackStartComboState()
 	CanNextWeakCombo = true;
 	bIsWeakComboInputOn = false;
 	CurrentWeakCombo = FMath::Clamp<int8>(CurrentWeakCombo + 1, 1, 4);
-	TargetTargetArmLength -= 7.5;
 }
 
 void AKratos::WeakAttackEndComboState()
@@ -1066,7 +1099,6 @@ void AKratos::StrongAttackStartComboState()
 	CanNextStrongCombo = true;
 	bIsStrongComboInputOn = false;
 	CurrentStrongCombo = FMath::Clamp<int8>(CurrentStrongCombo + 1, 1, 4);
-	TargetTargetArmLength -= 7.5;
 }
 
 void AKratos::StrongAttackEndComboState()
@@ -1092,14 +1124,17 @@ bool AKratos::Damage(AActor* Attacker, int DamageValue, EHitType HitType, bool I
 		{
 			LaunchCharacter(GetActorForwardVector() * -1 * 1500, true, false);
 			GetWorld()->SpawnActor<AActor>(GuardBlockLightFactory, Shield->GetActorTransform())->AttachToActor(Shield, FAttachmentTransformRules::KeepWorldTransform);
+			UNiagaraFunctionLibrary::SpawnSystemAttached(GuardBlockVFX, Shield->LightPosition, TEXT("GuardBlockVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
 			GuardHitCnt -= 1;
 			// 가드 성공 카메라 쉐이크
+			
 		}
 		// 가드 크러쉬
 		else
 		{
 			SetState(EPlayerState::NoneMovable);
 			LaunchCharacter(GetActorForwardVector() * -1 * 3000, true, false);
+			UNiagaraFunctionLibrary::SpawnSystemAttached(GuardCrashVFX, Shield->LightPosition, TEXT("GuardBlockVFX"), Shield->LightPosition->GetComponentLocation(), Shield->LightPosition->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true);
 			Anim->JumpToGuardMontageSection(TEXT("Guard_Stagger"));
 			GuardHitCnt = GUARD_MAX_COUNT;
 			bGuardStagger = true;
