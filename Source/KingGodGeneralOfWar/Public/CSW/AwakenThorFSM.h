@@ -77,7 +77,7 @@ public:
 	void OnEnd();
 	
 	void SetGlobalTimeDilation(float Duration, float SlowScale);
-	void SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::UP, bool bSuperAttack = false);
+	bool SetDamage(float Damage = 1, EAttackDirectionType AtkDir = EAttackDirectionType::UP, bool bSuperAttack = false);
 	void SetJump(bool Value);
 	void SetSuperArmor(bool Value);
 	EAwakenThorState GetState() const;
