@@ -399,10 +399,10 @@ void UAwakenThorFSM::OnEnd()
 	Me->EquipWeapon();
 }
 
-void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
+bool UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool bSuperAttack)
 {
 	if (State == EAwakenThorState::Die)
-		return ;
+		return true;
 	
 	bool isDie = Me->SetHp(Damage);
 	
@@ -412,16 +412,15 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
+		Target->LaunchKratos(6000);
 		Anim->PlayDieMontage();
 		if (GameMode)
 		{
-			FTimerHandle handle;
-			GetWorld()->GetTimerManager().SetTimer(handle, [ this ]()
-			{
-				GameMode->EndWithSucceed();
-			}, 2.f, false);
+			GameMode->PlayHpUIFadeOutAnim();
+			GameMode->EndWithSucceed();
+		
 		}
-		return;
+		return true;
 	}
 
 	ArmorGage += Damage * 6;
@@ -443,15 +442,16 @@ void UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		}, 4.f, false);
 		State = EAwakenThorState::Damage;
 		Anim->PlayKnockBackMontage();
-		return;
+		return false;
 	}
 
 	if (State != EAwakenThorState::Idle && (bSuperArmor && !bSuperAttack))
-		return ;
+		return false;
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);
 	State = EAwakenThorState::Damage;
 	Anim->PlayHitMontage(Str);
+	return false;
 }
 
 void UAwakenThorFSM::SetJump(bool Value)
