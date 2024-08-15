@@ -200,40 +200,4 @@ public:
 	class UNiagaraSystem* BDEmberVFX; //음파
 
 
-	//BGM
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* ThreeSound1; //망치 휘두르기 1번
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* ThreeSound2; //망치 휘두르기 2번
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* ThreeSound3; //망치 휘두르기 3번
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* ClapSound; //박수 치기
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* KickSound; //발차기
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* HammerThrowSound1; //망치 던지기
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* HammerThrowSound2; //망치 던지기 2
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* WindSound; // 바람 날리기 소리
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* Damage1; // 데미지 소리 1
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* Damage2; // 데미지 소리 1
-
-	UPROPERTY(EditDefaultsOnly)
-	class USoundWave* Damage3; // 데미지 소리 1
-
-
 };
