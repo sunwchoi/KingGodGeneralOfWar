@@ -73,6 +73,8 @@ public:
 	void StartJumpAttack();
 	void StartFallAttack();
 
+	void ShakeCamera();
+
 	void GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str);
 	void OnEnd();
 	
@@ -81,6 +83,9 @@ public:
 	void SetJump(bool Value);
 	void SetSuperArmor(bool Value);
 	EAwakenThorState GetState() const;
+
+	bool bStart = true;
+
 
 
 private:
@@ -99,7 +104,7 @@ private:
 	UPROPERTY()
 	class ACSWGameMode* GameMode;
 	
-	float IdleDelayTime = 1.5f;
+	float IdleDelayTime = 0.9f;
 	float CurrentTime = 0.f;
 	
 	float ArmorGage = 0.f;
@@ -130,6 +135,7 @@ private:
 
 	bool bJump;
 	bool bSuperArmor = true;
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess), Category="ZoneRadius")

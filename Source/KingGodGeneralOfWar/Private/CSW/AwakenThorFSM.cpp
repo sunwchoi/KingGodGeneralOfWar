@@ -34,12 +34,12 @@ void UAwakenThorFSM::BeginPlay()
 	if (GameMode)
 	{
 		GameMode->SetEnemyHpBar(1);
-		GameMode->PlayHpUIFadeInAnim();
 	}
 	if (tmp)
 		Target = tmp;
 	Me = Cast<AAwakenThor>(GetOwner());
 	Anim = Cast<UAwakenThorAnim>(Me->GetMesh()->GetAnimInstance());
+	Anim->PlayStartMontage();
 }
 
 
@@ -47,6 +47,9 @@ void UAwakenThorFSM::BeginPlay()
 void UAwakenThorFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bStart)
+		return ;
 	
 	switch (State)
 	{
@@ -227,7 +230,7 @@ void UAwakenThorFSM::DamageState()
 
 void UAwakenThorFSM::DieState()
 {
-
+	
 }
 
 void UAwakenThorFSM::LookTeleportDirection()
@@ -352,7 +355,8 @@ void UAwakenThorFSM::StartJumpAttack()
 		SphereOverlap(AttackZone.Pop(), 10, EHitType::STUN, false);
 		DecalZone.Pop()->DestroyComponent();
 	}
-	
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
+
 	FVector loc = Me->GetActorLocation();
 	FVector target = Target->GetActorLocation();
 	
@@ -371,6 +375,12 @@ void UAwakenThorFSM::StartFallAttack()
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ThunderVFX, AttackZone.Top().first - FVector(0, 0, 100));
 	SphereOverlap(AttackZone.Pop(),20, EHitType::NB_HIGH, false);
 	DecalZone.Pop()->DestroyComponent();
+}
+
+void UAwakenThorFSM::ShakeCamera()
+{
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), Me->PoundCameraShake, Me->GetActorLocation(), 0, 15000);
+
 }
 
 void UAwakenThorFSM::GetHitDirectionString(EAttackDirectionType AtkDir, FString& Str)
@@ -412,18 +422,28 @@ bool UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 	if (isDie)
 	{
 		State = EAwakenThorState::Die;
-		Target->LaunchKratos(6000);
+		if (!DecalZone.IsEmpty())
+		{
+			for (auto zone: DecalZone)
+				zone->DestroyComponent();
+			DecalZone.Empty();
+		}
+		FVector targetLoc = Target->GetActorLocation();
+		FVector myLoc = Me->GetActorLocation();
+		FVector dir = targetLoc - myLoc;
+		FRotator rot = dir.Rotation();
+	
+		Me->SetActorRotation(FRotator(0, rot.Yaw, 0));
+		
+		// Target->LaunchKratos(6000);
 		Anim->PlayDieMontage();
 		if (GameMode)
-		{
 			GameMode->PlayHpUIFadeOutAnim();
-			GameMode->EndWithSucceed();
 		
-		}
 		return true;
 	}
 
-	ArmorGage += Damage * 6;
+	ArmorGage += Damage * 3;
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ArmorGage);
 	if (ArmorGage >= 100.f)
 	{

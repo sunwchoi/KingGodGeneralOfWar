@@ -48,7 +48,8 @@ void ACSWGameMode::BeginPlay()
 	if (HitWidget)
 		HitWidget->AddToViewport();
 	
-	StartFirstPhase();
+	// StartFirstPhase();
+	StartSecondPhase();
 }
 
 void ACSWGameMode::Tick(float DeltaSeconds)

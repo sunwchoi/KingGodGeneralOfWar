@@ -81,9 +81,19 @@ public:
 	UFUNCTION()
 	void AnimNotify_OffTrail();
 
+	UFUNCTION()
+	void AnimNotify_EndGame();
+
+	UFUNCTION()
+	void AnimNotify_StartGame();
+
+	UFUNCTION()
+	void AnimNotify_ShakeCamera();
+
 	void PlayHitMontage(const FString& Section);
 
 	void PlayDieMontage();
+	void PlayStartMontage();
 
 	void PlayClapAttackMontage();
 	void PlayKickAttackMontage();
@@ -95,6 +105,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DieMontage;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* StartMontage;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<UAnimMontage*> HitMontageArr;
 

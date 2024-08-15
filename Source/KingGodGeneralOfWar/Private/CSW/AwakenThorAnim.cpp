@@ -4,6 +4,7 @@
 #include "CSW/AwakenThorAnim.h"
 #include "CSW/AwakenThorFSM.h"
 #include "CSW/AwakenThor.h"
+#include "CSW/CSWGameMode.h"
 
 UAwakenThorAnim::UAwakenThorAnim()
 {
@@ -112,6 +113,28 @@ void UAwakenThorAnim::AnimNotify_OffTrail()
 {
 }
 
+void UAwakenThorAnim::AnimNotify_EndGame()
+{
+	ACSWGameMode* GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (GameMode)
+		GameMode->EndWithSucceed();
+}
+
+void UAwakenThorAnim::AnimNotify_StartGame()
+{
+	ACSWGameMode* GameMode = Cast<ACSWGameMode>(GetWorld()->GetAuthGameMode());
+
+	Fsm->bStart = false;
+	if (GameMode)
+		GameMode->PlayHpUIFadeInAnim();
+}
+
+void UAwakenThorAnim::AnimNotify_ShakeCamera()
+{
+	Fsm->ShakeCamera();
+}
+
 void UAwakenThorAnim::PlayHitMontage(const FString& Section)
 {
 	int32 rand = FMath::RandRange(0, HitMontageArr.Num() - 1);
@@ -121,8 +144,14 @@ void UAwakenThorAnim::PlayHitMontage(const FString& Section)
 
 void UAwakenThorAnim::PlayDieMontage()
 {
-	UE_LOG(LogTemp, Warning, TEXT("DIE"));
-	Montage_Play(DieMontage);
+	if(!Montage_IsPlaying(DieMontage))
+		Montage_Play(DieMontage);
+}
+
+void UAwakenThorAnim::PlayStartMontage()
+{
+	if(!Montage_IsPlaying(StartMontage))
+		Montage_Play(StartMontage);
 }
 
 void UAwakenThorAnim::PlayClapAttackMontage()

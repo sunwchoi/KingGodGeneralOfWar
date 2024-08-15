@@ -216,9 +216,9 @@ BDThorGeneralState UBDThorFSM::RandomAttackState()
 	// 가능한 상태들을 배열로 저장
 	TArray<BDThorGeneralState> AttackStates = {
 		BDThorGeneralState::BDHammerThrow,
-		//BDThorGeneralState::BDHammerThreeSwing,
-		//BDThorGeneralState::BDHitDown,
-		//BDThorGeneralState::BDHammerWind,
+		BDThorGeneralState::BDHammerThreeSwing,
+		BDThorGeneralState::BDHitDown,
+		BDThorGeneralState::BDHammerWind,
 		BDThorGeneralState::BDClap,
 		BDThorGeneralState::BDKick,
 		//BDThorGeneralState::BDGiveUPFly
