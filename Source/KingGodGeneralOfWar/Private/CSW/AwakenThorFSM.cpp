@@ -139,6 +139,8 @@ void UAwakenThorFSM::IdleState()
 		CurrentTime = 0.f;
 		int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
 		State = NextStates[idx];
+		if (State == EAwakenThorState::Dash)
+			Me->DrawWeapon();
 		// State = EAwakenThorState::PoundAttack;
 	}
 }
@@ -465,7 +467,7 @@ bool UAwakenThorFSM::SetDamage(float Damage, EAttackDirectionType AtkDir, bool b
 		return false;
 	}
 
-	if (State != EAwakenThorState::Idle && (bSuperArmor && !bSuperAttack))
+	if (State != EAwakenThorState::Idle && bSuperArmor && !bSuperAttack)
 		return false;
 	FString Str;
 	GetHitDirectionString(AtkDir, Str);

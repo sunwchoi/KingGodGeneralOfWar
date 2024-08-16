@@ -16,6 +16,7 @@
 
 #include <Runtime/LevelSequence/Public/LevelSequencePlayer.h>
 
+#include "Axe.h"
 #include "CSW/HitWidget.h"
 
 ACSWGameMode::ACSWGameMode()
@@ -99,9 +100,8 @@ void ACSWGameMode::StartSecondPhase()
 	AudioComp->Play();
 	AmbientAudioComp->SetSound(Phase2AmbientSound);
 	AmbientAudioComp->Play();
-	GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
+	Thor2 = GetWorld()->SpawnActor<AAwakenThor>(BP_AwakenThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(false);
-	UGameplayStatics::PlaySound2D(GetWorld(), Phase2Sound);	
 }
 
 void ACSWGameMode::GoToNextPhase()
@@ -134,13 +134,15 @@ void ACSWGameMode::EndWithSucceed()
 	// 페이드인
 	if (SQ_FinalFadeIn)
 	{
+		
+		
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SQ_FinalFadeIn")));
 		ALevelSequenceActor* outActor;
 		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalFadeIn, FMovieSceneSequencePlaybackSettings(), outActor);
 		SequencePlayer->Play();
 		SequencePlayer->OnFinished.AddDynamic(this, &ACSWGameMode::PlayFinalSequence);
 	}
-
+	
 }
 
 void ACSWGameMode::EndFirstThor()
@@ -161,6 +163,12 @@ void ACSWGameMode::EndFirstThor()
 			if (BDSequencePlayer)
 			{
 				BDSequencePlayer->Play();
+				FTimerHandle tmp0;
+				GetWorld()->GetTimerManager().SetTimer(tmp0, []()
+				{
+						
+				},
+				2.f, false);
 				FTimerHandle handle;
 				// �������� ���� �� �Լ��� ȣ���ϵ��� Ÿ�̸� ���� (��: 10�� ��)
 				GetWorld()->GetTimerManager().SetTimer(
@@ -180,6 +188,11 @@ void ACSWGameMode::PlayFinalSequence()
 {
 	if(SQ_FinalScene)
 	{
+		AKratos* player = Cast<AKratos>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+		player->SetActorHiddenInGame(true);
+		player->Axe->SetActorHiddenInGame(true);
+		Thor2->SetActorHiddenInGame(true);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SQ_FinalScene")));
 		ALevelSequenceActor* outActor;
 		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalScene, FMovieSceneSequencePlaybackSettings(), outActor);

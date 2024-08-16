@@ -106,6 +106,7 @@ void UAwakenThorAnim::AnimNotify_JumpAttackEnd()
 
 void UAwakenThorAnim::AnimNotify_End()
 {
+	UE_LOG(LogTemp, Warning, TEXT("End!!!"));
 	Fsm->OnEnd();
 }
 
