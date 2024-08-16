@@ -177,7 +177,7 @@ public:
 	FString Str; //데미지 방향
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
-	float BDMaxHp = 200.0f;
+	float BDMaxHp = 150.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HP)
 	float BDCurrentHP;
