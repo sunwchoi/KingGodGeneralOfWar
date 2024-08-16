@@ -48,8 +48,8 @@ void ACSWGameMode::BeginPlay()
 	if (HitWidget)
 		HitWidget->AddToViewport();
 	
-	// StartFirstPhase();
-	StartSecondPhase();
+	StartFirstPhase();
+	//StartSecondPhase();
 }
 
 void ACSWGameMode::Tick(float DeltaSeconds)
@@ -147,7 +147,7 @@ void ACSWGameMode::EndFirstThor()
 {
 	ABDThor* BDThor = Cast<ABDThor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABDThor::StaticClass()));
 
-	if (BDThor->fsm->BDCurrentHP <= 140.0f) {
+	if (BDThor->fsm->BDCurrentHP <= 50.0f) {
 		AudioComp->Stop();
 		AmbientAudioComp->Stop();
 		if (SQ_middleScene)
@@ -167,7 +167,7 @@ void ACSWGameMode::EndFirstThor()
 					handle,
 					this,
 					&ACSWGameMode::GoToNextPhase,
-					25.f, // �������� ��� �ð��� ���⿡ �ش��ϴ� �ð����� ����
+					23.f, // �������� ��� �ð��� ���⿡ �ش��ϴ� �ð����� ����
 					false
 				);
 			}
