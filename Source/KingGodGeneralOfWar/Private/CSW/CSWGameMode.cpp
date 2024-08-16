@@ -89,7 +89,8 @@ void ACSWGameMode::StartFirstPhase()
 	GetWorld()->SpawnActor<ABDThor>(BP_BDThor, FVector(0, 0, 800), FRotator::ZeroRotator);
 	InGameWidget->SetThorName(true);
 	AudioComp->SetSound(Phase1Sound);
-	AudioComp->Play();
+	AudioComp->Play(10.f);
+	AudioComp->SetVolumeMultiplier(1.5f);
 	AmbientAudioComp->SetSound(Phase1AmbientSound);
 	AmbientAudioComp->Play();
 }
