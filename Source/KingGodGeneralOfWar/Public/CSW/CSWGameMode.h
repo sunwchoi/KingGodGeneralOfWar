@@ -41,6 +41,9 @@ public:
 	UFUNCTION()
 	void EndGame();
 private:
+	UPROPERTY()
+	class AAwakenThor* Thor2;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UInGameWidget> WBP_InGame;
 	

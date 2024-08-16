@@ -243,11 +243,13 @@ void AAwakenThor::Teleport(FVector Target)
 void AAwakenThor::EquipWeapon()
 {
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("LeftHandSocket"));
+	MjolnirMoveComp->Velocity = FVector::ZeroVector;
 }
 
 void AAwakenThor::DrawWeapon()
 {
 	Mjolnir->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("WeaponSocket"));
+	MjolnirMoveComp->Velocity = FVector::ZeroVector;
 }
 
 UAwakenThorFSM* AAwakenThor::getFSM() const
