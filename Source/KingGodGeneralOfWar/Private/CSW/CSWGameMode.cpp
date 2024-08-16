@@ -185,7 +185,7 @@ void ACSWGameMode::PlayFinalSequence()
 		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), SQ_FinalScene, FMovieSceneSequencePlaybackSettings(), outActor);
 		SequencePlayer->Play();
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &ACSWGameMode::EndGame, 5.0f);
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &ACSWGameMode::EndGame, 8.0f);
 		//
 	}
 }

@@ -173,6 +173,8 @@ public:
 
 	void OnMyEndWithFail();
 	void OnMyGetUPCameraSet();
+	void OnMySetThorDamage();
+
 
 	void CameraShakeOnAttack(EAttackDirectionType attackDir = EAttackDirectionType::UP, float scale = 1.0f);
 	FString GetPlayerStateString();
@@ -237,6 +239,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
 	class UInputAction* IA_RuneBase;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input Action")
+	class UInputAction* IA_SetDamage;
 
 	// UClass Pointer
 	class AActor* LockTarget;
