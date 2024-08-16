@@ -163,7 +163,8 @@ void AKratos::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		input->BindAction(IA_Guard, ETriggerEvent::Triggered, this, &AKratos::OnMyActionGuardOn);
 		input->BindAction(IA_Guard, ETriggerEvent::Completed, this, &AKratos::OnMyActionGuardOff);
 		input->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AKratos::OnMyActionLockOn);
-
+		input->BindAction(IA_SetDamage, ETriggerEvent::Started, this, &AKratos::OnMySetThorDamage);
+		
 		input->BindAction(IA_WeakAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionWeakAttack);
 		input->BindAction(IA_StrongAttack, ETriggerEvent::Started, this, &AKratos::OnMyActionStrongAttack);
 		input->BindAction(IA_Aim, ETriggerEvent::Triggered, this, &AKratos::OnMyActionAimOn);
@@ -386,7 +387,7 @@ void AKratos::PlayerMove()
 
 FORCEINLINE void AKratos::LockTargetFunc(float DeltaTime)
 {
-	if (!LockTarget)
+	if (!IsValid(LockTarget))
 	{
 		bLockOn = false;
 		return;
@@ -557,6 +558,61 @@ void AKratos::OnMyGetUPCameraSet()
 	TargetCameraOffset = DefaultCameraOffset;
 	TargetCameraAngle = DefaultCameraAngle;
 	TargetTargetArmLength = DefaultTargetTargetArmLength;
+}
+
+void AKratos::OnMySetThorDamage()
+{
+	FVector cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraComp->USceneComponent::K2_GetComponentRotation());
+	FVector actorLocation = GetActorLocation() + cameraForwardVector * 500;
+	FVector endLocation = GetActorLocation() + cameraForwardVector * 5000;
+	float Radius = 1000;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(TEnumAsByte<EObjectTypeQuery>(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1)));
+	TArray<AActor*> ActorsToIgnore;
+	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::None;
+	FHitResult OutHit;
+	bool bIgnoreSelf = false;
+	FLinearColor TraceColor = FLinearColor::White;
+	FLinearColor TraceHitColor = FLinearColor::Red;
+	float DrawTime = 3.0f;
+	FCollisionObjectQueryParams ObjectQueryParams;
+
+	bool bSetDamage = UKismetSystemLibrary::SphereTraceSingleForObjects(
+		GetWorld(),
+		actorLocation,
+		endLocation,
+		Radius,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		DrawDebugType,
+		OutHit,
+		bIgnoreSelf,
+		TraceColor,
+		TraceHitColor,
+		DrawTime
+	);
+
+	if (bSetDamage)
+	{
+		// **********************************************************************
+		auto* Target = OutHit.GetActor();
+		auto* Thor = Cast<ABDThor>(Target = OutHit.GetActor());
+		EAttackDirectionType attackDirection = EAttackDirectionType::UP;
+		if (Thor)
+		{
+			Thor->fsm->Damage(50, attackDirection);
+		}
+		else
+		{
+			auto AwakenThor = Cast<AAwakenThor>(Target);
+			if (AwakenThor)
+			{
+				AwakenThor->getFSM()->SetDamage(50, attackDirection);
+			}
+		}
+		// **********************************************************************
+	}
 }
 
 void AKratos::CameraShakeOnAttack(EAttackDirectionType attackDir, float scale)
@@ -818,23 +874,6 @@ void AKratos::OnMyActionLockOn(const FInputActionValue& value)
 	if (bLockOn)
 	{
 		LockTarget = OutHit.GetActor();
-
-		// **********************************************************************
-		auto* Thor = Cast<ABDThor>(LockTarget = OutHit.GetActor());
-		EAttackDirectionType attackDirection = EAttackDirectionType::UP;
-		if (Thor)
-		{
-			Thor->fsm->Damage(100, attackDirection);
-		}
-		else
-		{
-			auto AwakenThor = Cast<AAwakenThor>(LockTarget);
-			if (AwakenThor)
-			{
-				AwakenThor->getFSM()->SetDamage(100, attackDirection);
-			}
-		}
-		// **********************************************************************
 	}
 
 }
