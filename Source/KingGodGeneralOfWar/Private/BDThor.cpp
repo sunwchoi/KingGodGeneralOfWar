@@ -171,6 +171,8 @@ void ABDThor::BeginPlay()
 	GameMode = Cast<ACSWGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	GameMode->SetEnemyHpBar(fsm->BDCurrentHP / fsm->BDMaxHp);
 	//UpdateHpUI();
+
+	GameMode->PlayHpUIFadeInAnim();
 }
 
 // Called every frame

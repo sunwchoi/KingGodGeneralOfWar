@@ -306,8 +306,9 @@ void UBDThorFSM::Damage(float DamageNum, EAttackDirectionType AtkDir)
 	//피격 상태로 변경한다.
 	mState = BDThorGeneralState::BDDamage;
 
-	if (BDCurrentHP <= 140.0f) {
+	if (BDCurrentHP <= 50.0f) {
 		//me->GameMode->GoToNextPhase(); //다음 페이즈로 넘어간다.
+		me->GameMode->PlayHpUIFadeOutAnim(); //토르 UI를 끈다.
 		me->GameMode->EndFirstThor(); //시퀀스를 재생한다.
 		me->Destroy();
 	}
