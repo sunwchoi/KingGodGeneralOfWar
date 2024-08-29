@@ -2,6 +2,8 @@
 
 
 #include "SG_KratosAnim.h"
+
+#include "RuneAttackField.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimMontage.h"
 USG_KratosAnim::USG_KratosAnim()
@@ -255,7 +257,7 @@ void USG_KratosAnim::AnimNotify_HideAxe()
 	}
 }
 
-FORCEINLINE void USG_KratosAnim::AnimNotify_TimeDilation()
+void USG_KratosAnim::AnimNotify_TimeDilation()
 {
 	Me->SetGlobalTimeDilation(0.02f, 0.06f);
 }
