@@ -1,46 +1,84 @@
-일정 : 2024.07.23 ~ 2024. 08.16
+# 갓 오브 워: 라그나로크 언리얼 모작프로젝트   
+개발기간: 24.7 ~ 24.8   
+팀 구성: 언리얼3, 아트1, 기획1    
+담당: 보스ai   
 
-이슈 작성 후 작업 진행 바랍니다.<br>
+## 플레이 영상
+https://github.com/user-attachments/assets/bc8c89a4-2c7b-4db5-a437-1b8924f574ba   
 
-이슈 예<br>
+## 공격 부분 구현
 
-[Feat] BD(이니셜)_블록골램 걷기 구현<br>
+**랜덤 공격패턴 출력**    
+플레이어와의 거리마다 쓸 수 있는 공격을 next_states 배열에 넣어놓습니다.
+rand함수를 통해 랜덤 인덱스를 넣어 패턴을 출력합니다.   
 
-ISSUE<br>
-Type: feat<br>
-Detail: c++ 블록골램에 모션 기능 추가<br>
-TODO<br>
- 팔 모션 주기 <br>
- 다리 모션 주기<br>
- 실제 물리 공간 이동<br>
-작은 변경사항이라도 꼭 중간마다 커밋, 푸쉬 부탁드립니다. 또한 앞에 이니셜을 붙여주세요.<br>
+```c++
+    float dist = FVector::Dist(myLoc, targetLoc);
+    TArray<EAwakenThorState> NextStates;
+    
+    if (dist <= 200.f)
+    {
+        NextStates.Add(EAwakenThorState::MeleeAttackChange);
+    }
+    else if (200.f < dist && dist <= 700.f)
+    {
+        NextStates.Add(EAwakenThorState::RangedAttackChange);
+        NextStates.Add(EAwakenThorState::BackTeleport);
+        NextStates.Add(EAwakenThorState::BackTeleport);
+        NextStates.Add(EAwakenThorState::LeftTeleport);
+        NextStates.Add(EAwakenThorState::RightTeleport);
+    }
+    else
+    {
+        NextStates.Add(EAwakenThorState::RangedAttackChange);
+        NextStates.Add(EAwakenThorState::Dash);
+        NextStates.Add(EAwakenThorState::Dash);
+        NextStates.Add(EAwakenThorState::Dash);
+        NextStates.Add(EAwakenThorState::Dash);
+    }
+    
+    int32 idx = FMath::RandRange(0, NextStates.Num() - 1);
+    State = NextStates[idx];
+```
 
-[이니셜]<br>
-김바다 : BD
-전승건 : SG
+**애니메이션 동기화**
+fsm state에 맞는 애니메이션을 출력해야했습니다.   
+처음에는 anim instance의 state머신을 사용했습니다. fsm 컴포넌트의 state에 따라 state머신의 state가 전환되도록 구현했습니다.   
+    
+*변경 전 state머신*
+![image](https://github.com/user-attachments/assets/761adedc-670f-4074-b792-33db8bb2ea2f)
 
-커밋 컨벤션<br>
+state가 추가될수록 anim instance의 구조가 복잡해지고 상태 전환마다의 조건을 계속 지정해 줘야하는 불편함이 있었습니다.
+그래서 anim montage를 사용하는 방식으로 바꾸고 fsm컴포넌트에서 상태를 전환한 후 바로 애니메이션을 재생하는 방식을 사용했습니다.
 
-<유형> : <내용> #이슈번호<br>
-Feat : 새로운 기능을 추가할 경우<br>
-Fix : 버그를 고친 경우<br>
-!HOTFIX : 치명적인 버그를 고친 경우<br>
-Style : Norm 규정, 세미콜론 누락, 코드수정이 없는 경우<br>
-Refactor : 리팩토링<br>
-Comment : 주석 추가 및 변경<br>
-Docs : 문서를 수정한 경우<br>
-Test : 테스트 추가<br>
-Rename : 파일 혹은 폴더명을 수정하거나 옮기는 작업만인 경우<br>
-Remove : 파일을 삭제하는 경우<br>
-커밋 컨벤션 예<br>
+*변경 후 state머신*    
+![image](https://github.com/user-attachments/assets/d2d96614-845e-435d-b97b-a5c8ae073dec)
 
-Feat: tokenizer 구현 - minseok2<br>
-Fix: tokenizer 문자열 파싱 버그 수정 - junlee2<br>
-Remove: test.txt 임시파일 삭제 - tyi<br>
-Rename: test.txt → operator.txt - jincpark<br>
-코드 컨벤션<br>
+*애니메이션 몽타주*
+![image](https://github.com/user-attachments/assets/318b0f95-395f-47c0-958d-e3c0fef6eb4e)
 
-파스칼 컨벤션 (int ShootingPlayer)<br>
-블루프린트 생성 접두어 BP_  <br>
-클래스 만들 시 접두어 G  <br>
-엑터 클래스 만들 시 접두어 A  <br>
+*fsm컴포넌트의 몽타주 실행코드*
+```c++
+void UAwakenThorFSM::JumpAttackState()
+{
+	Anim->PlayJumpAttackMontage();
+}
+
+void UAwakenThorFSM::PoundAttackState()
+{
+	Anim->PlayPoundAttackMontage();
+}
+
+void UAwakenThorFSM::KickAttackState()
+{
+	Anim->PlayKickAttackMontage();
+}
+
+void UAwakenThorFSM::ClapAttackState()
+{
+	Anim->PlayClapAttackMontage();
+}
+```
+
+
+
