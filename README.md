@@ -1,7 +1,9 @@
+[언리얼포트폴리오.pdf](https://github.com/user-attachments/files/18180192/default.pdf)
+
 # 갓 오브 워: 라그나로크 언리얼 모작프로젝트   
 개발기간: 24.7 ~ 24.8   
 팀 구성: 언리얼3, 아트1, 기획1    
-담당: 보스ai   
+담당: 보스ai
 
 ## 플레이 영상
 https://github.com/user-attachments/assets/bc8c89a4-2c7b-4db5-a437-1b8924f574ba   
